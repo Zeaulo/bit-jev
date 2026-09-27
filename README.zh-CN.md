@@ -11,9 +11,11 @@
 > **Q：什么是 jev / kev 模型？**
 > A：输入一段共享内容及多个问题，模型对调用者明确给出的选项计算分数与概率，无需逐 token 生成回答文本。
 
-> **当前发布状态：v0.5.7 纯源码预览。** 仓库提供实现、原生 CPU 构建步骤和测量工具；不提供已训练的 bit-jev 权重、I2_S GGUF、指针头文件、模型输出或该检查点的性能数据。此前研究检查点涉及分发条件尚未厘清的训练数据，因此暂不公开。仅克隆仓库无法立即运行 bit-jev 分类。
+> **当前发布状态：v0.6.7 源码与公开基础模型测量。** 仓库提供实现、原生 CPU 构建步骤和测量工具；不提供已训练的 bit-jev 权重、I2_S GGUF、指针头文件、模型输出或该检查点的性能数据。此前研究检查点涉及分发条件尚未厘清的训练数据，因此暂不公开。仅克隆仓库无法立即运行 bit-jev 分类。
 
-![bit-jev 架构](docs/figures/architecture.svg)
+![bit-jev 深度学习模型结构图：输入打包、BitNet 解码层、指针头评分](docs/figures/model-framework.svg)
+
+图中按真实前向顺序展开分支因果掩码、30 层 BitNet 解码器内部的注意力与前馈残差路径，以及 256 维指针头如何从选项结束位和决策位的隐藏状态得到概率。底部单独标出打包 PyTorch 路径与原生 I2_S CPU 逐题路径的执行差别。[旧版简图](docs/figures/architecture.svg)仍保留供对照；结构图不代表已有公开的 bit-jev 权重。
 
 [CPU 构建与使用](docs/CPU_QUICKSTART.zh-CN.md) · [性能测量规范](docs/BENCHMARKS.zh-CN.md) · [架构与模型文件状态](docs/MODEL_CARD.zh-CN.md) · [第三方许可说明](THIRD_PARTY_NOTICES.md)
 

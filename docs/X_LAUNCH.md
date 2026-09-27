@@ -1,4 +1,4 @@
-# X launch copy — source and public-base benchmark v0.5.7
+# X launch copy — source, model framework and public-base benchmark v0.6.7
 
 These are drafts for the authorized post from the logged-in X account. Publish after the updated [Zeaulo/bit-jev](https://github.com/Zeaulo/bit-jev) repository displays the source and the independently measured public-base charts. The launch shares **source and measurements of Microsoft's public BitNet backbone**, not a trained bit-jev checkpoint or its performance.
 
@@ -15,6 +15,8 @@ Attach the [public-base speed PNG](figures/public-base-speed.png). The image its
 > bit-jev = BitNet backbone + Kev-style structured decisions. It scores given options without decoding answer text token by token. The repo publishes source only; the trained bit-jev checkpoint and its performance remain withheld pending data-rights review.
 >
 > Method + samples: https://github.com/Zeaulo/bit-jev/blob/main/docs/BENCHMARKS.md
+
+Attach the [neural model framework PNG](figures/model-framework.png) to this reply. It shows the branch mask, decoder layer and pointer readout and marks the native CPU row path separately.
 
 ## 中文备选首帖
 
@@ -34,6 +36,7 @@ Post only when each linked page is public and accurate. Space useful explanation
 
 1. **Decision interface:** explain `state`, `choice`, `noul`, and `score` with an input-only JSON snippet from the [README](../README.md). Explain that output values require a trained model.
 2. **CPU execution path:** show the architecture graphic and explain the boundary: no answer-token decoding, but one native causal row per question and repeated shared-state work for multiple questions.
+   Use the [neural model framework PNG](figures/model-framework.png) to explain the decoder layer, branch mask and pointer-head readout.
 3. **Reproduction invitation:** link the [public-base JSON](benchmark-data/public-bitnet-base-2026-09-27.json) and [measurement notes](BENCHMARKS.md). Explain the original GGUF revision, model SHA-256, 8 threads, 128 input tokens, 32 output tokens, 5 runs, CPU-only binary, Vulkan hybrid binary, and global GPU-memory sampling.
 
 ## Launch checks

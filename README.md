@@ -13,7 +13,9 @@ The code combines a BitNet backbone with a Kev-inspired decision interface. Comp
 
 This is a **source-only research release**. It includes the implementation, pinned upstream bootstrap, native I2_S CPU runner, and measurement scripts. The project's trained checkpoint, its exported weights, and its benchmark results are withheld while training-data rights are reviewed. This repository does not currently offer a ready-to-run bit-jev model or a public speed/accuracy claim.
 
-![bit-jev architecture](docs/figures/architecture.svg)
+![bit-jev neural model framework: packed input, BitNet decoder layer, pointer readout](docs/figures/model-framework.svg)
+
+The diagram expands the actual forward path: branch-causal packing, the attention and feed-forward residual paths inside the 30-layer BitNet backbone, and the 256-dimensional pointer head. It distinguishes packed PyTorch execution from the native I2_S CPU path that recomputes the shared state per question. The [earlier overview](docs/figures/architecture.svg) remains available. No trained bit-jev weights are represented.
 
 [CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 

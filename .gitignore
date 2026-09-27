@@ -30,6 +30,8 @@
 !/docs/figures/public-base-speed.svg
 !/docs/figures/public-base-memory.png
 !/docs/figures/public-base-memory.svg
+!/docs/figures/model-framework.png
+!/docs/figures/model-framework.svg
 /test/*.log
 /test/*.stderr
 /test/*_wall_seconds.txt

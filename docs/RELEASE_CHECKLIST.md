@@ -1,4 +1,4 @@
-# v0.5.7 source and public-base measurement release checklist
+# v0.6.7 source, model-framework figure and public-base measurement release checklist
 
 This checklist covers **public source and independently measured Microsoft BitNet base-model figures**. It does not authorize publication of the local trained bit-jev checkpoint, I2_S export, model output, or checkpoint-derived benchmark reports.
 
@@ -16,11 +16,11 @@ This checklist covers **public source and independently measured Microsoft BitNe
 - [ ] Clone the public repository in a fresh directory. Run `python test/bootstrap_bitnet.py` and `python test/bootstrap_bitnet.py --check`; record the exact pinned upstream commits and patch checks.
 - [ ] Build `bit-jev-cpu` from that clone with the documented CMake command. Record compiler, CMake, operating system, CPU architecture, and bootstrap network limitations.
 - [ ] Confirm the native and Python interfaces accept the documented request shape. Any actual inference check must use a separately authorized compatible model; do not turn a private local checkpoint into a public fixture.
-- [ ] Verify that all public Markdown links, the [architecture diagram](figures/architecture.svg), [source diagram](figures/source-architecture.svg), [public-base speed chart](figures/public-base-speed.svg), and [memory chart](figures/public-base-memory.svg) render on GitHub.
+- [ ] Verify that all public Markdown links, the [neural model-framework figure](figures/model-framework.svg), [earlier overview](figures/architecture.svg), [source diagram](figures/source-architecture.svg), [public-base speed chart](figures/public-base-speed.svg), and [memory chart](figures/public-base-memory.svg) render on GitHub.
 
 ## Publication
 
-- [ ] Update the existing public `Zeaulo/bit-jev` repository from the reviewed history, push `v0.5.7`, and open it while signed out.
+- [ ] Update the existing public `Zeaulo/bit-jev` repository from the reviewed history, push `v0.6.7`, and open it while signed out.
 - [ ] If a GitHub release is created, label the bit-jev checkpoint **withheld**; link the public Microsoft base-model benchmark data and attach no model archive.
 - [ ] Publish the [X launch copy](X_LAUNCH.md) only after the repository URL resolves and the post labels the speed chart as a Microsoft base-model measurement.
 - [ ] Invite architecture feedback, build reports, and independent benchmarks produced with artifacts and data that contributors may share.

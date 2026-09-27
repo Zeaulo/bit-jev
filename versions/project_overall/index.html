@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.5.7 源码架构、公开基础模型测量、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.6.7 深度学习模型结构、公开基础模型测量、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.5.7 源码与公开基础模型测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.6.7 模型结构与公开基础模型测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -81,7 +81,7 @@
             <div class="flow-node"><small>8 / 输出</small><b>JSONL → TypeSafe</b><span>原生程序返回 logits 和概率；cpu.py 恢复 Choice、Noul、Score 答案。</span></div>
             <div class="flow-node"><small>源码验证支线</small><b>bootstrap → CMake</b><span>固定上游 Git 提交、应用补丁、构建原生程序、检查命令帮助；无需训练权重。</span></div>
           </div>
-          <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/architecture.svg" alt="bit-jev 论文式架构图：请求编码、BitNet 骨干 30 层堆叠、指针头评分与原生 CPU 推理路径"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">论文式架构图：打包路径可共享 state 计算；原生 CPU 路径按问题重复计算。蓝色支路表示 I2_S GGUF 骨干与指针头组成的 CPU 推理路径。图中不展示未经授权的检查点测量值。</figcaption></figure>
+          <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-framework.svg" alt="bit-jev 深度学习模型结构：请求打包、分支掩码、BitNet 解码层的注意力和前馈残差、256 维指针头"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">模型结构图：从共享 state、多问题封装与分支因果掩码进入 30 层 BitNet 解码器；单层依次执行注意力归一化、Q/K/V 与 RoPE、注意力输出、残差、前馈归一化、Up 与 ReLU² Gate、Down 和残差。最终隐藏状态在选项结束位置和决定位置取样，经两个 256 维线性投影、点积、温度缩放与 softmax 得到候选概率。底部区分 PyTorch 打包路径共享 state 与原生 CPU 逐题重算。图片描述源码结构，不代表已有公开 bit-jev 权重。</figcaption></figure>
           <p class="mt-6 text-sm leading-7 text-slate-600"><b>执行边界：</b>GGUF 只装 backbone；原生指针头需独立的 <code>head.f32</code>。纯源码克隆可以验证编译和接口，无法直接产生真实分类答案。若请求包含多个问题，当前原生路径逐题重算 state；这与打包 PyTorch 前向的一次共享 state 路径不同。</p>
         </div>
       </section>
@@ -122,6 +122,7 @@
 │  ├─ benchmark_gpu.py
 │  ├─ benchmark_public_base.py
 │  ├─ render_public_base_figures.py
+│  ├─ render_model_framework.py
 │  ├─ render_architecture_figure.py
 │  ├─ package_release.py
 │  └─ verify_release_package.py
@@ -132,6 +133,7 @@
 │  ├─ benchmark-data/
 │  │  └─ public-bitnet-base-2026-09-27.json
 │  └─ figures/
+│     ├─ model-framework.svg / .png
 │     ├─ architecture.svg
 │     ├─ source-architecture.svg
 │     ├─ public-base-speed.svg / .png
@@ -157,6 +159,7 @@
             <div><dt>test/patches/public-bitnet25-compat.patch</dt><dd>在 ReLU² 补丁之后应用于固定 llama.cpp：识别原版 GGUF 的 bitnet-25 架构名，并使用独立 output.weight；此补丁只用于公开基础模型的基准复现。</dd></div>
             <div><dt>docs/benchmark-data/public-bitnet-base-2026-09-27.json</dt><dd>保留原版 BitNet 文件哈希、固定修订、硬件、二进制哈希、每阶段五个原始计时样本与内存口径；不含本机模型路径和历史 bit-jev 检查点结果。</dd></div>
             <div><dt>docs/figures/public-base-speed.svg / public-base-memory.svg</dt><dd>展示同一公开 BitNet GGUF 的 CPU 原生路径和 RTX 2060 Vulkan 混合路径；速度按预填充与解码分开，内存按 RSS 与整卡显存增量分开。</dd></div>
+            <div><dt>test/render_model_framework.py / docs/figures/model-framework.svg</dt><dd>按 model.py 的打包掩码、30 层 BitNet 解码器、256 维指针头和 native/main.cpp 的逐题执行边界绘制模型结构图。原生 BitNet 层内部的 RMSNorm、RoPE、Q/K/V/O、Up/Gate/Down 与残差顺序经固定 llama.cpp 源码核对。</dd></div>
             <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
             <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
             <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
@@ -191,7 +194,7 @@
 
       <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.5.7 源码与公开基础模型测量</h2>
+        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.6.7 模型结构图、源码与公开基础模型测量</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
@@ -199,7 +202,7 @@
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.5.7 公开源码与基础模型测量范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.6.7 模型结构、公开源码与基础模型测量范围</footer>
   </div>
 </body>
 </html>
