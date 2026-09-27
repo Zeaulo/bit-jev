@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.4.5 源码架构、数据流、构建路径与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.4.7 源码架构、数据流、构建路径与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.4.5 纯源码版</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.4.7 纯源码版</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -80,7 +80,7 @@
             <div class="flow-node"><small>8 / 输出</small><b>JSONL → TypeSafe</b><span>原生程序返回 logits 和概率；cpu.py 恢复 Choice、Noul、Score 答案。</span></div>
             <div class="flow-node"><small>源码验证支线</small><b>bootstrap → CMake</b><span>固定上游 Git 提交、应用补丁、构建原生程序、检查命令帮助；无需训练权重。</span></div>
           </div>
-          <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/source-architecture.svg" alt="bit-jev 源码中的请求、训练、导出及原生 CPU 推理路径"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">架构图只展示源码职责与数据流，不包含既有检查点的测量结果。</figcaption></figure>
+          <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/architecture.svg" alt="bit-jev 论文式架构图：请求编码、BitNet 骨干 30 层堆叠、指针头评分与原生 CPU 推理路径"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">论文式架构图：打包路径可共享 state 计算；原生 CPU 路径按问题重复计算。蓝色支路表示 I2_S GGUF 骨干与指针头组成的 CPU 推理路径。图中不展示未经授权的检查点测量值。</figcaption></figure>
           <p class="mt-6 text-sm leading-7 text-slate-600"><b>执行边界：</b>GGUF 只装 backbone；原生指针头需独立的 <code>head.f32</code>。纯源码克隆可以验证编译和接口，无法直接产生真实分类答案。若请求包含多个问题，当前原生路径逐题重算 state；这与打包 PyTorch 前向的一次共享 state 路径不同。</p>
         </div>
       </section>
@@ -118,13 +118,16 @@
 │  │  └─ llama-relu2.patch
 │  ├─ benchmark_native_formats.py
 │  ├─ benchmark_gpu.py
+│  ├─ render_architecture_figure.py
 │  ├─ package_release.py
 │  └─ verify_release_package.py
 ├─ docs/
 │  ├─ CPU_QUICKSTART.md / BENCHMARKS.md
 │  ├─ MODEL_CARD.md / RELEASE_CHECKLIST.md
 │  ├─ X_LAUNCH.md
-│  └─ figures/source-architecture.svg
+│  └─ figures/
+│     ├─ architecture.svg
+│     └─ source-architecture.svg
 └─ versions/
    ├─ update.log
    └─ project_overall/
@@ -143,7 +146,8 @@
             <div><dt>test/bootstrap_bitnet.py / test/patches/</dt><dd>固定 BitNet 与 llama.cpp 修订版，核对两份补丁后应用；失败时报告具体依赖或补丁步骤。</dd></div>
             <div><dt>test/benchmark_native_formats.py / benchmark_gpu.py</dt><dd>仅提供操作者可在自有模型上运行的原生 CPU 格式计时和 GPU 对照代码；既有结果文件不纳入 Git。</dd></div>
             <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
-            <div><dt>docs/figures/source-architecture.svg</dt><dd>公开架构图只描绘请求、训练、导出和 CPU 路径；不包含任何既有检查点性能指标。</dd></div>
+            <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
+            <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
             <div><dt>versions/update.log / project_overall/</dt><dd>时间戳版本记录与本页共同维护；每次代码变更同步检查流程、目录树和发布状态。</dd></div>
           </dl></article>
         </div>
@@ -166,7 +170,7 @@
 
       <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">06 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.4.5 仅发布可审阅源码</h2>
+        <p class="eyebrow">06 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.4.7 仅发布可审阅源码</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
           <div class="status"><span class="status-dot done"></span><b>本地测试工具</b><p>保留评估和计时脚本的实现；既有输出文件、模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
@@ -174,7 +178,7 @@
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.4.5 公开源码范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.4.7 公开源码范围</footer>
   </div>
 </body>
 </html>

@@ -2,13 +2,20 @@
 
 简体中文 · [English](README.md)
 
-**用 BitNet b1.58 骨干网络和受 Kev 启发的指针头处理结构化判断。** 输入一段共享内容及多个问题，模型对调用者明确给出的选项计算分数与概率，无需逐 token 生成回答文本。
+## bit-jev = bitnet + jev ！！！
 
-> **当前发布状态：v0.4.5 纯源码预览。** 仓库提供实现、原生 CPU 构建步骤和测量工具；不提供已训练的 bit-jev 权重、I2_S GGUF、指针头文件、模型输出或该检查点的性能数据。此前研究检查点涉及分发条件尚未厘清的训练数据，因此暂不公开。仅克隆仓库无法立即运行 bit-jev 分类。
+骨干网络中的 BitLinear 权重在量化推理时使用 **{-1, 0, +1}** 三值，有利于缩小 CPU 部署所需的模型存储。指针头及部分其他张量仍保留较高精度。当前没有公开的 bit-jev 检查点，因此不能给出可独立复现的端到端速度或模型加载内存数字。
 
-![bit-jev 源码架构](docs/figures/source-architecture.svg)
+项目将 BitNet 骨干与受 Kev 启发的判断接口结合。要与 Kev 比较，需要双方可运行的公开检查点、相同请求和统一测量方法；目前不宣称参数量比例或速度倍数。
 
-[CPU 构建与使用](docs/CPU_QUICKSTART.zh-CN.md) · [性能测量规范](docs/BENCHMARKS.zh-CN.md) · [架构与模型文件状态](docs/MODEL_CARD.md) · [第三方许可说明](THIRD_PARTY_NOTICES.md)
+> **Q：什么是 jev / kev 模型？**
+> A：输入一段共享内容及多个问题，模型对调用者明确给出的选项计算分数与概率，无需逐 token 生成回答文本。
+
+> **当前发布状态：v0.4.7 纯源码预览。** 仓库提供实现、原生 CPU 构建步骤和测量工具；不提供已训练的 bit-jev 权重、I2_S GGUF、指针头文件、模型输出或该检查点的性能数据。此前研究检查点涉及分发条件尚未厘清的训练数据，因此暂不公开。仅克隆仓库无法立即运行 bit-jev 分类。
+
+![bit-jev 架构](docs/figures/architecture.svg)
+
+[CPU 构建与使用](docs/CPU_QUICKSTART.zh-CN.md) · [性能测量规范](docs/BENCHMARKS.zh-CN.md) · [架构与模型文件状态](docs/MODEL_CARD.zh-CN.md) · [第三方许可说明](THIRD_PARTY_NOTICES.md)
 
 ## 项目要点
 

@@ -18,10 +18,14 @@
 /test/*.jsonl
 !/test/example_cpu_request.jsonl
 !/test/cpu_smoke_request.jsonl
+# 架构图与性能图默认排除，仅放行两张公开图：源码卡片图与论文式架构图。
+# 其余由既有检查点生成的图片不进入公开仓库。
 /docs/figures/*.png
 /docs/figures/*.svg
 !/docs/figures/source-architecture.png
 !/docs/figures/source-architecture.svg
+!/docs/figures/architecture.png
+!/docs/figures/architecture.svg
 /test/*.log
 /test/*.stderr
 /test/*_wall_seconds.txt

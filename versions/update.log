@@ -44,3 +44,19 @@
 - 从公开 Git 索引排除历史检查点生成的 JSON/JSONL 报告、性能图片与其他模型衍生物；本地文件可继续保留用于维护，但公开文档不再引用其数值或发布链接。
 - versions/project_overall/ 重写为当前源码链路：逐层记录 TypeSafe 输入、分支编码、指针头、I2_S 导出、原生逐题计算、依赖构建及文件职责；新增 docs/figures/source-architecture.svg 作为无性能数据的架构图。
 - 历史版本条目保留原时间戳和实际代码改动，但移除既有检查点的准确率、速度、内存、哈希及预测细节。发布前仍须核对实际 Git 索引与公开页面是否完全属于纯源码范围。
+
+[2026-09-27 16:15:00] v0.4.6（小版本，中文首页换成量化卖点并新增论文式架构图）
+- 集成前序会话记忆，维持纯源码发布范围；受限训练检查点及其性能和内存报告不进入公开资料。
+- README.zh-CN.md 开头改写为 "bit-jev = bitnet + jev"，介绍三值 BitLinear 权重及 "Q：什么是 jev / kev 模型？" 问答小节。
+- 新增 test/render_architecture_figure.py 与 docs/figures/architecture.{svg,png}：论文风格架构图（白底细框、左到右数据流、W=round(W·s)·clip/s 公式、蓝色 I2_S CPU 推理支路），中文首页改引用该图。
+- core 包版本由 0.4.5 更新为 0.4.6；同步 core/pyproject.toml 与 core/bit_jev/__version__.py。
+- 架构图按论文式标准复核并修正布局：方框改直角细边并把 pad 外向扩张计入箭头端点（原箭头大半埋在框内）；图例从标题行下移到副标题与主干框之间的空带；掩码说明框加高并左移标题，蓝色支路改从骨干底部右侧绕行（原竖线穿过掩码框、第二行文字溢出框底）；骨干框内新增 30 层堆叠薄框与 "× 30 层" 标注；图例 "训练数据流" 更正为 "前向数据流"。图中声明均与源码核对：指针头约 1.3 M 参数（2×Linear(2560→256)）、骨干 30 层、score 取 E[level]、noul 取 p(yes)。
+- .gitignore 放行 docs/figures/architecture.{svg,png}（原规则会使首页引用的架构图无法进入公开仓库）；由既有检查点衍生的对比图继续保持排除。英文 README.md 同步首页卖点与架构图引用。
+- versions/project_overall/index.html 同步 v0.4.6：架构图引用、目录树（新增 render_architecture_figure.py 与 architecture.svg）、两张公开图的职责说明及页脚版本号。
+- 发布状态说明统一到 v0.4.6：README.zh-CN.md、docs/MODEL_CARD.md、docs/MODEL_CARD.zh-CN.md、docs/CPU_QUICKSTART.md、docs/CPU_QUICKSTART.zh-CN.md 中的版本号由 v0.4.5 改为 v0.4.6，仍为纯源码发布口径。
+
+[2026-09-27 19:14:02] v0.4.7（小版本，纠正公开文档的基准归属与架构图标注）
+- 对照本地原始报告确认，v0.4.6 首页中的速度、文件大小与 RSS 数字属于受限训练检查点，不是微软公开 BitNet 基础模型独立实测；撤下这些数字及其 Kev 对比结论。
+- README.md、README.zh-CN.md 改为说明三值权重的适用范围、当前纯源码状态和有条件的比较方法；不宣称尚未验证的端到端速度、内存或参数量倍数。
+- 修正 test/render_architecture_figure.py 的单次前向、文件大小和内存标注，重新生成公开架构图；versions/project_overall/ 同步现有打包与原生 CPU 路径差别。
+- core 包版本更新为 0.4.7；继续独立验证官方公开基础模型的性能，只有模型文件哈希、硬件、原始计时和内存口径齐全后才绘制公开对比图。

@@ -2,11 +2,18 @@
 
 [简体中文](README.zh-CN.md) · English
 
-**Structured decisions with a BitNet b1.58 backbone and a Kev-inspired pointer head.** A request supplies shared `state` and typed `choice`, `noul` (yes/no), or `score` questions. The head scores explicit options from backbone hidden states and returns decision probabilities without generating answer text token by token.
+## bit-jev = bitnet + jev !!!
+
+The backbone's BitLinear weights use ternary values **{-1, 0, +1}** for quantized inference. This makes a compact CPU deployment possible. The pointer head and some other tensors retain higher precision; the repository has no public bit-jev checkpoint from which to measure its end-to-end speed or loaded memory.
+
+The code combines a BitNet backbone with a Kev-inspired decision interface. Comparisons with Kev require runnable public checkpoints, matched requests, and a common measurement protocol; no such comparison is claimed here.
+
+> **Q: What is a jev / kev model?**
+> A: Given one shared piece of content and several questions, the model computes scores and probabilities over the caller-supplied options — no answer text is generated token by token.
 
 This is a **source-only research release**. It includes the implementation, pinned upstream bootstrap, native I2_S CPU runner, and measurement scripts. The project's trained checkpoint, its exported weights, and its benchmark results are withheld while training-data rights are reviewed. This repository does not currently offer a ready-to-run bit-jev model or a public speed/accuracy claim.
 
-![bit-jev source architecture](docs/figures/source-architecture.svg)
+![bit-jev architecture](docs/figures/architecture.svg)
 
 [CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 

@@ -2,7 +2,7 @@
 
 ## Release status
 
-Version **v0.4.5 is source-only**. No trained bit-jev checkpoint, I2_S GGUF, pointer-head weights, tokenizer bundle, model output, or benchmark report is distributed with this release. A local research checkpoint used training material whose redistribution conditions have not been resolved, including Yelp review data. The project withholds that checkpoint and its derived measurements.
+Version **v0.4.7 is source-only**. No trained bit-jev checkpoint, I2_S GGUF, pointer-head weights, tokenizer bundle, model output, or benchmark report is distributed with this release. A local research checkpoint used training material whose redistribution conditions have not been resolved, including Yelp review data. The project withholds that checkpoint and its derived measurements.
 
 This page documents the **code interface and requirements for a future model artifact**. It is not a performance card for a model available to download.
 

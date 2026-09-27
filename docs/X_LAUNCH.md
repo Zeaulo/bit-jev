@@ -1,4 +1,4 @@
-# X launch copy — source-only v0.4.5
+# X launch copy — source-only v0.4.7
 
 These are drafts for the authorized post from the logged-in X account. Publish only after the public repository resolves at [Zeaulo/bit-jev](https://github.com/Zeaulo/bit-jev) and the source-only commit has passed the [release checklist](RELEASE_CHECKLIST.md). This launch shares **code and architecture**, not a trained model or its measurements.
 

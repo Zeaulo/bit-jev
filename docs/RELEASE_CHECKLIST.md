@@ -1,4 +1,4 @@
-# v0.4.5 source-only release checklist
+# v0.4.7 source-only release checklist
 
 This checklist is for the **public source revision only**. It does not authorize or schedule publication of the local trained checkpoint, I2_S export, model output, or benchmark reports.
 
@@ -16,11 +16,11 @@ This checklist is for the **public source revision only**. It does not authorize
 - [ ] Clone the public repository in a fresh directory. Run `python test/bootstrap_bitnet.py` and `python test/bootstrap_bitnet.py --check`; record the exact pinned upstream commits and patch checks.
 - [ ] Build `bit-jev-cpu` from that clone with the documented CMake command. Record compiler, CMake, operating system, CPU architecture, and bootstrap network limitations.
 - [ ] Confirm the native and Python interfaces accept the documented request shape. Any actual inference check must use a separately authorized compatible model; do not turn a private local checkpoint into a public fixture.
-- [ ] Verify that all public Markdown links and the [source architecture diagram](figures/source-architecture.svg) render on GitHub.
+- [ ] Verify that all public Markdown links and the [paper-style architecture diagram](figures/architecture.svg) plus the [source architecture diagram](figures/source-architecture.svg) render on GitHub.
 
 ## Publication
 
-- [ ] Create the public `Zeaulo/bit-jev` repository from the reviewed source-only history, push `v0.4.5`, and open it while signed out.
+- [ ] Create the public `Zeaulo/bit-jev` repository from the reviewed source-only history, push `v0.4.7`, and open it while signed out.
 - [ ] If a GitHub release is created, label it **source-only** and attach no model archive or performance report.
 - [ ] Publish the [X launch copy](X_LAUNCH.md) only after the repository URL resolves and the post matches the public artifact. The first image is the source architecture diagram, not a benchmark chart.
 - [ ] Invite architecture feedback, build reports, and independent benchmarks produced with artifacts and data that contributors may share.
