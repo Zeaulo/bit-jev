@@ -1,0 +1,39 @@
+diff --git a/src/llama-arch.cpp b/src/llama-arch.cpp
+index 0181e59..b5c1464 100644
+--- a/src/llama-arch.cpp
++++ b/src/llama-arch.cpp
+@@ -83,7 +83,7 @@ static const std::map<llm_arch, const char *> LLM_ARCH_NAMES = {
+     { LLM_ARCH_GLM4_MOE,         "glm4moe"          },
+     { LLM_ARCH_GLM_DSA,          "glm-dsa"          },
+     { LLM_ARCH_BITNET,           "bitnet"           },
+-    { LLM_ARCH_BITNET_B158,      "bitnet-b1.58"     },
++    { LLM_ARCH_BITNET_B158,      "bitnet-25"        },
+     { LLM_ARCH_T5,               "t5"               },
+     { LLM_ARCH_T5ENCODER,        "t5encoder"        },
+     { LLM_ARCH_JAIS,             "jais"             },
+diff --git a/src/models/bitnet.cpp b/src/models/bitnet.cpp
+index 985c8d6..dd112f6 100644
+--- a/src/models/bitnet.cpp
++++ b/src/models/bitnet.cpp
+@@ -15,7 +15,8 @@ void llama_model_bitnet::load_arch_tensors(llama_model_loader &) {
+ 
+     tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), {n_embd, n_vocab}, 0);
+ 
+-    // output
++    // 兼容原版 bitnet-25 GGUF 的独立输出矩阵；缺失时回退到词嵌入共享权重。
++    output = create_tensor(tn(LLM_TENSOR_OUTPUT, "weight"), {n_embd, n_vocab}, TENSOR_NOT_REQUIRED);
+     output_norm = create_tensor(tn(LLM_TENSOR_OUTPUT_NORM, "weight"), {n_embd}, 0);
+ 
+     for (int i = 0; i < n_layer; ++i) {
+@@ -160,9 +161,8 @@ llama_model_bitnet::graph::graph(const llama_model & model, const llm_graph_para
+     cb(cur, "result_norm", -1);
+     res->t_embd = cur;
+ 
+-    // lm_head
+-    // FIXME: do not use model.tok_embd directly, duplicate as model.output
+-    cur = build_lora_mm(model.tok_embd, cur);
++    // 输出层优先使用原版模型提供的独立矩阵。
++    cur = build_lora_mm(model.output ? model.output : model.tok_embd, cur);
+ 
+     cb(cur, "result_output", -1);
+     res->t_logits = cur;

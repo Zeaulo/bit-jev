@@ -26,6 +26,10 @@
 !/docs/figures/source-architecture.svg
 !/docs/figures/architecture.png
 !/docs/figures/architecture.svg
+!/docs/figures/public-base-speed.png
+!/docs/figures/public-base-speed.svg
+!/docs/figures/public-base-memory.png
+!/docs/figures/public-base-memory.svg
 /test/*.log
 /test/*.stderr
 /test/*_wall_seconds.txt

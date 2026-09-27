@@ -25,6 +25,8 @@ import psutil
 # 官方模型来源固定到已核对的提交；文件哈希仍须由本机重新计算。
 OFFICIAL_REPOSITORY = "microsoft/bitnet-b1.58-2B-4T-gguf"
 DEFAULT_REVISION = "9f43072f69492cbd5bc5d5ebb085fec519686a93"
+OFFICIAL_MODEL_SHA256 = "13939ce5030319a35db346e5dba7a3a3bd599dfc18b113a2a97446ff964714c5"
+OFFICIAL_MODEL_BYTES = 1_844_472_032
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TEST_ROOT = PROJECT_ROOT / "test"
 MIB = 1024 * 1024
@@ -211,6 +213,10 @@ def run_mode(
         "-ub", str(arguments.prompt_tokens), "-ngl", str(gpu_layers),
         "-o", "json",
     ]
+    # 详细日志用于确认实际层分配和 CPU/GPU 缓冲区，不能只凭 -ngl 参数判断执行位置。
+    command.append("-v")
+    if mode == "gpu":
+        command.extend(("-dev", arguments.gpu_device))
     if arguments.no_warmup:
         command.append("--no-warmup")
 
@@ -290,6 +296,12 @@ def run_mode(
     offload_match = re.search(r"offloaded\s+(\d+)/(\d+)\s+layers?\s+to\s+GPU", stderr, re.I)
     offloaded_layers = int(offload_match.group(1)) if offload_match else None
     total_layers = int(offload_match.group(2)) if offload_match else None
+    # 层被分配到 GPU 不代表全部量化矩阵也常驻显存，须单独记录实际缓冲区。
+    buffer_matches = re.findall(
+        r"load_tensors:\s+([A-Za-z0-9_]+) model buffer size\s*=\s*([0-9.]+) MiB",
+        stderr,
+    )
+    model_buffers_mib = {name: float(size) for name, size in buffer_matches}
     if mode == "gpu" and offloaded_layers == 0:
         raise ValueError("GPU 后端存在，但实际卸载层数为 0")
 
@@ -323,6 +335,7 @@ def run_mode(
             "peak_process_used_mib": peak_process_vram_mib,
             "offloaded_layers": offloaded_layers,
             "total_layers": total_layers,
+            "model_buffers_mib": model_buffers_mib,
         },
         "phases": phases,
         "warnings": warnings,
@@ -345,6 +358,7 @@ def main() -> int:
     parser.add_argument("--source-revision", default=DEFAULT_REVISION, help="官方 GGUF 仓库的 40 位提交")
     parser.add_argument("--output", type=Path, default=TEST_ROOT / "public_base_llama_bench.json")
     parser.add_argument("--gpu-index", type=int, default=0)
+    parser.add_argument("--gpu-device", help="llama-bench --list-devices 列出的目标后端设备，例如 Vulkan1")
     parser.add_argument("--gpu-layers", type=int, default=99)
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--prompt-tokens", type=int, default=128)
@@ -364,6 +378,14 @@ def main() -> int:
             parser.error("--model 文件没有 GGUF 魔数")
     if not re.fullmatch(r"[0-9a-fA-F]{40}", arguments.source_revision):
         parser.error("--source-revision 必须是 40 位 Git 提交哈希")
+    if arguments.source_revision.lower() != DEFAULT_REVISION:
+        parser.error("本基准只接受已核对的微软原版模型提交")
+    if model.stat().st_size != OFFICIAL_MODEL_BYTES:
+        parser.error("GGUF 文件大小与微软原版模型不一致")
+    # 必须检查文件内容，而非仅信任操作员填写的来源字段。
+    model_sha256 = file_sha256(model)
+    if model_sha256 != OFFICIAL_MODEL_SHA256:
+        parser.error("GGUF SHA-256 与微软原版模型不一致")
     if any(value <= 0 for value in (
         arguments.threads, arguments.prompt_tokens, arguments.decode_tokens,
         arguments.repetitions, arguments.gpu_layers, arguments.rss_sample_seconds,
@@ -389,6 +411,8 @@ def main() -> int:
         binaries[mode] = binary
 
     nvidia_smi = shutil.which("nvidia-smi")
+    if "gpu" in modes and not arguments.gpu_device:
+        parser.error("GPU 模式需要 --gpu-device，避免自动选择错误的显卡")
     if "gpu" in modes and (nvidia_smi is None or gpu_by_index(nvidia_smi, arguments.gpu_index) is None):
         parser.error("GPU 模式需要 nvidia-smi 和有效的 --gpu-index")
 
@@ -404,7 +428,7 @@ def main() -> int:
         "model": {
             "path": str(model),
             "bytes": model.stat().st_size,
-            "sha256": file_sha256(model),
+            "sha256": model_sha256,
             "format": "I2_S GGUF",
         },
         "workload": {
@@ -430,6 +454,7 @@ def main() -> int:
             "project_git_commit": git_value(PROJECT_ROOT, "rev-parse", "HEAD"),
             "project_worktree_clean": git_value(PROJECT_ROOT, "status", "--porcelain") == "",
             "upstream_git_commit": git_value(PROJECT_ROOT / "learning" / "bitnet", "rev-parse", "HEAD"),
+            "benchmark_compat_patch_sha256": file_sha256(TEST_ROOT / "patches" / "public-bitnet25-compat.patch"),
         },
         "runs": {},
         "measurement_notes": [

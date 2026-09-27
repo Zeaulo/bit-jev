@@ -1,30 +1,32 @@
-# X launch copy — source-only v0.4.7
+# X launch copy — source and public-base benchmark v0.5.7
 
-These are drafts for the authorized post from the logged-in X account. Publish only after the public repository resolves at [Zeaulo/bit-jev](https://github.com/Zeaulo/bit-jev) and the source-only commit has passed the [release checklist](RELEASE_CHECKLIST.md). This launch shares **code and architecture**, not a trained model or its measurements.
+These are drafts for the authorized post from the logged-in X account. Publish after the updated [Zeaulo/bit-jev](https://github.com/Zeaulo/bit-jev) repository displays the source and the independently measured public-base charts. The launch shares **source and measurements of Microsoft's public BitNet backbone**, not a trained bit-jev checkpoint or its performance.
 
-## First post (English)
+## First post (English; attach speed chart)
 
-> Your classifier doesn't need to write an answer.
+> On my laptop, CPU beat the Vulkan hybrid path for Microsoft's public BitNet I2_S: 56.2 vs 45.2 input tok/s (Ryzen 7 4800H / RTX 2060; 5 runs; load excluded). GPU path still uses CPU RAM.
 >
-> bit-jev puts Kev-style decisions on BitNet b1.58: state + typed questions in, pointer-head scores out. Native I2_S CPU source is open.
->
-> Source only; weights/results await data-rights review.
->
-> https://github.com/Zeaulo/bit-jev
+> Raw data + source: https://github.com/Zeaulo/bit-jev
 
-Attach the [source architecture PNG](figures/source-architecture.png). Its SVG source is [here](figures/source-architecture.svg). The graphic should show that the native CPU path processes **one row per question**. Do not attach the withheld performance charts or a screenshot of a prediction from the local checkpoint.
+Attach the [public-base speed PNG](figures/public-base-speed.png). The image itself states that this is a synthetic base-model backbone benchmark, not bit-jev classification.
+
+## First reply (English)
+
+> bit-jev = BitNet backbone + Kev-style structured decisions. It scores given options without decoding answer text token by token. The repo publishes source only; the trained bit-jev checkpoint and its performance remain withheld pending data-rights review.
+>
+> Method + samples: https://github.com/Zeaulo/bit-jev/blob/main/docs/BENCHMARKS.md
 
 ## 中文备选首帖
 
-> 分类任务不一定要逐 token 生成答案。
+> 笔记本 CPU 跑 BitNet，有时能比这台机器的 GPU 混合路径更快。
 >
-> bit-jev 探索把 Kev 式结构化判断放到 BitNet b1.58 上：输入状态和问题，指针头给候选项打分。源码含原生 I2_S CPU 路径。
+> 同一份微软公开 I2_S GGUF：Ryzen 7 4800H 预填充 56.2 token/s，RTX 2060 Vulkan 混合路径 45.2。各 5 次，计时不含模型加载；GPU 路径仍使用 CPU 内存，不能泛化为“CPU 比 GPU 强”。
 >
-> 本次只发布源码；训练权重和相关结果待数据使用权限审核。
+> bit-jev 把 BitNet 骨干接到 Kev 式候选评分接口。源码已开源；bit-jev 训练权重和其跑分暂不公开。
 >
 > https://github.com/Zeaulo/bit-jev
 
-Use one language for the first post. A translated follow-up can link back to the same source repository. Keep the rights statement in either language.
+Use one language for the first post. A translated follow-up can link back to the same source repository. Keep the distinction between public BitNet and withheld bit-jev results in either language.
 
 ## Optional follow-ups
 
@@ -32,11 +34,11 @@ Post only when each linked page is public and accurate. Space useful explanation
 
 1. **Decision interface:** explain `state`, `choice`, `noul`, and `score` with an input-only JSON snippet from the [README](../README.md). Explain that output values require a trained model.
 2. **CPU execution path:** show the architecture graphic and explain the boundary: no answer-token decoding, but one native causal row per question and repeated shared-state work for multiple questions.
-3. **Reproduction invitation:** point to the [CPU source quick start](CPU_QUICKSTART.md) and [benchmark protocol](BENCHMARKS.md). Invite build feedback and measurements using artifacts and data contributors are permitted to share. State the CPU, thread count, quantization, input length, question count, load inclusion, and memory definition for any future number.
+3. **Reproduction invitation:** link the [public-base JSON](benchmark-data/public-bitnet-base-2026-09-27.json) and [measurement notes](BENCHMARKS.md). Explain the original GGUF revision, model SHA-256, 8 threads, 128 input tokens, 32 output tokens, 5 runs, CPU-only binary, Vulkan hybrid binary, and global GPU-memory sampling.
 
 ## Launch checks
 
 - Open the repository link while signed out; verify the README, quick start, diagram, license, and source-only tag.
 - Inspect the final post text and image in X before posting. Link directly to the repository.
-- Do not state that bit-jev weights are downloadable or that accuracy, memory, or speed claims are public. The source-only release has no such public artifact.
+- Do not state that bit-jev weights are downloadable or that its accuracy, memory, or speed have been measured publicly. Label every chart as a Microsoft public-base measurement.
 - After posting, record the post URL in the release log or launch notes and answer technical questions with the actual source paths and limitations.

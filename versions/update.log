@@ -60,3 +60,9 @@
 - README.md、README.zh-CN.md 改为说明三值权重的适用范围、当前纯源码状态和有条件的比较方法；不宣称尚未验证的端到端速度、内存或参数量倍数。
 - 修正 test/render_architecture_figure.py 的单次前向、文件大小和内存标注，重新生成公开架构图；versions/project_overall/ 同步现有打包与原生 CPU 路径差别。
 - core 包版本更新为 0.4.7；继续独立验证官方公开基础模型的性能，只有模型文件哈希、硬件、原始计时和内存口径齐全后才绘制公开对比图。
+[2026-09-27 19:58:00] v0.5.7（中版本，新增微软公开 BitNet 基础模型的 CPU/Vulkan 独立测量与可复现图表）
+- 新增 test/patches/public-bitnet25-compat.patch：使固定 llama.cpp 能识别原版 bitnet-25 GGUF 并读取独立输出权重；该补丁只用于基础模型基准，不改变 bit-jev 原生分类路径。
+- 更新 test/benchmark_public_base.py：锁定公开 GGUF 固定修订、大小及 SHA-256，明确选择 Vulkan 设备，记录后端模型缓冲区、补丁哈希、阶段计时、CPU RSS 和整卡显存采样。
+- 更新 test/render_public_base_figures.py：校验模型与负载，输出预填充/解码速度图、CPU RSS/全局 GPU 显存图，以及去除本机路径的逐次样本 JSON。
+- README 中英文与 docs/BENCHMARKS 中英文引用新图、公开样本、硬件条件和复现步骤；明确该测量是微软原版基础模型的合成基准，Vulkan 路径仍部分使用 CPU，不能当作 bit-jev 检查点性能。
+- 版本从 0.4.7 升至 0.5.7；同步更新 versions/project_overall 的架构、目录树、数据流与测量边界。历史 Yelp 相关检查点、模型输出及其衍生指标仍不公开。

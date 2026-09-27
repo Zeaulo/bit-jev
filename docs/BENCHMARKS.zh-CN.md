@@ -6,6 +6,41 @@
 
 bit-jev 对明确列出的候选项打分，不逐 token 解码答案文本。因此，“生成输出 tokens/s”不适合表示其吞吐量。优先报告**单请求延迟**；必要时可报告**输入 tokens/s**，但要说明输入 token 的计数方法。
 
+## 微软公开 BitNet 基础模型独立实测
+
+这组数据只检验公开的 **[Microsoft BitNet b1.58 2B 原版 I2_S GGUF](https://huggingface.co/microsoft/bitnet-b1.58-2B-4T-gguf/tree/9f43072f69492cbd5bc5d5ebb085fec519686a93)** 在两条部署路径上的表现。两次测试使用同一文件：1,844,472,032 字节，SHA-256 为 `13939ce5030319a35db346e5dba7a3a3bd599dfc18b113a2a97446ff964714c5`。模型文件不收入本仓库。使用此固定旧修订，是因为[官方仓库对较新权重的异常已有公开反馈](https://github.com/microsoft/BitNet/issues/608)；不能把两种修订的结果混在一起。
+
+![128-token 预填充与 32-token 解码的中位吞吐](figures/public-base-speed.svg)
+
+![同一 GGUF 在两种路径下的进程内存与显存观测](figures/public-base-memory.svg)
+
+| 测量项 | Ryzen 7 4800H，8 线程，CPU-only 二进制 | RTX 2060，Vulkan1 混合执行 |
+| --- | ---: | ---: |
+| 128 输入 token 预填充中位耗时 | 2,276.20 ms | 2,831.68 ms |
+| 预填充中位吞吐 | 56.23 token/s | 45.20 token/s |
+| 32 输出 token 解码中位耗时 | 7,008.26 ms | 9,000.01 ms |
+| 解码中位吞吐 | 4.57 token/s | 3.56 token/s |
+| 进程峰值 RSS，含加载和测试 | 1,230.19 MiB | 1,955.56 MiB |
+| 整卡显存相对运行前基线的峰值增量 | 0 MiB | 722 MiB |
+| 模型张量缓冲区的后端分配日志 | CPU_Mapped 1,751.06 MiB | CPU_Mapped 1,124.80 MiB；Vulkan1 627.93 MiB |
+
+采用 `llama-bench -p 128 -n 32 -r 5 -t 8 -b 128 -ub 128`，各阶段预热，顺序运行 CPU 和 GPU。预填充与解码是 **llama-bench 的两种合成工作负载**，不能将两项耗时直接相加充作“一道题”的端到端耗时。吞吐排除模型加载；RSS 每 50 ms 采样，覆盖加载与测试；显存由 `nvidia-smi` 每 250 ms 采样。Windows WDDM 未返回 Vulkan 进程显存，因此仅报告**整卡**增量，可能受其他进程影响。31/31 层设置为 GPU 卸载，但 I2_S 部分运算仍由 CPU 映射权重执行。此路径不是纯 GPU，也不是 bit-jev 分类推理。CPU 在本机此负载上更快，不能外推到别的设备。
+
+[逐次样本与硬件、二进制、模型哈希](benchmark-data/public-bitnet-base-2026-09-27.json)可直接下载。原始本地报告不含模型输出，图表由 [`test/render_public_base_figures.py`](../test/render_public_base_figures.py) 生成。复现时先运行 [`test/bootstrap_bitnet.py`](../test/bootstrap_bitnet.py) 取得固定 BitNet/llama.cpp 版本及 ReLU² 补丁，再在 `learning/bitnet/3rdparty/llama.cpp` 应用 [公开模型兼容补丁](../test/patches/public-bitnet25-compat.patch)。该补丁将原版 GGUF 的 `bitnet-25` 架构名映射到运行时，并读取独立 `output.weight`；它只服务于这项基础模型测量。分别以 `GGML_VULKAN=OFF` 与 `GGML_VULKAN=ON` 构建 `llama-bench`，再执行：
+
+```powershell
+python test/bootstrap_bitnet.py
+git -C learning/bitnet/3rdparty/llama.cpp apply "$(Resolve-Path test/patches/public-bitnet25-compat.patch)"
+cmake -S learning/bitnet/3rdparty/llama.cpp -B test/build-public-base -G "MinGW Makefiles" -DGGML_VULKAN=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DCMAKE_C_FLAGS="-D_WIN32_WINNT=0x0A00" -DCMAKE_CXX_FLAGS="-D_WIN32_WINNT=0x0A00"
+cmake --build test/build-public-base --target llama-bench -j 8
+cmake -S learning/bitnet/3rdparty/llama.cpp -B test/build-public-vulkan -G "MinGW Makefiles" -DGGML_VULKAN=ON -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DCMAKE_C_FLAGS="-D_WIN32_WINNT=0x0A00" -DCMAKE_CXX_FLAGS="-D_WIN32_WINNT=0x0A00"
+cmake --build test/build-public-vulkan --target llama-bench -j 8
+python test/benchmark_public_base.py --model test/ggml-model-i2_s-original.gguf --cpu-binary test/build-public-base/bin/llama-bench.exe --gpu-binary test/build-public-vulkan/bin/llama-bench.exe --gpu-device Vulkan1 --threads 8 --prompt-tokens 128 --decode-tokens 32 --repetitions 5 --output test/public_base_llama_bench_final.json
+python test/render_public_base_figures.py
+```
+
+上例构建命令对应 Windows MSYS2 UCRT 工具链；Vulkan 版还需可被 CMake 找到的 Vulkan 头文件和导入库。原版 GGUF 可以从上方固定修订下载到 `test/`；`--gpu-device` 应按本机 `llama-bench --list-devices` 的结果调整。复现依赖完整模型文件和同等补丁；两张图不支持 bit-jev 端到端速度、准确率或与 Kev 的倍数比较。
+
 ## CPU：把加载和常驻推理分开
 
 1. 记录源码提交号、骨干与指针头文件的 SHA-256、分词器版本、量化格式、编译选项及原生程序哈希。

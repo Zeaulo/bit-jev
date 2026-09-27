@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "raw_report_sha256": "57dbd55a1cc23b6cb5286b93825e259b749f0660451c6195094ac8f507eb9f89",
+  "benchmark_utc": "2026-09-27T11:51:59.622725+00:00",
+  "completed_utc": "2026-09-27T11:53:59.825789+00:00",
+  "model_family": "microsoft/bitnet-b1.58-2B-4T",
+  "source_repository": "microsoft/bitnet-b1.58-2B-4T-gguf",
+  "source_revision": "9f43072f69492cbd5bc5d5ebb085fec519686a93",
+  "source_revision_is_operator_assertion": true,
+  "model": {
+    "bytes": 1844472032,
+    "sha256": "13939ce5030319a35db346e5dba7a3a3bd599dfc18b113a2a97446ff964714c5",
+    "format": "I2_S GGUF"
+  },
+  "workload": {
+    "kind": "llama-bench synthetic backbone prefill and decode, not bit-jev decisions",
+    "prompt_tokens": 128,
+    "decode_tokens": 32,
+    "repetitions": 5,
+    "threads": 8,
+    "batch_tokens": 128,
+    "microbatch_tokens": 128,
+    "warmup_per_phase": true,
+    "model_load_excluded_from_throughput": true
+  },
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpu_name": "AMD Ryzen 7 4800H with Radeon Graphics",
+    "physical_cpu_cores": 8,
+    "logical_cpu_cores": 16,
+    "system_ram_mib": 23977.30859375,
+    "gpu": {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 2060",
+      "memory_total_mib": 6144.0,
+      "memory_used_mib": 59.0,
+      "driver_version": "572.70"
+    }
+  },
+  "source": {
+    "project_git_commit": "7f3088b97009b8023747182114e904d6336f221a",
+    "project_worktree_clean": false,
+    "upstream_git_commit": "0b341e582afbf9e1011f24744b554c96a3477eb5",
+    "benchmark_compat_patch_sha256": "b167824ebb481bb11c222fc725f53cb090944267a98418af922dc026e6930de8"
+  },
+  "runs": {
+    "cpu": {
+      "mode": "cpu",
+      "binary_sha256": "346d03f80c80723d1631c8415d1e2de9a673b47038f2a4586ed85564e14af97e",
+      "process_peak_rss_mib": 1230.19140625,
+      "gpu": {
+        "peak_global_delta_mib": 0.0,
+        "peak_process_used_mib": null,
+        "offloaded_layers": null,
+        "total_layers": null,
+        "model_buffers_mib": {
+          "CPU_Mapped": 1751.06
+        }
+      },
+      "phases": {
+        "prefill": {
+          "tokens_per_sample": 128,
+          "duration_ms_samples": [
+            2230.4349,
+            2409.5351,
+            2262.347,
+            2276.2021,
+            2292.7916
+          ],
+          "tokens_per_second_samples": [
+            57.38791120960311,
+            53.12228072543952,
+            56.57841171137761,
+            56.23402245345437,
+            55.82714102755785
+          ],
+          "reported_tokens_per_second_samples": [
+            57.3879,
+            53.1223,
+            56.5784,
+            56.234,
+            55.8271
+          ],
+          "median_duration_ms": 2276.2021,
+          "median_tokens_per_second": 56.23402245345437,
+          "llama_bench_metadata": {
+            "build_commit": "390c307",
+            "build_number": 1,
+            "cpu_info": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "D:\\AI_WorksPlace\\bit-jev\\test\\ggml-model-i2_s-original.gguf",
+            "model_type": "bitnet-25 2B Q1_0",
+            "model_size": 1836120640,
+            "model_n_params": 2741155840,
+            "n_batch": 128,
+            "n_ubatch": 128,
+            "n_threads": 8,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "use_mmap": true,
+            "use_direct_io": false,
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 128,
+            "n_gen": 0,
+            "n_depth": 0,
+            "test_time": "2026-09-27T11:52:01Z",
+            "avg_ns": 2294262140,
+            "stddev_ns": 68389830,
+            "avg_ts": 55.829953,
+            "stddev_ts": 1.618811
+          }
+        },
+        "decode": {
+          "tokens_per_sample": 32,
+          "duration_ms_samples": [
+            7008.2613,
+            7176.7522,
+            7357.2958,
+            6769.4282,
+            6886.5467
+          ],
+          "tokens_per_second_samples": [
+            4.566039796489894,
+            4.458841424119395,
+            4.349424145757467,
+            4.727134856087254,
+            4.646741159832692
+          ],
+          "reported_tokens_per_second_samples": [
+            4.56604,
+            4.45884,
+            4.34942,
+            4.72713,
+            4.64674
+          ],
+          "median_duration_ms": 7008.2613,
+          "median_tokens_per_second": 4.566039796489894,
+          "llama_bench_metadata": {
+            "build_commit": "390c307",
+            "build_number": 1,
+            "cpu_info": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+            "gpu_info": "",
+            "backends": "CPU",
+            "model_filename": "D:\\AI_WorksPlace\\bit-jev\\test\\ggml-model-i2_s-original.gguf",
+            "model_type": "bitnet-25 2B Q1_0",
+            "model_size": 1836120640,
+            "model_n_params": 2741155840,
+            "n_batch": 128,
+            "n_ubatch": 128,
+            "n_threads": 8,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 0,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "auto",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "use_mmap": true,
+            "use_direct_io": false,
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 0,
+            "n_gen": 32,
+            "n_depth": 0,
+            "test_time": "2026-09-27T11:52:15Z",
+            "avg_ns": 7039656840,
+            "stddev_ns": 232992252,
+            "avg_ts": 4.549636,
+            "stddev_ts": 0.14961
+          }
+        }
+      },
+      "warnings": []
+    },
+    "gpu": {
+      "mode": "gpu",
+      "binary_sha256": "fa8bf9af2f597fcee1f6be5236b1309343ab30504e78750dcafe9d1bb6741740",
+      "process_peak_rss_mib": 1955.55859375,
+      "gpu": {
+        "peak_global_delta_mib": 722.0,
+        "peak_process_used_mib": null,
+        "offloaded_layers": 31,
+        "total_layers": 31,
+        "model_buffers_mib": {
+          "CPU_Mapped": 1124.8,
+          "Vulkan1": 627.93
+        }
+      },
+      "phases": {
+        "prefill": {
+          "tokens_per_sample": 128,
+          "duration_ms_samples": [
+            2815.7463,
+            2855.4228,
+            2813.8494,
+            2831.6793,
+            2832.6331
+          ],
+          "tokens_per_second_samples": [
+            45.45864092940476,
+            44.82698674255875,
+            45.489285958232166,
+            45.20285895369578,
+            45.18763831433022
+          ],
+          "reported_tokens_per_second_samples": [
+            45.4586,
+            44.827,
+            45.4893,
+            45.2029,
+            45.1876
+          ],
+          "median_duration_ms": 2831.6793,
+          "median_tokens_per_second": 45.20285895369578,
+          "llama_bench_metadata": {
+            "build_commit": "390c307",
+            "build_number": 1,
+            "cpu_info": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+            "gpu_info": "AMD Radeon(TM) Graphics, NVIDIA GeForce RTX 2060",
+            "backends": "Vulkan",
+            "model_filename": "D:\\AI_WorksPlace\\bit-jev\\test\\ggml-model-i2_s-original.gguf",
+            "model_type": "bitnet-25 2B Q1_0",
+            "model_size": 1836120640,
+            "model_n_params": 2741155840,
+            "n_batch": 128,
+            "n_ubatch": 128,
+            "n_threads": 8,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 99,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "Vulkan1",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "use_mmap": true,
+            "use_direct_io": false,
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 128,
+            "n_gen": 0,
+            "n_depth": 0,
+            "test_time": "2026-09-27T11:52:55Z",
+            "avg_ns": 2829866180,
+            "stddev_ns": 16733143,
+            "avg_ts": 45.233082,
+            "stddev_ts": 0.26665
+          }
+        },
+        "decode": {
+          "tokens_per_sample": 32,
+          "duration_ms_samples": [
+            9000.0061,
+            9739.6125,
+            8910.9427,
+            9095.9085,
+            8872.2453
+          ],
+          "tokens_per_second_samples": [
+            3.5555531456806455,
+            3.2855516582410234,
+            3.5910903119150346,
+            3.5180652927632243,
+            3.6067532984012516
+          ],
+          "reported_tokens_per_second_samples": [
+            3.55555,
+            3.28555,
+            3.59109,
+            3.51807,
+            3.60675
+          ],
+          "median_duration_ms": 9000.0061,
+          "median_tokens_per_second": 3.5555531456806455,
+          "llama_bench_metadata": {
+            "build_commit": "390c307",
+            "build_number": 1,
+            "cpu_info": "AMD Ryzen 7 4800H with Radeon Graphics         ",
+            "gpu_info": "AMD Radeon(TM) Graphics, NVIDIA GeForce RTX 2060",
+            "backends": "Vulkan",
+            "model_filename": "D:\\AI_WorksPlace\\bit-jev\\test\\ggml-model-i2_s-original.gguf",
+            "model_type": "bitnet-25 2B Q1_0",
+            "model_size": 1836120640,
+            "model_n_params": 2741155840,
+            "n_batch": 128,
+            "n_ubatch": 128,
+            "n_threads": 8,
+            "cpu_mask": "0x0",
+            "cpu_strict": false,
+            "poll": 50,
+            "type_k": "f16",
+            "type_v": "f16",
+            "n_gpu_layers": 99,
+            "n_cpu_moe": 0,
+            "split_mode": "layer",
+            "main_gpu": 0,
+            "no_kv_offload": false,
+            "flash_attn": -1,
+            "devices": "Vulkan1",
+            "tensor_split": "0.00",
+            "tensor_buft_overrides": "none",
+            "use_mmap": true,
+            "use_direct_io": false,
+            "embeddings": false,
+            "no_op_offload": 0,
+            "no_host": false,
+            "fit_target": 0,
+            "fit_min_ctx": 0,
+            "n_prompt": 0,
+            "n_gen": 32,
+            "n_depth": 0,
+            "test_time": "2026-09-27T11:53:12Z",
+            "avg_ns": 9123743020,
+            "stddev_ns": 354935163,
+            "avg_ts": 3.511403,
+            "stddev_ts": 0.130809
+          }
+        }
+      },
+      "warnings": [
+        "nvidia-smi 未提供 Vulkan 进程显存；全局增量可能包含其他进程"
+      ]
+    }
+  },
+  "measurement_notes": [
+    "llama-bench -p 与 -n 分别产生 prefill 和 decode 测试，不是同一道题的端到端时延。",
+    "吞吐样本排除模型加载；wall_seconds_including_load 包含加载和全部测试，仅供参考。",
+    "CPU 内存是进程峰值 RSS；GPU 显存优先记录进程值，若驱动未提供则仅记录全局基线增量。"
+  ]
+}

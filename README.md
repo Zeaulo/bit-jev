@@ -28,6 +28,21 @@ The PyTorch packed path uses a block-causal mask so question branches can share 
 
 I2_S storage is intended to reduce backbone memory relative to less compressed formats. Actual process memory and request latency depend on the authorized model artifacts, input length, candidate count, CPU, thread count, and build. The [benchmark protocol](docs/BENCHMARKS.md) explains how to measure those quantities without conflating model load time and resident inference.
 
+## Independent public BitNet base measurement
+
+These charts measure **Microsoft's public original BitNet b1.58 2B GGUF backbone**, using the same I2_S file on both paths. They do **not** measure a bit-jev classification request or its withheld checkpoint. The Vulkan path is hybrid: some I2_S weights remain CPU mapped.
+
+![Public BitNet base CPU and hybrid GPU throughput](docs/figures/public-base-speed.svg)
+
+![Public BitNet base RAM and VRAM observations](docs/figures/public-base-memory.svg)
+
+| Path | 128 input token prefill | 32 output token decode | Peak process RAM | GPU global VRAM rise |
+| --- | ---: | ---: | ---: | ---: |
+| Ryzen 7 4800H, 8 threads, native CPU | 56.23 tokens/s; 2.28 s | 4.57 tokens/s; 7.01 s | 1.20 GiB | 0 GiB |
+| RTX 2060, Vulkan hybrid | 45.20 tokens/s; 2.83 s | 3.56 tokens/s; 9.00 s | 1.91 GiB | 0.71 GiB |
+
+Values are medians of five repetitions per phase; throughput **excludes model loading**. RAM is peak process RSS during loading and tests. VRAM is the change in global GPU use from the pre-run baseline, not process-exclusive allocation. The GGUF file is 1,844,472,032 bytes (1.72 GiB). On this setup the CPU path is faster; this does not generalize to other GPUs or bit-jev requests. See the [public base measurement record](docs/BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) for samples, hashes and reproduction steps.
+
 ## Request shape
 
 The JSONL CLI accepts one request per line. This is an **input example**, not a saved model prediction:

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.4.7 源码架构、数据流、构建路径与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.5.7 源码架构、公开基础模型测量、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,13 +15,14 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.4.7 纯源码版</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.5.7 源码与公开基础模型测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
         <a class="nav-pill" href="#flow">数据流动</a>
         <a class="nav-pill" href="#files">目录与文件</a>
         <a class="nav-pill" href="#build">构建与验证</a>
+        <a class="nav-pill" href="#public-benchmark">公开测量</a>
         <a class="nav-pill" href="#boundary">发布边界</a>
       </nav>
     </header>
@@ -31,7 +32,7 @@
       <section id="summary" class="glass hero scroll-mt-28 rounded-[2rem] p-8 md:p-12">
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并提供原生 CPU 推理源码。</h2>
-        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。本次公开发布仅包含源码、许可、架构文档与构建脚本；训练权重、模型包、推理结果、性能图和原始报告均不在仓库内。</p>
+        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。本次公开发布包含源码、许可、架构文档、构建脚本，以及微软公开 BitNet 基础模型的独立测量图和逐次样本；历史 bit-jev 训练权重、模型包及其衍生结果仍不公开。</p>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
           <div class="metric"><strong>Pointer</strong><span>从选项与决策位置隐藏状态计算分数</span></div>
@@ -59,7 +60,7 @@
             <li><b>一次读出</b><span>每条原生因果行以前向计算取得所有候选分数；没有逐个生成答案 token 的循环。多题原生请求仍逐题重算共享 state。</span></li>
             <li><b>量化兼容</b><span>导出器按在线量化对应的三元舍入规则写 I2_S；原生 runner 从 GGUF 取得骨干隐藏状态，从 <code>head.f32</code> 取得指针头参数。</span></li>
             <li><b>可复现源码</b><span>仓库固定上游提交和补丁，允许在独立机器上检查依赖源码、构建可执行文件及运行命令帮助；真实分类需要额外提供合法取得的兼容检查点。</span></li>
-            <li><b>性能研究</b><span><code>test/</code> 保留 CPU/GPU 和 I2_S/F16 测量脚本，供操作者在自有模型与请求上生成本地报告；当前仓库不发布既有检查点的结果或图。</span></li>
+            <li><b>性能研究</b><span><code>test/benchmark_public_base.py</code> 核对微软公开 GGUF 的固定大小与 SHA-256，再顺序测 CPU 原生与 Vulkan 混合路径；<code>render_public_base_figures.py</code> 从原始样本生成可公开的速度、内存图和剔除本机路径的 JSON。原 bit-jev 检查点的测量值始终留在本地。</span></li>
             <li><b>数据权限</b><span>训练脚本属于研究实现，不承诺其历史数据配方可用于公开权重分发。任何新训练、教师输出、模型与评估结果都须按各自数据和模型条款审查。</span></li>
           </ol></article>
         </div>
@@ -115,9 +116,12 @@
 │  ├─ bootstrap_bitnet.py
 │  ├─ patches/
 │  │  ├─ bitnet-converter.patch
-│  │  └─ llama-relu2.patch
+│  │  ├─ llama-relu2.patch
+│  │  └─ public-bitnet25-compat.patch
 │  ├─ benchmark_native_formats.py
 │  ├─ benchmark_gpu.py
+│  ├─ benchmark_public_base.py
+│  ├─ render_public_base_figures.py
 │  ├─ render_architecture_figure.py
 │  ├─ package_release.py
 │  └─ verify_release_package.py
@@ -125,9 +129,13 @@
 │  ├─ CPU_QUICKSTART.md / BENCHMARKS.md
 │  ├─ MODEL_CARD.md / RELEASE_CHECKLIST.md
 │  ├─ X_LAUNCH.md
+│  ├─ benchmark-data/
+│  │  └─ public-bitnet-base-2026-09-27.json
 │  └─ figures/
 │     ├─ architecture.svg
-│     └─ source-architecture.svg
+│     ├─ source-architecture.svg
+│     ├─ public-base-speed.svg / .png
+│     └─ public-base-memory.svg / .png
 └─ versions/
    ├─ update.log
    └─ project_overall/
@@ -145,6 +153,10 @@
             <div><dt>core/bit_jev/cpu.py / native/main.cpp</dt><dd>Python 负责请求拆行和答案格式；C++ 负责模型常驻、隐藏状态读取、指针头计算和 JSONL 响应。</dd></div>
             <div><dt>test/bootstrap_bitnet.py / test/patches/</dt><dd>固定 BitNet 与 llama.cpp 修订版，核对两份补丁后应用；失败时报告具体依赖或补丁步骤。</dd></div>
             <div><dt>test/benchmark_native_formats.py / benchmark_gpu.py</dt><dd>仅提供操作者可在自有模型上运行的原生 CPU 格式计时和 GPU 对照代码；既有结果文件不纳入 Git。</dd></div>
+            <div><dt>test/benchmark_public_base.py / render_public_base_figures.py</dt><dd>前者限定微软公开 GGUF 的固定提交、文件大小与 SHA-256，记录两种路径各五次预填充和解码、进程 RSS 与整卡显存；后者验证记录，输出公开 JSON 和速度、内存 SVG/PNG。</dd></div>
+            <div><dt>test/patches/public-bitnet25-compat.patch</dt><dd>在 ReLU² 补丁之后应用于固定 llama.cpp：识别原版 GGUF 的 bitnet-25 架构名，并使用独立 output.weight；此补丁只用于公开基础模型的基准复现。</dd></div>
+            <div><dt>docs/benchmark-data/public-bitnet-base-2026-09-27.json</dt><dd>保留原版 BitNet 文件哈希、固定修订、硬件、二进制哈希、每阶段五个原始计时样本与内存口径；不含本机模型路径和历史 bit-jev 检查点结果。</dd></div>
+            <div><dt>docs/figures/public-base-speed.svg / public-base-memory.svg</dt><dd>展示同一公开 BitNet GGUF 的 CPU 原生路径和 RTX 2060 Vulkan 混合路径；速度按预填充与解码分开，内存按 RSS 与整卡显存增量分开。</dd></div>
             <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
             <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
             <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
@@ -168,17 +180,26 @@
         </div>
       </section>
 
+      <!-- 基准数据流与正式 bit-jev 分类数据流分别记录，防止读者混淆。 -->
+      <section id="public-benchmark" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
+        <p class="eyebrow">06 / 公开基础模型测量</p><h2 class="mt-2 text-2xl font-semibold">同一微软 I2_S GGUF 的两条部署路径</h2>
+        <p class="mt-5 text-sm leading-7 text-slate-700">输入来源固定为 microsoft/bitnet-b1.58-2B-4T-gguf 修订 9f43072f69492cbd5bc5d5ebb085fec519686a93，GGUF 大小 1,844,472,032 字节，SHA-256 以 benchmark_public_base.py 的常量核对。先执行 bootstrap_bitnet.py 应用转换器与 ReLU² 补丁，再给固定 llama.cpp 应用 public-bitnet25-compat.patch；CPU-only 与 Vulkan 版本分别构建到 test/build-public-base 和 test/build-public-vulkan。Vulkan1 指向 RTX 2060；Vulkan0 是集成显卡，不能自动选择。</p>
+        <p class="mt-4 text-sm leading-7 text-slate-700">测量程序对 128 输入 token 的预填充和 32 输出 token 的解码分别预热并各重复五次，依次启动两个二进制；吞吐排除模型加载。CPU 原生路径中位吞吐为 56.23 / 4.57 token/s，Vulkan 混合路径为 45.20 / 3.56 token/s。进程 RSS 在加载与测试期间采样，峰值分别为 1,230.19 / 1,955.56 MiB。显存仅有 nvidia-smi 整卡基线增量：CPU 0 MiB、Vulkan 722 MiB；不能当成每进程模型显存。GPU 虽配置卸载 31/31 层，仍有 1,124.80 MiB 模型缓冲区映射在 CPU。以上数据属于公开基础语言模型合成基准，不是 bit-jev 判题或 Kev 对照。</p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2"><img class="w-full rounded-xl border border-white/70" src="../../docs/figures/public-base-speed.svg" alt="公开 BitNet 基础模型的 CPU 与 Vulkan 混合路径预填充、解码吞吐"><img class="w-full rounded-xl border border-white/70" src="../../docs/figures/public-base-memory.svg" alt="公开 BitNet 基础模型的进程 RAM 峰值与整卡显存增量"></div>
+        <p class="mt-4 text-sm leading-7 text-slate-700">详细方法与复现命令见 <code>docs/BENCHMARKS.zh-CN.md</code>；逐次样本见 <code>docs/benchmark-data/public-bitnet-base-2026-09-27.json</code>。本组结果不得替代 bit-jev 检查点的每请求延迟与准确率验证。</p>
+      </section>
+
       <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">06 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.4.7 仅发布可审阅源码</h2>
+        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.5.7 源码与公开基础模型测量</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
-          <div class="status"><span class="status-dot done"></span><b>本地测试工具</b><p>保留评估和计时脚本的实现；既有输出文件、模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
           <div class="status"><span class="status-dot pending"></span><b>权重与结果</b><p>历史训练数据包含权利边界未确认的评论数据。当前不公开该检查点、由其生成的模型包或衍生测量结果；后续应使用权利清晰的数据重新训练并验证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.4.7 公开源码范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.5.7 公开源码与基础模型测量范围</footer>
   </div>
 </body>
 </html>
