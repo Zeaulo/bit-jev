@@ -32,6 +32,10 @@
 !/docs/figures/public-base-memory.svg
 !/docs/figures/model-framework.png
 !/docs/figures/model-framework.svg
+!/docs/figures/model-highlights.zh-CN.png
+!/docs/figures/model-highlights.zh-CN.svg
+!/docs/figures/model-highlights.en.png
+!/docs/figures/model-highlights.en.svg
 /test/*.log
 /test/*.stderr
 /test/*_wall_seconds.txt

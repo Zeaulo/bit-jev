@@ -71,3 +71,8 @@
 - 新增 test/render_model_framework.py 与 docs/figures/model-framework.{svg,png}：从真实前向顺序展开多题输入打包、分支因果掩码、30 层 BitNet 解码器内部注意力和前馈残差、最终隐藏状态及 256 维指针头评分；区分 PyTorch 打包共享 state 与原生 CPU 逐题重算。
 - README 中英文将新图设为首页模型结构主图，并保留旧简图作为历史概览；.gitignore 仅放行这两张新生成的公开图，不放行模型权重或本地检查点结果。
 - 包版本从 0.5.7 升为 0.6.7；同步更新构建文档、模型卡、发布核对表、X 首发材料和 versions/project_overall/ 内部手册。公开 BitNet 基础模型测量口径保持不变。
+
+[2026-09-27 20:58:43] v0.7.7（中版本，新增中文与英文独立首页核心图）
+- 新增 test/render_model_highlights.py 和 docs/figures/model-highlights.zh-CN.{svg,png}、model-highlights.en.{svg,png}。两张图同版式强调量化 BitLinear 的 −1/0/+1 三值、CPU 内存与速度的公开基础模型实测，以及 LoRA 微调、教师 logits、完整学生蒸馏、I2_S 原生 CPU 选项评分的先后链路。
+- README.zh-CN.md 只嵌入中文版核心图，README.md 只嵌入英文版；保留 v0.6.7 的详细模型内部结构图作为深入阅读链接。图片自身明确指出数值只来自微软公开基础模型，不能替代尚未公开的 bit-jev 检查点端到端成绩。
+- 模型卡补充 train.py、distill.py、export_distilled.py 的职责与三值权重适用范围；同步更新 .gitignore 图表白名单、发布核对表、X 文案、包版本和 versions/project_overall/ 内部手册。版本从 0.6.7 升为 0.7.7。

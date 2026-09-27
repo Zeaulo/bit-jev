@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.6.7 深度学习模型结构、公开基础模型测量、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.7.7 三值 BitNet、LoRA 与蒸馏、CPU 基础模型测量、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.6.7 模型结构与公开基础模型测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.7.7 中英文核心图与公开基础模型测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -33,6 +33,7 @@
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并提供原生 CPU 推理源码。</h2>
         <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。本次公开发布包含源码、许可、架构文档、构建脚本，以及微软公开 BitNet 基础模型的独立测量图和逐次样本；历史 bit-jev 训练权重、模型包及其衍生结果仍不公开。</p>
+        <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-highlights.zh-CN.svg" alt="三值 BitLinear 权重、微软公开 BitNet 基础模型的 CPU 实测，以及 LoRA 微调后教师学生蒸馏的流程"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">首页中文核心图对应 README.zh-CN.md；README.md 使用独立的英文图。量化后三值只作用于 BitLinear 权重，指针头与部分张量保留较高精度。图中 1.20 GiB RSS、56.23 输入 token/s 预填充及 4.57 输出 token/s 解码是公开基础模型实测，不是 bit-jev 检查点成绩。</figcaption></figure>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
           <div class="metric"><strong>Pointer</strong><span>从选项与决策位置隐藏状态计算分数</span></div>
@@ -122,6 +123,7 @@
 │  ├─ benchmark_gpu.py
 │  ├─ benchmark_public_base.py
 │  ├─ render_public_base_figures.py
+│  ├─ render_model_highlights.py
 │  ├─ render_model_framework.py
 │  ├─ render_architecture_figure.py
 │  ├─ package_release.py
@@ -133,6 +135,8 @@
 │  ├─ benchmark-data/
 │  │  └─ public-bitnet-base-2026-09-27.json
 │  └─ figures/
+│     ├─ model-highlights.zh-CN.svg / .png
+│     ├─ model-highlights.en.svg / .png
 │     ├─ model-framework.svg / .png
 │     ├─ architecture.svg
 │     ├─ source-architecture.svg
@@ -160,6 +164,7 @@
             <div><dt>docs/benchmark-data/public-bitnet-base-2026-09-27.json</dt><dd>保留原版 BitNet 文件哈希、固定修订、硬件、二进制哈希、每阶段五个原始计时样本与内存口径；不含本机模型路径和历史 bit-jev 检查点结果。</dd></div>
             <div><dt>docs/figures/public-base-speed.svg / public-base-memory.svg</dt><dd>展示同一公开 BitNet GGUF 的 CPU 原生路径和 RTX 2060 Vulkan 混合路径；速度按预填充与解码分开，内存按 RSS 与整卡显存增量分开。</dd></div>
             <div><dt>test/render_model_framework.py / docs/figures/model-framework.svg</dt><dd>按 model.py 的打包掩码、30 层 BitNet 解码器、256 维指针头和 native/main.cpp 的逐题执行边界绘制模型结构图。原生 BitNet 层内部的 RMSNorm、RoPE、Q/K/V/O、Up/Gate/Down 与残差顺序经固定 llama.cpp 源码核对。</dd></div>
+            <div><dt>test/render_model_highlights.py / docs/figures/model-highlights.zh-CN.svg / model-highlights.en.svg</dt><dd>同一脚本以中文和英文内容字典绘制首页双语核心图。三张信息卡分别限定为量化 BitLinear 三值、微软公开基础模型 CPU 峰值 RSS 和预填充/解码速度；下方按 train.py → distill.py export_teacher → distill.py train → export_distilled.py 的顺序展示 LoRA 教师和无 LoRA 学生。图注在图片脱离 README 时仍保留测量来源与不能外推至 bit-jev 的边界。</dd></div>
             <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
             <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
             <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
@@ -194,7 +199,7 @@
 
       <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.6.7 模型结构图、源码与公开基础模型测量</h2>
+        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.7.7 双语核心图、源码与公开基础模型测量</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
@@ -202,7 +207,7 @@
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.6.7 模型结构、公开源码与基础模型测量范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.7.7 双语核心图、公开源码与基础模型测量范围</footer>
   </div>
 </body>
 </html>

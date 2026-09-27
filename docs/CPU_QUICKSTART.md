@@ -1,6 +1,6 @@
 # CPU source quick start
 
-This guide builds the native I2_S runner and shows the JSONL inference interface. **v0.6.7 remains a source-only bit-jev release**: there is no public bit-jev weight archive or saved answer to reproduce. The separate [Microsoft public-base benchmark](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) measures backbone execution, not classification. Running inference requires your own compatible, authorized tokenizer, I2_S GGUF backbone, and trained pointer-head sidecar. The Microsoft BitNet base model by itself does not provide bit-jev's trained decision head.
+This guide builds the native I2_S runner and shows the JSONL inference interface. **v0.7.7 remains a source-only bit-jev release**: there is no public bit-jev weight archive or saved answer to reproduce. The separate [Microsoft public-base benchmark](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) measures backbone execution, not classification. Running inference requires your own compatible, authorized tokenizer, I2_S GGUF backbone, and trained pointer-head sidecar. The Microsoft BitNet base model by itself does not provide bit-jev's trained decision head.
 
 The Python launcher encodes requests and manages a persistent native process. The native binary performs backbone inference and pointer-head scoring. It does not run an HTTP server.
 

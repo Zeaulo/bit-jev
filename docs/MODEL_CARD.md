@@ -2,7 +2,7 @@
 
 ## Release status
 
-Version **v0.6.7 ships bit-jev source only**. No trained bit-jev checkpoint, I2_S GGUF, pointer-head weights, tokenizer bundle, model output, or checkpoint-derived benchmark report is distributed. The separate [public BitNet backbone measurements](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) use an official Microsoft base-model file and do not measure bit-jev classification. A local research checkpoint used training material whose redistribution conditions have not been resolved, including Yelp review data. The project withholds that checkpoint and its derived measurements.
+Version **v0.7.7 ships bit-jev source only**. No trained bit-jev checkpoint, I2_S GGUF, pointer-head weights, tokenizer bundle, model output, or checkpoint-derived benchmark report is distributed. The separate [public BitNet backbone measurements](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) use an official Microsoft base-model file and do not measure bit-jev classification. A local research checkpoint used training material whose redistribution conditions have not been resolved, including Yelp review data. The project withholds that checkpoint and its derived measurements.
 
 This page documents the **code interface and requirements for a future model artifact**. It is not a performance card for a model available to download.
 
@@ -15,6 +15,8 @@ The implementation is inspired by [Kev](https://github.com/jaredpalmer/kev)'s st
 - `score`: score ordered categories.
 
 The pointer head reads the option-boundary and decision hidden states and produces option logits and probabilities. It does not produce answer text. The PyTorch packed implementation uses a block-causal attention mask to isolate question branches while sharing state computation. The native CPU implementation evaluates **one causal row per question**, so a multiquestion request repeats the shared-state work.
+
+The [English highlights figure](figures/model-highlights.en.svg) follows the code's training-to-deployment order: `train.py` trains LoRA and the pointer head on the BitNet BF16 base; `distill.py export_teacher` records option logits from the trained model; `distill.py train` trains a full-backbone student without LoRA and uses the fine-tuned pointer head; `export_distilled.py` exports a compatible student backbone to I2_S GGUF. Ternary describes **quantized BitLinear weights**, not every tensor. The CPU numbers in the figure measure the separate Microsoft public base model, not this trained pipeline.
 
 The native runner reads JSONL and returns JSONL. It is not an HTTP service. The PyTorch service in `core/bit_jev/serve.py` is a separate execution path.
 
