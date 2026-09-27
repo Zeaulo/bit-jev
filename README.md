@@ -2,7 +2,7 @@
 
 BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。
 
-[English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases)
+[English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases) · [Hugging Face 模型与模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
 ![bit-jev 项目流程图](docs/figures/model-highlights.zh-CN.svg)
 
@@ -46,7 +46,17 @@ BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问
 
 ### bit-jev AutoDL 单题案例
 
-AutoDL 的 CPU/GPU 单题报告和图表已经在本地整理，但由于它们来自 Yelp 训练检查点，暂不放入公开仓库。许可确认后再补充脱敏图表、模型哈希、完整硬件条件和复现命令；在此之前不要把本地 `test/release/` 草稿当成公开发布物。
+![bit-jev 单题 AutoDL 延迟与内存对比](docs/figures/bit-jev-autodl-case.zh-CN.svg)
+
+同一台 Xeon Gold 6459C / RTX 5090 主机上测试一道固定开发题，输入 703 tokens、77 个候选项；下表均不计模型加载时间。GPU 测试另排除预热。
+
+| 路径 | 平均推理时间 | 重复次数 | 峰值内存观测 |
+| --- | ---: | ---: | ---: |
+| CPU，8 线程，I2_S 原生 | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
+| CPU，16 线程，I2_S 原生 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
+| RTX 5090，FP16 混合精度 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
+
+该单题上 GPU 路径约为 16 线程 CPU 路径的 22.8 倍；但两条路径使用不同权重格式和数值精度，不能据此声称纯硬件加速倍数。CPU RSS 与 GPU 分配显存口径不同。原始输入、候选内容和预测值均未公开；逐次计时、模型 SHA-256、实验边界和图表生成脚本见[公开案例数据](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json)与[性能测量规范](docs/BENCHMARKS.zh-CN.md#bit-jev-autodl-单题案例)。这组小样本不代表通用延迟或准确率。模型权重可从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载；使用前请阅读模型卡中的数据来源和许可状态。
 
 ## 快速开始
 
@@ -59,6 +69,8 @@ python test/bootstrap_bitnet.py --check
 ```
 
 构建原生程序不需要下载本项目检查点。实际推理需要兼容的 tokenizer/config、I2_S GGUF 骨干和指针头 sidecar；请先确认模型与数据拥有可公开使用的权利。
+
+公开模型包位于 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)，本项目 [CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md)含下载及运行步骤。
 
 ## 请求格式
 
@@ -75,7 +87,7 @@ python test/bootstrap_bitnet.py --check
 | [中文 CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md) | 第一次运行 | 构建、模型文件和 JSONL 调用。 |
 | [中文性能规范](docs/BENCHMARKS.zh-CN.md) | 做实验 | 加载、预热、推理、RSS、显存和线程数的统一口径。 |
 | [中文模型卡](docs/MODEL_CARD.zh-CN.md) | 评估模型 | 架构、输入契约、局限和发布边界。 |
-| [Hugging Face 中文模型卡草稿](docs/HF_MODEL_CARD.zh-CN.md) | 发布模型 | 按 Kev 风格组织训练流程、文件布局、评测切分和发布条件。 |
+| [Hugging Face 中文模型卡](docs/HF_MODEL_CARD.zh-CN.md) | 评估权重 | 训练流程、AutoDL 案例、数据来源、文件哈希和限制。 |
 | [英文 README](README.en.md) | English readers | English overview and reproduction links. |
 | [第三方许可](THIRD_PARTY_NOTICES.md) | 发布前 | BitNet、Kev、数据集和检查点的权利边界。 |
 | [项目总览网页](versions/project_overall/index.html) | 内部学习 | 代码逻辑、功能需求、数据流和关键目录。 |
@@ -92,7 +104,7 @@ python test/bootstrap_bitnet.py --check
 
 ## 发布状态与许可
 
-仓库代码采用 [Apache-2.0](LICENSE)。BitNet 上游、基础模型、教师模型、Yelp 数据及训练后的检查点各自保留原有条款。Yelp 检查点公开发布需以数据权利方书面许可为依据；许可申请已经发出，正式权重包和派生指标在收到答复前保持待发布状态。
+仓库代码采用 [Apache-2.0](LICENSE)。I2_S 检查点与脱敏 AutoDL 派生指标现已发布到 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)。训练集包含 Yelp 评论记录；许可申请已发出，截至 2026-09-28 尚未收到书面答复。本项目没有为权重另行指定开放许可证，代码仓库许可证不自动覆盖权重或第三方数据。公开案例只含聚合计时与内存，不含评论原文、候选内容或模型预测。
 
 ## 引用与致谢
 

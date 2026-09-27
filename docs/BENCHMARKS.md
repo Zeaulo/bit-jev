@@ -37,6 +37,22 @@ python test/render_public_base_figures.py
 
 The build example uses Windows MSYS2 UCRT; the Vulkan build also needs Vulkan headers and import libraries discoverable by CMake. Download the original GGUF from the fixed revision above into `test/`, and select the actual GPU device reported by `llama-bench --list-devices`. These measurements do not establish bit-jev request latency, accuracy, or a speed ratio against Kev.
 
+## bit-jev AutoDL single-question case
+
+![bit-jev CPU/GPU latency and memory for one question](figures/bit-jev-autodl-case.en.svg)
+
+This measurement uses the bit-jev-2b-distilled checkpoint published on Hugging Face. One fixed development request encoded to 703 input tokens and 77 options. The native CPU I2_S path ran three times; the GPU FP16 mixed-precision path ran five times. Model loading is excluded from inference time; GPU warmup is also excluded.
+
+| Path | Mean inference time | Repetitions | Peak memory observation |
+| --- | ---: | ---: | ---: |
+| CPU, 8 threads, native I2_S | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
+| CPU, 16 threads, native I2_S | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
+| RTX 5090, FP16 mixed precision | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
+
+For this fixed request, GPU-path latency was about 1/22.8 of the 16-thread CPU path. The paths use different weight formats and arithmetic precision, so the ratio is not an isolated hardware speedup. CPU RSS and GPU framework allocation are different memory measures. The [sanitized JSON](benchmark-data/bit-jev-autodl-case-2026-09-27.json) contains each timing sample, hardware, checkpoint hashes, and limitations. The bilingual charts are generated from that file by [`test/render_checkpoint_public_figures.py`](../test/render_checkpoint_public_figures.py), without reading the local input request. This one-request development case is not a general speed or accuracy claim.
+
+The checkpoint was trained on a multi-source decision set that includes Yelp review records. As of 2026-09-28, no written response had arrived to the permission request for derivative weights and metrics. The model card discloses this status; the maintainer chose to publish these sanitized aggregate measurements. No standalone open-weights license is specified for the checkpoint.
+
 ## CPU measurement
 
 1. Record the exact source revision, model and pointer-head hashes, tokenizer revision, quantization format, compiler flags, and native binary hash.
@@ -70,4 +86,4 @@ Freeze the model and evaluation protocol before scoring. Identify the dataset, s
 | Memory | File size, peak process RSS, GPU allocation, sampling method |
 | Correctness | Finite outputs, option agreement, accuracy/calibration on a permitted evaluation set |
 
-A future chart should link to the exact input and report used to produce it. No chart in this source-only release represents a publicly distributed bit-jev checkpoint.
+Every published chart links to its public measurement record. The bit-jev AutoDL case chart uses only the sanitized timing and memory values in the linked JSON; the local request and predictions are not part of the release.

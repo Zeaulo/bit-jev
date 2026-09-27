@@ -18,8 +18,7 @@
 /test/*.jsonl
 !/test/example_cpu_request.jsonl
 !/test/cpu_smoke_request.jsonl
-# 架构图与性能图默认排除，仅放行两张公开图：源码卡片图与论文式架构图。
-# 其余由既有检查点生成的图片不进入公开仓库。
+# 架构图与性能图默认排除；只逐项放行已审阅、数据来源可追溯的公开图。
 /docs/figures/*.png
 /docs/figures/*.svg
 !/docs/figures/source-architecture.png
@@ -36,6 +35,10 @@
 !/docs/figures/model-highlights.zh-CN.svg
 !/docs/figures/model-highlights.en.png
 !/docs/figures/model-highlights.en.svg
+!/docs/figures/bit-jev-autodl-case.zh-CN.png
+!/docs/figures/bit-jev-autodl-case.zh-CN.svg
+!/docs/figures/bit-jev-autodl-case.en.png
+!/docs/figures/bit-jev-autodl-case.en.svg
 /test/*.log
 /test/*.stderr
 /test/*_wall_seconds.txt

@@ -1,0 +1,59 @@
+{
+  "format": "bit-jev-single-question-case-v1",
+  "publication_status": "public_sanitized_case_study",
+  "rights_note": "Yelp permission request was sent; no written response had been received on 2026-09-28. The project publishes only aggregate timings and memory observations at the maintainer's direction. No input, option text, prediction, or raw review record is included.",
+  "checkpoint": {
+    "name": "bit-jev-2b-distilled",
+    "cpu_gguf_bytes": 1187288192,
+    "cpu_gguf_sha256": "731700ba3112e35dc9bbecf54fe97b79d91b69246d765413ce683e06250773ff",
+    "head_f32_bytes": 5244948,
+    "head_f32_sha256": "a3b3df8f5d4803d575e64c4f15e8ab09c00762e4140917c07925705ba43c1b27"
+  },
+  "workload": {
+    "questions": 1,
+    "input_tokens": 703,
+    "options": 77,
+    "input_contents_included": false
+  },
+  "hardware": {
+    "cpu": "Intel Xeon Gold 6459C",
+    "gpu": "NVIDIA GeForce RTX 5090"
+  },
+  "timing_protocol": {
+    "model_loading_included": false,
+    "gpu_warmup_included": false,
+    "cpu_path": "native I2_S",
+    "gpu_path": "experimental FP16 mixed precision"
+  },
+  "measurements": [
+    {
+      "path": "native_cpu_i2_s_8_threads",
+      "inference_ms": [3130.145155, 3116.412122, 3137.091499],
+      "peak_process_rss_mib": 1622.73828125
+    },
+    {
+      "path": "native_cpu_i2_s_16_threads",
+      "inference_ms": [1988.39572, 1932.495782, 1995.618271],
+      "peak_process_rss_mib": 1624.51953125
+    },
+    {
+      "path": "experimental_gpu_fp16_mixed_precision",
+      "inference_ms": [86.58125344663858, 86.55721507966518, 86.44785638898611, 87.03544735908508, 86.19202673435211],
+      "model_gpu_allocation_mib": 4629.59228515625,
+      "peak_gpu_allocation_mib": 4935.5322265625
+    }
+  ],
+  "quality_metrics": {
+    "accuracy": null,
+    "brier": null,
+    "nll": null,
+    "ece": null,
+    "note": "No auditable held-out source-split quality report is included."
+  },
+  "limitations": [
+    "One fixed development request and few repetitions do not establish general latency, throughput, or accuracy.",
+    "CPU and GPU use different weight formats and arithmetic precision; this compares deployment paths, not isolated hardware speedup.",
+    "CPU process RSS and GPU framework allocation are different memory measures.",
+    "Generated tokens per second does not apply because the model scores explicit options and emits structured decisions."
+  ]
+}

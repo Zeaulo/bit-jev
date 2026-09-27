@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.9.0 中文默认 README、三值 BitNet、LoRA 与蒸馏、Kev 风格 Hugging Face 模型卡、AutoDL 案例测量、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.10.1 中文默认 README、三值 BitNet、LoRA 与蒸馏、Hugging Face 模型包、AutoDL CPU/GPU 案例、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.9.0 中文默认 README、模型卡与双路径测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.10.1 中文默认 README、模型包与公开案例</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -33,7 +33,7 @@
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并提供原生 CPU 推理源码。</h2>
         <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。根目录 README.md 现在是中文主入口，英文说明放在 README.en.md；公开页面区分微软基础模型测量与仍待许可确认的 AutoDL 单题案例，避免把不同模型、格式和精度混成一个速度结论。</p>
-        <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-highlights.zh-CN.svg" alt="三值 BitLinear 权重、BitNet 基础模型测量，以及 LoRA 微调和教师学生蒸馏流程"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">根目录 README.md 是中文默认入口，README.en.md 使用英文核心图。量化后三值只作用于 BitLinear 权重，指针头与部分张量保留较高精度；AutoDL 检查点案例保留在本地发布草稿，等待许可确认后再制作公开图表。</figcaption></figure>
+        <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-highlights.zh-CN.svg" alt="三值 BitLinear 权重、BitNet 基础模型测量，以及 LoRA 微调和教师学生蒸馏流程"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">根目录 README.md 是中文默认入口，README.en.md 使用英文核心图。量化后三值只作用于 BitLinear 权重，指针头与部分张量保留较高精度；bit-jev-2b-distilled I2_S 权重和脱敏 AutoDL 单题图现已公开于 Hugging Face 与仓库。</figcaption></figure>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
           <div class="metric"><strong>Pointer</strong><span>从选项与决策位置隐藏状态计算分数</span></div>
@@ -162,13 +162,15 @@
             <div><dt>test/benchmark_public_base.py / render_public_base_figures.py</dt><dd>前者限定微软公开 GGUF 的固定提交、文件大小与 SHA-256，记录两种路径各五次预填充和解码、进程 RSS 与整卡显存；后者验证记录，输出公开 JSON 和速度、内存 SVG/PNG。</dd></div>
             <div><dt>test/patches/public-bitnet25-compat.patch</dt><dd>在 ReLU² 补丁之后应用于固定 llama.cpp：识别原版 GGUF 的 bitnet-25 架构名，并使用独立 output.weight；此补丁只用于公开基础模型的基准复现。</dd></div>
             <div><dt>docs/benchmark-data/public-bitnet-base-2026-09-27.json</dt><dd>保留原版 BitNet 文件哈希、固定修订、硬件、二进制哈希、每阶段五个原始计时样本与内存口径；不含本机模型路径和历史 bit-jev 检查点结果。</dd></div>
+            <div><dt>docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json</dt><dd>公开 bit-jev 检查点 SHA-256、Xeon/5090 硬件、703 输入 token 与 77 候选项形状、CPU 8/16 线程及 GPU 的逐次时间、RSS/显存指标和限制；不含本机问题文本、候选内容与预测。</dd></div>
             <div><dt>docs/figures/public-base-speed.svg / public-base-memory.svg</dt><dd>展示同一公开 BitNet GGUF 的 CPU 原生路径和 RTX 2060 Vulkan 混合路径；速度按预填充与解码分开，内存按 RSS 与整卡显存增量分开。</dd></div>
             <div><dt>test/render_model_framework.py / docs/figures/model-framework.svg</dt><dd>按 model.py 的打包掩码、30 层 BitNet 解码器、256 维指针头和 native/main.cpp 的逐题执行边界绘制模型结构图。原生 BitNet 层内部的 RMSNorm、RoPE、Q/K/V/O、Up/Gate/Down 与残差顺序经固定 llama.cpp 源码核对。</dd></div>
             <div><dt>test/render_model_highlights.py / docs/figures/model-highlights.zh-CN.svg / model-highlights.en.svg</dt><dd>同一脚本以中文和英文内容字典绘制首页双语核心图。三张信息卡分别限定为量化 BitLinear 三值、微软公开基础模型 CPU 峰值 RSS 和预填充/解码速度；下方按 train.py → distill.py export_teacher → distill.py train → export_distilled.py 的顺序展示 LoRA 教师和无 LoRA 学生。图注在图片脱离 README 时仍保留测量来源与不能外推至 bit-jev 的边界。</dd></div>
-            <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
+            <div><dt>test/release_config.py / package_release.py / test_release_config.py</dt><dd>release_config.py 将 modules_to_not_convert 的 null 规范为空数组并同步更新 Hub 包清单；package_release.py 创建本地归档时应用相同规则；test_release_config.py 检查字段类型、已有数组保留和哈希一致。</dd></div>
             <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
             <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
-            <div><dt>docs/HF_MODEL_CARD.zh-CN.md / docs/HF_MODEL_CARD.md</dt><dd>按 Kev 风格整理的 Hugging Face 中文与英文模型卡草稿，记录任务定义、训练蒸馏链路、文件布局、评测指标和权重发布前置条件。</dd></div>
+            <div><dt>docs/HF_MODEL_CARD.zh-CN.md / docs/HF_MODEL_CARD.md</dt><dd>与 Hugging Face 模型页同步的中英文卡片，说明 choice/noul/score 输入输出、LoRA 与教师学生蒸馏、I2_S 文件、单题结果、质量评测空缺和数据许可状态。</dd></div>
+            <div><dt>test/render_checkpoint_public_figures.py</dt><dd>只读脱敏 JSON，校验检查点摘要与工作负载后生成中文、英文延迟与内存 SVG/PNG；不读取 test/release 的隐藏草稿或原始请求。</dd></div>
             <div><dt>versions/update.log / project_overall/</dt><dd>时间戳版本记录与本页共同维护；每次代码变更同步检查流程、目录树和发布状态。</dd></div>
           </dl></article>
         </div>
@@ -198,17 +200,26 @@
         <p class="mt-4 text-sm leading-7 text-slate-700">详细方法与复现命令见 <code>docs/BENCHMARKS.zh-CN.md</code>；逐次样本见 <code>docs/benchmark-data/public-bitnet-base-2026-09-27.json</code>。本组结果不得替代 bit-jev 检查点的每请求延迟与准确率验证。</p>
       </section>
 
-      <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
+      <!-- 检查点案例单独呈现，明确 CPU/GPU 路径采用不同格式与精度。 -->
+      <section id="checkpoint-benchmark" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
+        <p class="eyebrow">07 / bit-jev AutoDL 单题案例</p><h2 class="mt-2 text-2xl font-semibold">检查点的 CPU 与 GPU 部署路径</h2>
+        <p class="mt-5 text-sm leading-7 text-slate-700">固定题目编码为 703 个输入 token、77 个候选项，运行在 Xeon Gold 6459C / RTX 5090。CPU 使用原生 I2_S，GPU 使用实验性 FP16 混合精度。计时不含模型加载；GPU 计时另排除预热。此表仅适用于这一道开发题。</p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2"><img class="w-full rounded-xl border border-white/70" src="../../docs/figures/bit-jev-autodl-case.zh-CN.svg" alt="bit-jev AutoDL 单题延迟和内存对比"><img class="w-full rounded-xl border border-white/70" src="../../docs/figures/bit-jev-autodl-case.en.svg" alt="bit-jev AutoDL single-question latency and memory comparison"></div>
+        <div class="mt-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr><th class="p-3">路径</th><th class="p-3">平均推理时间</th><th class="p-3">重复</th><th class="p-3">内存观测</th></tr></thead><tbody><tr><td class="p-3">CPU，8 线程，I2_S</td><td class="p-3">3,127.88 ms</td><td class="p-3">3 次</td><td class="p-3">RSS 1,622.74 MiB</td></tr><tr><td class="p-3">CPU，16 线程，I2_S</td><td class="p-3">1,972.17 ms</td><td class="p-3">3 次</td><td class="p-3">RSS 1,624.52 MiB</td></tr><tr><td class="p-3">RTX 5090，FP16 混合精度</td><td class="p-3">86.56 ms</td><td class="p-3">5 次</td><td class="p-3">GPU 分配 4,935.53 MiB</td></tr></tbody></table></div>
+        <p class="mt-5 text-sm leading-7 text-slate-700">同一道题中 GPU 路径约为 16 线程 CPU 路径的 1/22.8 延迟。模型格式、数值精度与内存计量方法都不同，因此不能推导出纯硬件加速倍数。逐次数据在 <code>docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json</code>；图由 <code>test/render_checkpoint_public_figures.py</code> 读取该数据生成。训练集含 Yelp 评论记录，许可申请已发出但截至 2026-09-28 尚无书面回复；Hugging Face 模型卡说明未为权重另行指定开放许可证。</p>
+      </section>
+
+      <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.9.0 中文默认 README、Kev 风格模型卡与双路径测量</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.10.1 中文默认 README、Hub 模型包与公开单题数据</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
-          <div class="status"><span class="status-dot pending"></span><b>权重与结果</b><p>Hugging Face 中文与英文模型卡草稿已准备，上传清单、指标口径和许可边界均已写明。当前仍需 HF CLI 鉴权及 Yelp 权利方书面答复，检查点和由其生成的派生指标暂不公开。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>权重与结果</b><p>Hugging Face 发布 I2_S GGUF、float32 指针头、分词器、配置、SHA-256 清单与双语模型卡；config.json 的 modules_to_not_convert 已修正为空数组，远端清单哈希已复核。GitHub 发布脱敏 CPU/GPU 单题时间、内存和中英文图。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.9.0 中文默认 README、Kev 风格模型卡与双路径测量范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.10.1 Hub 模型包、公开单题案例与中文默认 README</footer>
   </div>
 </body>
 </html>

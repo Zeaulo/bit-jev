@@ -87,3 +87,15 @@
 - 新增 docs/HF_MODEL_CARD.zh-CN.md 与 docs/HF_MODEL_CARD.md，按 Kev 的模型卡结构整理任务定义、训练与蒸馏流程、文件布局、评测口径和发布边界。
 - 在根目录中文 README 的文档导航中加入 Hugging Face 中文模型卡草稿，明确模型权重尚未上传、Yelp 权利方书面答复尚未收到，并保留公开源码可复核的发布路径。
 - 同步更新 versions/project_overall/index.html 的版本号、目录树和发布状态，记录 Hugging Face 鉴权与数据许可是实际上传前置条件。
+
+[2026-09-28 00:50:55] v0.10.0（中版本，发布 I2_S 模型包与脱敏 AutoDL 结果）
+- 公开 Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled，上传 1.187 GB I2_S GGUF、float32 指针头、tokenizer/config、SHA-256 清单、AutoDL 汇总与中英文模型卡；未上传 BF16 分片、原始 Yelp 评论或训练日志。
+- 新增 docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json 和 test/render_checkpoint_public_figures.py，从脱敏逐次数据生成中英文 CPU/GPU 延迟与内存 SVG/PNG；图表明确单题、不同精度、加载/预热排除范围及内存口径。
+- README 中英文、中文兼容入口、CPU 快速开始、性能规范、模型卡、第三方说明与发布清单改为链接已发布模型和案例；公开写明 Yelp 许可答复未到且权重未单独指定开放许可证。
+- 更新 versions/project_overall/index.html 的版本、Hub 文件清单、数据流与单题基准章节。
+
+[2026-09-28 01:24:18] v0.10.1（小版本，修复 Hugging Face BitNet 配置解析警告）
+- 新增 test/release_config.py：将 quantization_config.modules_to_not_convert 的空值修复为空数组，并在更新既有 Hub 包时同步重算 config.json 的大小与 SHA-256 清单。
+- 更新 test/package_release.py，保证本地重新打包时对相同字段执行 schema 规范化；新增 test/test_release_config.py，覆盖空值转换、已有数组保留和清单哈希一致性。
+- 修复 Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled 的 config.json 并更新 SHA256SUMS.json；从 Hub 下载复核字段为 []、配置长度和摘要均与清单一致，提交 revision 为 3a0495c3ad2d8ae0e19d1382b14b9126b679d88b。
+- 更新 versions/project_overall/index.html，记录配置修复、发布维护入口与当前版本。

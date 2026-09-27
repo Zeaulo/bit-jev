@@ -2,9 +2,9 @@
 
 This directory contains the implementation of a structured decision model: a
 BitNet b1.58 backbone, Kev-style block-causal request encoding, and a pointer
-head that scores candidate answers. **This repository is a source-only release.**
-It does not include trained bit-jev weights, exported GGUF files, inference
-reports, or a public model download.
+head that scores candidate answers. **This GitHub repository contains source,
+not trained bit-jev weights.** The I2_S CPU package and its model card are
+published at <https://huggingface.co/jinghao1632/bit-jev-2b-distilled>.
 
 The model emits a probability distribution over supplied options. It does not
 decode an answer token by token. The packed PyTorch implementation can process
@@ -46,6 +46,13 @@ current bitnet.cpp runner does not implement the packed branch mask. Each row
 contains the state and one question. The native process reads the option-close
 and decision hidden states and applies the same pointer-head schema. Repeating
 the state for every row is a known performance cost and an area for future work.
+
+## Download the model
+
+Read the Hugging Face model card before downloading. It documents the Yelp
+training-data provenance, unanswered permission request, and the absence of a
+standalone open-weights license. The model package does not contain this
+directory's native runner binary.
 
 ## Prepare and inspect source
 

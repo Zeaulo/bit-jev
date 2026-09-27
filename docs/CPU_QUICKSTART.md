@@ -1,6 +1,6 @@
 # CPU source quick start
 
-This guide builds the native I2_S runner and shows the JSONL inference interface. **v0.7.7 remains a source-only bit-jev release**: there is no public bit-jev weight archive or saved answer to reproduce. The separate [Microsoft public-base benchmark](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) measures backbone execution, not classification. Running inference requires your own compatible, authorized tokenizer, I2_S GGUF backbone, and trained pointer-head sidecar. The Microsoft BitNet base model by itself does not provide bit-jev's trained decision head.
+This guide builds the native I2_S runner and shows the JSONL inference interface. The bit-jev-2b-distilled I2_S CPU model package is published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); the GitHub repository does not store the checkpoint. The separate [Microsoft public-base benchmark](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) measures a different original backbone, not bit-jev classification. Read the Hugging Face model card for Yelp data provenance, measurement limits, and license status before downloading.
 
 The Python launcher encodes requests and manages a persistent native process. The native binary performs backbone inference and pointer-head scoring. It does not run an HTTP server.
 
@@ -49,20 +49,21 @@ Save one complete UTF-8 JSON object per line in `test/my-request.jsonl`. This ex
 
 The `questions` object must be nonempty. The request can contain `choice`, `noul`, and `score` questions; [the architecture page](MODEL_CARD.md) describes the readout. No example output or expected prediction is supplied because the public source release has no trained bit-jev model.
 
-## 3. Run with your authorized artifacts
+## 3. Download and run the published I2_S model
 
-After you have prepared a compatible trained model, replace both artifact placeholders below with its **local directories**. `--run` points to the matching tokenizer directory. `--artifact` points to the directory containing `backbone-i2_s.gguf` and `head.f32`; pointer metadata should accompany an artifact to document its compatibility, although the CLI reads the GGUF and head files directly. The directories may be the same if your own package combines them.
+Download the model files from Hugging Face. `--run` points to the tokenizer/config directory, while `--artifact` points to the directory containing `backbone-i2_s.gguf` and `head.f32`. This package keeps both in one directory, so both flags use the same path.
 
 ~~~powershell
+hf download jinghao1632/bit-jev-2b-distilled --local-dir './models/bit-jev-2b-distilled'
 python -m bit_jev.cpu `
-  --run './path/to/authorized-run' `
-  --artifact './path/to/authorized-export' `
+  --run './models/bit-jev-2b-distilled' `
+  --artifact './models/bit-jev-2b-distilled' `
   --binary './core/build/bit-jev-cpu/bit-jev-cpu.exe' `
   --input './test/my-request.jsonl' `
   --out './test/my-result.jsonl' `
   --threads 8 --batch 128
 ~~~
 
-On Linux, use the binary path without `.exe` and normal shell continuation syntax. The result includes answers, logits, probabilities, and native compute latency; the values depend on the supplied model. Keep generated requests and results under `test/` in this workspace.
+On Linux, use the binary path without `.exe` and normal shell continuation syntax. The result includes answers, logits, probabilities, and native compute latency. The Yelp data permission request for this checkpoint is still awaiting a written response, and no open-weights license is specified in its model card; the code's Apache-2.0 license does not cover the weights. Keep generated requests and results under `test/` in this workspace.
 
 The native runner evaluates **one causal row per question**. It does not generate answer tokens, but multiquestion requests repeat shared-state computation and long option lists increase input work. Use the [benchmark protocol](BENCHMARKS.md) to measure model load, resident latency, and process memory separately.

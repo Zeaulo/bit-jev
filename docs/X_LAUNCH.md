@@ -1,47 +1,54 @@
-# X launch copy — bilingual highlights and public-base benchmark v0.7.7
+# v0.10.0 X 首发文案
 
-These are drafts for the authorized post from the logged-in X account. Publish after the updated [Zeaulo/bit-jev](https://github.com/Zeaulo/bit-jev) repository displays the source and the independently measured public-base charts. The launch shares **source and measurements of Microsoft's public BitNet backbone**, not a trained bit-jev checkpoint or its performance.
+首帖建议英文并附英文 AutoDL 图，之后接两条回复：一条解释模型链路并放下载链接，一条披露 Yelp 数据和权重许可状态。中文版本单独备选。所有数值均对应仓库中的单题脱敏记录，不作为通用性能承诺。
 
-## First post (English; attach speed chart)
+## English launch thread
 
-> On my laptop, CPU beat the Vulkan hybrid path for Microsoft's public BitNet I2_S: 56.2 vs 45.2 input tok/s (Ryzen 7 4800H / RTX 2060; 5 runs; load excluded). GPU path still uses CPU RAM.
+### Post 1 — attach `figures/bit-jev-autodl-case.en.png`
+
+> bit-jev scores supplied options instead of generating answer tokens.
 >
-> Raw data + source: https://github.com/Zeaulo/bit-jev
-
-Attach the [public-base speed PNG](figures/public-base-speed.png). The image itself states that this is a synthetic base-model backbone benchmark, not bit-jev classification.
-
-## First reply (English)
-
-> bit-jev = BitNet backbone + Kev-style structured decisions. It scores given options without decoding answer text token by token. The repo publishes source only; the trained bit-jev checkpoint and its performance remain withheld pending data-rights review.
+> One AutoDL case (703 input tokens, 77 options):
+> CPU · I2_S · 16 threads: 1.97s / 1.59 GiB RSS
+> RTX 5090 · FP16: 86.6ms / 4.82 GiB GPU allocation
 >
-> Method + samples: https://github.com/Zeaulo/bit-jev/blob/main/docs/BENCHMARKS.md
+> Different paths, one development request—not a general benchmark.
 
-Attach the [English highlights PNG](figures/model-highlights.en.png) to this reply. It shows the ternary BitLinear weights and the LoRA → teacher–student distillation → I2_S + CPU sequence while labelling the public-base measurements.
+### Reply 1
 
-## 中文备选首帖
-
-> 笔记本 CPU 跑 BitNet，有时能比这台机器的 GPU 混合路径更快。
+> BitNet b1.58 → LoRA + pointer head → Kev 9B teacher logits → full-student distillation → I2_S CPU package.
 >
-> 同一份微软公开 I2_S GGUF：Ryzen 7 4800H 预填充 56.2 token/s，RTX 2060 Vulkan 混合路径 45.2。各 5 次，计时不含模型加载；GPU 路径仍使用 CPU 内存，不能泛化为“CPU 比 GPU 强”。
+> Model: https://huggingface.co/jinghao1632/bit-jev-2b-distilled
+> Code + sanitized samples: https://github.com/Zeaulo/bit-jev
+
+### Reply 2 — provenance disclosure
+
+> Disclosure: training included Yelp review records. The permission request has no written reply as of Sep 28, 2026; the model card specifies no standalone open-weights license. No raw reviews or predictions are distributed.
+
+## 中文备选
+
+### 首帖 — 附 `figures/bit-jev-autodl-case.zh-CN.png`
+
+> bit-jev 用指针头直接对候选项打分，不逐 token 生成答案。
 >
-> bit-jev 把 BitNet 骨干接到 Kev 式候选评分接口。源码已开源；bit-jev 训练权重和其跑分暂不公开。
+> AutoDL 单题（703 tokens / 77 选项）：I2_S CPU 16 线程 1.97 秒、RSS 1.59 GiB；RTX 5090 FP16 86.6 毫秒、GPU 分配 4.82 GiB。
 >
-> https://github.com/Zeaulo/bit-jev
+> 两种推理精度；一道开发题，不代表通用性能。
 
-Use one language for the first post. A translated follow-up can link back to the same source repository. Keep the distinction between public BitNet and withheld bit-jev results in either language.
+### 回复 1
 
-## Optional follow-ups
+> 训练与导出：BitNet b1.58 → LoRA + 指针头 → Kev 9B teacher logits → 学生全量蒸馏 → I2_S CPU 模型。
+>
+> 模型：https://huggingface.co/jinghao1632/bit-jev-2b-distilled
+> 代码与脱敏数据：https://github.com/Zeaulo/bit-jev
 
-Post only when each linked page is public and accurate. Space useful explanations across several days.
+### 回复 2 — 数据披露
 
-1. **Decision interface:** explain `state`, `choice`, `noul`, and `score` with an input-only JSON snippet from the [README](../README.md). Explain that output values require a trained model.
-2. **CPU execution path:** show the architecture graphic and explain the boundary: no answer-token decoding, but one native causal row per question and repeated shared-state work for multiple questions.
-   Use the [detailed neural model framework PNG](figures/model-framework.png) to explain the decoder layer, branch mask and pointer-head readout.
-3. **Reproduction invitation:** link the [public-base JSON](benchmark-data/public-bitnet-base-2026-09-27.json) and [measurement notes](BENCHMARKS.md). Explain the original GGUF revision, model SHA-256, 8 threads, 128 input tokens, 32 output tokens, 5 runs, CPU-only binary, Vulkan hybrid binary, and global GPU-memory sampling.
+> 训练集包含 Yelp 评论记录。许可申请已发出，截至 2026-09-28 未收到书面答复；模型卡未给权重另行指定开放许可证。公开包不含评论原文或预测结果。
 
-## Launch checks
+## 发布前检查
 
-- Open the repository link while signed out; verify the README, quick start, diagram, license, and source-only tag.
-- Inspect the final post text and image in X before posting. Link directly to the repository.
-- Do not state that bit-jev weights are downloadable or that its accuracy, memory, or speed have been measured publicly. Label every chart as a Microsoft public-base measurement.
-- After posting, record the post URL in the release log or launch notes and answer technical questions with the actual source paths and limitations.
+- 检查图片中数值与 `docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json` 一致。
+- 明确说明 CPU 与 GPU 使用不同权重格式和数值精度，CPU RSS 与 GPU 分配量也不是同一内存口径。
+- 确认 GitHub 与 Hugging Face 链接可公开访问，Hub 页面展示中英文模型卡、文件清单和数据状态。
+- 不声称有整体准确率、校准成绩、普遍 CPU/GPU 加速比或生成 tokens/s；当前没有可审计的留出集质量报告。

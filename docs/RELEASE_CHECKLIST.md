@@ -1,15 +1,15 @@
-# v0.7.7 source, bilingual highlights and public-base measurement release checklist
+# v0.10.0 source, Hugging Face model and benchmark publication record
 
-This checklist covers **public source and independently measured Microsoft BitNet base-model figures**. It does not authorize publication of the local trained bit-jev checkpoint, I2_S export, model output, or checkpoint-derived benchmark reports.
+This checklist records the **GitHub source release**, independent Microsoft BitNet base-model figures, and the separate [Hugging Face bit-jev model package](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). The GitHub repository remains source-only; the Hub card and sanitized benchmark data describe the distributed I2_S export.
 
 ## Public source boundary
 
-- [ ] Confirm the source version, tag, `versions/update.log`, and project overview describe the same source-only release.
-- [ ] Keep trained bit-jev weights, GGUF exports, pointer-head weights, tokenizer copies from a trained package, teacher logits, training/evaluation records, model outputs, derived reports, and performance charts out of the public source tree. The Microsoft public-base JSON and charts must have verified source revision and model SHA-256.
+- [ ] Confirm the source version, tag, `versions/update.log`, and project overview describe the same GitHub source release and link to the Hub package.
+- [ ] Keep trained bit-jev weights, GGUF exports, pointer-head weights, tokenizer copies from the trained package, teacher logits, training/evaluation records, and model outputs out of the GitHub tree. Publish only the sanitized AutoDL aggregate JSON and bilingual charts; keep the Microsoft public-base JSON tied to its verified source revision and model SHA-256.
 - [ ] Scan the **entire history being pushed**, not just the final file list. Removed files in an earlier reachable commit remain publicly accessible. Use a clean public root commit or an equivalent history rewrite after checking the contents.
 - [ ] Scan tracked files for credentials, private keys, workstation paths, and output that could reconstruct restricted source records. Confirm `git ls-files` and inspect the public commit before pushing.
 - [ ] Keep root [LICENSE](../LICENSE) and [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md), including required upstream notices. Verify upstream source licenses against the pinned revisions.
-- [ ] Ensure [README](../README.md), [CPU quick start](CPU_QUICKSTART.md), [model status](MODEL_CARD.md), and [benchmark protocol](BENCHMARKS.md) contain no current-checkpoint results, live weight claims, or dead release-asset download instructions.
+- [ ] Ensure [README](../README.md), [CPU quick start](CPU_QUICKSTART.md), [model status](MODEL_CARD.md), and [benchmark protocol](BENCHMARKS.md) link to the same Hub repository and label the single-question case accurately.
 
 ## Source reproducibility
 
@@ -20,11 +20,11 @@ This checklist covers **public source and independently measured Microsoft BitNe
 
 ## Publication
 
-- [ ] Update the existing public `Zeaulo/bit-jev` repository from the reviewed history, push `v0.7.7`, and open it while signed out.
-- [ ] If a GitHub release is created, label the bit-jev checkpoint **withheld**; link the public Microsoft base-model benchmark data and attach no model archive.
+- [ ] Update the existing public `Zeaulo/bit-jev` repository from the reviewed history, push the current version, and open it while signed out.
+- [ ] If a GitHub release is created, attach no model archive; link the separate Hugging Face model package and both benchmark data records.
 - [ ] Publish the [X launch copy](X_LAUNCH.md) only after the repository URL resolves and the post labels the speed chart as a Microsoft base-model measurement.
 - [ ] Invite architecture feedback, build reports, and independent benchmarks produced with artifacts and data that contributors may share.
 
-## Separate gate for any future trained model
+## Rights and evaluation status for the published trained model
 
-Before distributing a model or checkpoint-derived metrics, document the precise base and teacher revisions, training/evaluation sources, rights to publish the derivative and results, release license, model hashes, clean-machine package test, numerical parity, accuracy/calibration scope, timing method, and memory units. In particular, resolve the local Yelp training-data issue; the [Yelp dataset card](https://huggingface.co/datasets/Yelp/yelp_review_full) links to separate [dataset terms](https://s3-media3.fl.yelpcdn.com/assets/srv0/engineering_pages/bea5c1e92bf3/assets/vendor/yelp-dataset-agreement.pdf). The present source-only release leaves this gate open.
+The model and its sanitized single-question measurements are published. The permission request to Yelp remains unanswered as of 2026-09-28; the [Yelp dataset card](https://huggingface.co/datasets/Yelp/yelp_review_full) links to separate [dataset terms](https://s3-media3.fl.yelpcdn.com/assets/srv0/engineering_pages/bea5c1e92bf3/assets/vendor/yelp-dataset-agreement.pdf). The Hub model card records the unresolved status and does not assign an open-weights license. The package hash list, clean-machine inference, and any future held-out accuracy/calibration report should be updated when independently verified; current public performance claims remain limited to the labeled AutoDL case and the separate Microsoft base-model benchmark.

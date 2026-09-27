@@ -41,6 +41,22 @@ python test/render_public_base_figures.py
 
 上例构建命令对应 Windows MSYS2 UCRT 工具链；Vulkan 版还需可被 CMake 找到的 Vulkan 头文件和导入库。原版 GGUF 可以从上方固定修订下载到 `test/`；`--gpu-device` 应按本机 `llama-bench --list-devices` 的结果调整。复现依赖完整模型文件和同等补丁；两张图不支持 bit-jev 端到端速度、准确率或与 Kev 的倍数比较。
 
+## bit-jev AutoDL 单题案例
+
+![bit-jev CPU/GPU 单题延迟与内存对比](figures/bit-jev-autodl-case.zh-CN.svg)
+
+这一组测量使用 Hugging Face 上发布的 bit-jev-2b-distilled 检查点。同一道开发题编码后为 703 个输入 token、77 个候选项；CPU 原生 I2_S 重复 3 次，GPU FP16 混合精度重复 5 次。模型加载时间不计入推理耗时；GPU 计时也不含预热。
+
+| 路径 | 平均推理时间 | 次数 | 峰值内存观测 |
+| --- | ---: | ---: | ---: |
+| CPU，8 线程，I2_S 原生 | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
+| CPU，16 线程，I2_S 原生 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
+| RTX 5090，FP16 混合精度 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
+
+该固定请求中，GPU 路径延迟约为 16 线程 CPU 路径的 1/22.8。两者使用不同的权重格式与计算精度，不能把比值解释成纯硬件加速倍数。CPU RSS 与 GPU 框架分配显存不是同一种口径。公开逐次计时、硬件、模型哈希与限制见[脱敏 JSON](benchmark-data/bit-jev-autodl-case-2026-09-27.json)，中英文图由 [`test/render_checkpoint_public_figures.py`](../test/render_checkpoint_public_figures.py) 从这份文件生成；图表不读取本机原始请求。该单题开发案例不代表通用速度或准确率。
+
+本检查点由包含 Yelp 评论记录的多源决策集训练而来。向 Yelp 发出的衍生权重和指标许可申请截至 2026-09-28 仍未收到书面答复；本项目在模型卡中公开说明该状态，并由维护者决定发布此脱敏聚合案例。模型卡没有给检查点另行指定开放权重许可证。
+
 ## CPU：把加载和常驻推理分开
 
 1. 记录源码提交号、骨干与指针头文件的 SHA-256、分词器版本、量化格式、编译选项及原生程序哈希。

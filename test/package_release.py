@@ -7,6 +7,8 @@ import json
 import tarfile
 from pathlib import Path
 
+from release_config import normalize_config_bytes
+
 
 # 所有发布输入都从项目根目录解析，避免工作目录影响产物内容。
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +49,10 @@ def package(version, output_dir):
     output_dir.mkdir(parents=True, exist_ok=True)
     # 每个文件的路径和摘要在打包前固定，缺失文件立即报错。
     source_paths = {}
+    # 仅对配置保存规范化后的少量字节，模型权重仍以流式方式归档。
+    payload_overrides = {}
+    # 保存源文件原始指纹，用于检测打包期间的并发修改。
+    source_fingerprints = {}
     file_manifest = {}
     for archive_name, relative_source in RELEASE_FILES.items():
         # 来源路径由白名单常量定义，不能由外部参数注入。
@@ -54,10 +60,21 @@ def package(version, output_dir):
         if not source_path.is_file():
             raise FileNotFoundError(f"发布输入缺失：{source_path}")
         source_paths[archive_name] = source_path
-        file_manifest[archive_name] = {
+        # 源指纹与归档清单分开记录，因为 config.json 会做 schema 规范化。
+        source_fingerprints[archive_name] = {
             "bytes": source_path.stat().st_size,
             "sha256": sha256_file(source_path),
         }
+        if archive_name == "config.json":
+            # Hub 将该值解析为数组；上游写出的 null 在归档时改为空数组。
+            payload = normalize_config_bytes(source_path)
+            payload_overrides[archive_name] = payload
+            file_manifest[archive_name] = {
+                "bytes": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            }
+        else:
+            file_manifest[archive_name] = source_fingerprints[archive_name]
     # 清单仅记录可移植的归档内名称，不泄露本机绝对路径。
     manifest = {"release": release_name, "format": "bit-jev-cpu-i2_s-v1", "files": file_manifest}
     # 序列化结果保持 UTF-8 与稳定键序，方便独立校验。
@@ -67,7 +84,16 @@ def package(version, output_dir):
     with tarfile.open(archive_path, "w:gz") as archive:
         # 逐项归档已通过存在性和摘要检查的文件。
         for archive_name, source_path in source_paths.items():
-            archive.add(source_path, arcname=f"{release_name}/{archive_name}", recursive=False)
+            if archive_name in payload_overrides:
+                # 配置使用规范化副本；TarInfo 限定为普通文件并固定归档时间。
+                payload = payload_overrides[archive_name]
+                member = tarfile.TarInfo(f"{release_name}/{archive_name}")
+                member.size = len(payload)
+                member.mtime = 0
+                member.mode = 0o644
+                archive.addfile(member, io.BytesIO(payload))
+            else:
+                archive.add(source_path, arcname=f"{release_name}/{archive_name}", recursive=False)
         # 内存中的 SHA256SUMS.json 使用相同的归档顶层目录。
         manifest_info = tarfile.TarInfo(f"{release_name}/SHA256SUMS.json")
         manifest_info.size = len(manifest_bytes)
@@ -75,7 +101,8 @@ def package(version, output_dir):
         archive.addfile(manifest_info, io.BytesIO(manifest_bytes))
     # 归档期间若来源文件变化，原先写入的摘要将失效；发布前立即拒绝该产物。
     for archive_name, source_path in source_paths.items():
-        if source_path.stat().st_size != file_manifest[archive_name]["bytes"] or sha256_file(source_path) != file_manifest[archive_name]["sha256"]:
+        source_fingerprint = source_fingerprints[archive_name]
+        if source_path.stat().st_size != source_fingerprint["bytes"] or sha256_file(source_path) != source_fingerprint["sha256"]:
             raise RuntimeError(f"打包期间来源文件发生变化：{source_path}")
     # 顶层摘要供 GitHub Release 页面和下载后的完整性校验使用。
     archive_digest = sha256_file(archive_path)

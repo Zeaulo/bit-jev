@@ -1,95 +1,114 @@
+---
+base_model:
+  - microsoft/bitnet-b1.58-2B-4T-bf16
+library_name: bit-jev
+tags:
+  - bitnet
+  - structured-decision
+  - pointer-head
+  - cpu-inference
+  - knowledge-distillation
+  - yelp
+---
+
 # bit-jev-2b-distilled
 
-> Hugging Face 发布草稿。当前版本只用于本地审阅；Yelp 训练数据的权利方书面答复尚未收到，因此检查点和派生指标尚未上传。
+[English model card](HF_MODEL_CARD.md) · [源码仓库](https://github.com/Zeaulo/bit-jev)
+
+> 本仓库提供 bit-jev 的 I2_S CPU 推理模型包。权重来自包含 Yelp 评论数据的多源决策训练集。Yelp 权利方许可申请已发出，截至 2026-09-28 尚未收到书面答复。本模型卡公开说明来源与限制；项目代码仓库的 Apache-2.0 许可证不自动适用于此检查点。
 
 ## 模型简介
 
-bit-jev-2b-distilled 是一个用于结构化决策的 BitNet 学生模型。它接受一段共享 `state` 和一个或多个问题，在调用方给出的候选项上返回分数、概率和答案。模型输出结构化决策，不逐 token 生成回答文本。
+bit-jev-2b-distilled 是一个结构化判断学生模型。输入包含共享 `state` 和一个或多个问题；指针头直接对输入中的候选项打分，返回选择、概率或有序等级。模型不会逐 token 生成自然语言答案。
 
-训练链路：
+支持的问题类型：
+
+| 类型 | 输入 | 结构化输出 |
+| --- | --- | --- |
+| `choice` | 一组选项及说明 | 选择项、分数、概率 |
+| `noul` | 是/否问题 | 两类分数与概率 |
+| `score` | 有序等级及说明 | 等级分数、期望值、概率 |
+
+## 训练与导出流程
 
 ```text
-Microsoft BitNet BF16 backbone
-        ↓
-LoRA + pointer head fine-tuning
-        ↓ export_teacher
-teacher logits
-        ↓ distill.py train
-full student backbone + pointer head
-        ↓ export_distilled.py
-I2_S GGUF + float32 pointer head
+Microsoft BitNet b1.58 2B BF16
+        ↓ LoRA 微调 + 指针头训练
+bit-jev 初始模型与指针头
+        + Kev 9B 教师候选项 logits
+完整学生骨干蒸馏 + 指针头
+        ↓ I2_S 量化导出
+I2_S GGUF + float32 指针头
 ```
 
-## 任务类型
+发布包仅含面向原生 CPU runner 的 I2_S 产物、匹配的 tokenizer/config 和头部元数据。训练配置记录了 3,144 步、2 个 epoch、BF16、学习率 `2e-5`、批量 2、梯度累积 4、蒸馏温度 2.0 与权重 1.0。推理头温度在 `pointer.json` 中为 2.35。
 
-| 类型 | 输入 | 输出 |
-| --- | --- | --- |
-| `choice` | 候选项名称及说明 | 选择项、概率、置信度 |
-| `noul` | 是/否问题 | `noul` 概率 |
-| `score` | 有序等级列表 | 期望等级、概率、置信度 |
+## 文件与内存规模
 
-一个请求可以同时包含三种问题。问题共享 `state`，但不能读取其他问题的文本。
+| 文件 | 用途 | 大小 |
+| --- | --- | ---: |
+| `backbone-i2_s.gguf` | 量化 BitNet 骨干 | 1,187,288,192 字节（约 1.106 GiB） |
+| `head.f32` | float32 指针头 | 5,244,948 字节 |
+| `pointer.json` | 头部形状、边界 token 与温度 | 770 字节 |
+| tokenizer/config 文件 | 请求编码和模型配置 | 约 17.2 MB |
 
-## 训练和蒸馏配置
+`SHA256SUMS.json` 列出推理包文件的大小和 SHA-256。它不包含自身的哈希。发布包未提供 BF16 safetensors 分片，也未包含训练数据、训练日志或原始评论。
 
-| 项目 | 记录 |
-| --- | --- |
-| 基础模型 | `microsoft/bitnet-b1.58-2B-4T-bf16` |
-| 初始学生 | LoRA 微调后的 `runs/bit-jev-2b` |
-| 教师输出 | `runs/distill/kev9b_logits.jsonl` |
-| 蒸馏轮数 | 2 |
-| 学习率 | `2e-5` |
-| 批量 / 梯度累积 | 2 / 4 |
-| 蒸馏温度 | 2.0 |
-| 蒸馏权重 | 1.0 |
-| 训练步数 | 3,144 |
-| 学生精度 | BF16 训练，I2_S 导出 |
+## 推理示例
 
-完整训练数据清单、拆分方式和许可依据应在获得数据权利方书面确认后补充。仓库不发布原始 Yelp 评论记录。
-
-## 文件布局
-
-最终 Hub 仓库应至少包含：
-
-- `backbone-i2_s.gguf`：原生 CPU 推理骨干。
-- `head.f32`：float32 指针头 sidecar。
-- `pointer.json`：边界标记、头部布局和温度元数据。
-- `tokenizer.json`、`tokenizer_config.json`、`special_tokens_map.json`：输入编码文件。
-- `config.json`：学生骨干配置。
-- `README.md`：本模型卡的发布版。
-- `SHA256SUMS.json`：逐文件 SHA-256 清单。
-
-I2_S GGUF 的本地候选文件为 1,187,288,192 字节；正式发布前需要在干净环境重新打包并核对摘要。完整 BF16 分片不作为 CPU 包的替代品上传，除非模型卡明确说明它们的用途、尺寸和许可。
-
-## 本地 AutoDL 案例（未发布）
-
-同一 Xeon Gold 6459C / RTX 5090 主机上的单题案例包含 703 个输入 token 和 77 个候选项，推理时间不含加载。CPU I2_S 原生路径与 GPU FP16 混合精度路径使用不同格式，不能把延迟比解释为纯硬件加速比。逐次样本与脱敏候选稿保存在项目根目录的 `test/release/`，收到书面许可后再转成公开表格和图。
-
-## 使用方式
-
-公开版应提供一个与仓库 CPU runner 对齐的最小示例：
+先按[源码仓库的 CPU 快速开始](https://github.com/Zeaulo/bit-jev/blob/main/docs/CPU_QUICKSTART.zh-CN.md)安装依赖、构建原生 runner，并下载模型文件：
 
 ```powershell
-python -m pip install -e './core'
-python test/bootstrap_bitnet.py --check
-python -m bit_jev.cpu --model ./backbone-i2_s.gguf --head ./head.f32 --input ./example_cpu_request.jsonl
+hf download jinghao1632/bit-jev-2b-distilled --local-dir ./models/bit-jev-2b-distilled
+python -m bit_jev.cpu `
+  --run './models/bit-jev-2b-distilled' `
+  --artifact './models/bit-jev-2b-distilled' `
+  --binary './core/build/bit-jev-cpu/bit-jev-cpu.exe' `
+  --input './test/my-request.jsonl' `
+  --out './test/my-result.jsonl' `
+  --threads 16 --batch 128
 ```
 
-具体参数以发布时的 CPU quick start 为准。模型不会把选项答案逐 token 解码出来；性能报告应使用每请求延迟、每问题延迟、输入 token/s 和峰值 RSS，而不是生成 token/s。
+Linux 用户将二进制路径改为 `./core/build/bit-jev-cpu/bit-jev-cpu`。JSONL 输入格式与完整构建说明见 CPU 快速开始。模型包自身不含 runner 二进制。
 
-## 评测报告结构
+## 性能案例：AutoDL Xeon Gold 6459C / RTX 5090
 
-发布版应仿照 Kev 的模型卡把结果分开：
+以下测量来自一道固定开发题，输入 703 tokens、77 个候选项；推理计时不含加载。CPU 使用 I2_S 原生路径，GPU 使用实验性 FP16 混合精度 PyTorch 路径。
 
-1. 已训练来源（训练数据分布内的留出集）。
-2. 新来源（训练阶段未出现的数据或规则）。
-3. 每个问题类型的样本数、准确率、Brier、NLL、ECE 和温度校准结果。
-4. CPU 与 GPU 的硬件、线程、量化格式、精度、预热、同步方式和内存定义。
-5. 每个公开检查点的版本、文件哈希和基准输入形状。
+| 路径 | 平均推理时间 | 重复次数 | 观测内存 |
+| --- | ---: | ---: | ---: |
+| CPU，8 线程 | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
+| CPU，16 线程 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
+| RTX 5090 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
 
-不要把开发集、测试集和单题 smoke test 的数字放在同一张“总准确率”图里。
+![bit-jev AutoDL 单题延迟和内存对比](figures/bit-jev-autodl-case.zh-CN.svg)
 
-## 许可与发布状态
+[English chart](figures/bit-jev-autodl-case.en.svg)
 
-代码仓库采用 Apache-2.0。BitNet 基础模型、上游实现、教师模型和 Yelp 数据各自适用其原有条款。向 Hugging Face 公开上传本检查点及其派生指标前，需要保存覆盖权重下载、量化导出、指标展示和下游使用范围的书面许可。
+同一道题上，16 线程 CPU 与 RTX 5090 GPU 路径的延迟比约为 22.8。两条路径使用不同权重格式和数值精度，因此该比值不能解释为纯硬件加速比。CPU RSS 与 GPU 分配量是不同口径。此单题少量重复只作为案例，不代表通用吞吐或准确率承诺。详细的脱敏计时数据见 `benchmark_case_autodl.json`；本包没有收录输入文本、候选内容或预测结果。模型不生成答案 token，因此不适用生成 tokens/s 指标。准确率、Brier、NLL 与 ECE 尚无可复核的公开留出集报告，本页不填入推测值。
+
+## 数据来源与使用边界
+
+训练数据是本地 `decision-v7` 多源决策集，包含 Yelp 评论记录；教师监督来自 Kev 9B 候选项 logits。仓库不包含 Yelp 原始记录。项目已向 Yelp 发送关于衍生权重和指标发布范围的许可申请，截至 2026-09-28 未收到书面答复。下载者应自行审查适用的 Yelp 数据条款及其对衍生权重的影响。
+
+本模型**没有单独授予开放权重许可证**。代码仓库的 Apache-2.0、Microsoft 基础模型许可证及 Kev 源码许可证分别适用于各自作品，不能视为对 Yelp 数据或本衍生检查点的许可。此卡记录项目当前公开状态，不构成法律意见。
+
+## 评测范围与局限
+
+- 当前公开的 bit-jev 结果只有上表的单题延迟与内存案例；微软原版 BitNet 的基础模型基准是另一组独立测量，不能当成本模型成绩。
+- 没有提供完整训练/测试来源拆分上的 Accuracy、Brier、NLL、ECE 或置信区间。
+- 测试题为开发案例，重复次数少，不能外推到长输入、多问题请求或其他 CPU/GPU。
+- 当前原生 CPU runner 每个问题执行一条因果序列；多问题请求会重复处理共享 state。
+- 选择结果受候选项措辞、顺序、长度与训练分布影响。重要决策需在目标数据上验证并保留人工复核。
+
+## 引用
+
+```bibtex
+@misc{bitjev2026,
+  title = {bit-jev-2b-distilled},
+  author = {Zeaulo},
+  year = {2026},
+  url = {https://huggingface.co/jinghao1632/bit-jev-2b-distilled}
+}
+```
 

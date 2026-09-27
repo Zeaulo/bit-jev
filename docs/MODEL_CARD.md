@@ -2,9 +2,9 @@
 
 ## Release status
 
-The current release contains source, public-base measurements, and a documented bit-jev case study. The Yelp-trained checkpoint, I2_S GGUF, pointer-head weights, and checkpoint-derived benchmark bundle remain pending the written data-rights response requested from Yelp. The separate [public BitNet backbone measurements](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) do not measure bit-jev classification.
+The bit-jev-2b-distilled I2_S package and sanitized AutoDL single-question measurements are published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). The training set includes Yelp review records. A permission request was sent; as of 2026-09-28, no written reply had arrived. The model card discloses this status and specifies no standalone open-weights license. Separate [Microsoft public-base measurements](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) test the original backbone, not bit-jev classification.
 
-This page documents the **code interface and requirements for a future model artifact**. It is not a performance card for a model available to download.
+This page documents the code interface. See the [Hugging Face model card](HF_MODEL_CARD.md) for training, the published package, the single-question measurement case, and its limitations.
 
 ## Architecture
 
@@ -20,7 +20,7 @@ The [English highlights figure](figures/model-highlights.en.svg) follows the cod
 
 The native runner reads JSONL and returns JSONL. It is not an HTTP service. The PyTorch service in `core/bit_jev/serve.py` is a separate execution path.
 
-## What an authorized CPU artifact must supply
+## Published CPU package
 
 A future CPU package, or a user-provided compatible model, must supply:
 
@@ -30,18 +30,18 @@ A future CPU package, or a user-provided compatible model, must supply:
 | I2_S GGUF backbone | Run the quantized BitNet model through the native CPU binary |
 | Float32 pointer-head sidecar | Score the option and decision hidden states |
 | Pointer metadata | Record delimiter IDs, head layout, and temperature |
-| Provenance and hashes | Identify the base, training data and rights, export procedure, and exact files |
+| Provenance and hashes | The Hub card records the base, training data status, export procedure, and per-file SHA-256 |
 
-The [CPU quick start](CPU_QUICKSTART.md) builds the code and shows the command shape for artifacts the user is authorized to use. It does not provide a ready-to-run model package.
+The [CPU quick start](CPU_QUICKSTART.md) shows how to build the runner, download the Hub files, and invoke the model.
 
 ## Intended use and limits
 
-The code supports research into routing, yes/no decisions, and ordered ratings with explicit options. It is not a general chat generator. The speed or memory of a resulting system depends on the particular weights, build, CPU, question count, input length, and candidate count. The present source release provides **no checkpoint accuracy, calibration, latency, or resident-memory guarantee**.
+The code supports research into routing, yes/no decisions, and ordered ratings with explicit options. It is not a general chat generator. The published AutoDL results come from one development request and do not establish accuracy or general speed. Actual speed and memory depend on weights, build, CPU, question count, input length, and candidate count.
 
 Before deploying any trained artifact, evaluate it on a permitted dataset that matches the application. Check option ordering, numerical parity between CPU and reference paths, probability calibration, and error costs. Human review is needed for consequential decisions until the system has been validated in that setting.
 
-## Requirements for a future public model card
+## Published evaluation and license status
 
-A public artifact should identify the immutable base and teacher revisions, every training/evaluation source and its usage rights, training configuration, file hashes, supported input contract, exact inference precision, hardware measurements, per-split quality, calibration, known failure modes, and license terms. The [benchmark protocol](BENCHMARKS.md) states how to report timing and memory without mixing load, warmup, and resident inference.
+The public measurements record hardware, request shape, repetitions, quantization/precision, and memory definitions. No auditable held-out Accuracy, Brier, NLL, or ECE report is currently available. The [benchmark protocol](BENCHMARKS.md) links to sanitized timing samples and explains load, warmup, resident inference, and memory definitions.
 
-Repository code is under [Apache-2.0](../LICENSE). Upstream source and base-model notices appear in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md). Those licenses do not by themselves settle rights to distribute a derivative trained on separately licensed data.
+Repository code is under [Apache-2.0](../LICENSE). Upstream source and base-model notices appear in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md). The code license does not automatically apply to the Hugging Face weights or settle distribution rights for a checkpoint trained on separately licensed Yelp data.

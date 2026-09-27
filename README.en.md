@@ -2,6 +2,8 @@
 
 [简体中文](README.md) · English
 
+[Hugging Face model and model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+
 ## bit-jev = bitnet + jev !!!
 
 The backbone's quantized BitLinear weights use ternary values **{-1, 0, +1}**. A pointer head reads hidden states and scores caller-supplied options directly, so the model does not autoregressively generate answer text.
@@ -11,7 +13,7 @@ The code combines a BitNet backbone with a Kev-inspired decision interface. Comp
 > **Q: What is a jev / kev model?**
 > A: Given one shared piece of content and several questions, the model computes scores and probabilities over the caller-supplied options — no answer text is generated token by token.
 
-This repository is currently a source-and-measurement release. The Yelp-trained checkpoint and its derived benchmark bundle remain pending the written data-rights response requested from Yelp; the local AutoDL case study is documented separately and is not presented as a general speed claim.
+The I2_S checkpoint and sanitized AutoDL measurements are now published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). The training set included Yelp review records. A permission request was sent; as of 2026-09-28, no written response has arrived. The model card states this provenance, the measurement limits, and that no standalone open-weights license has been specified.
 
 ![bit-jev English highlights: ternary weights, public-base CPU measurements, LoRA and distillation](docs/figures/model-highlights.en.svg)
 
@@ -28,7 +30,21 @@ The landing figure highlights quantized BitLinear ternary weights and the LoRA �
 
 The PyTorch packed path uses a block-causal mask so question branches can share the state computation while remaining isolated. The **native CPU runner evaluates one causal row per question** and repeats the shared state for multiquestion requests. A question can require several internal prefill batches. The absence of answer-token decoding does not mean every request completes in one hardware forward call or has negligible latency.
 
-I2_S storage is intended to reduce backbone memory relative to less compressed formats. Actual process memory and request latency depend on the authorized model artifacts, input length, candidate count, CPU, thread count, and build. The [benchmark protocol](docs/BENCHMARKS.md) explains how to measure those quantities without conflating model load time and resident inference.
+I2_S storage is intended to reduce backbone memory relative to less compressed formats. Actual process memory and request latency depend on the model artifacts, input length, candidate count, CPU, thread count, and build. The [benchmark protocol](docs/BENCHMARKS.md) explains how to measure those quantities without conflating model load time and resident inference.
+
+### bit-jev AutoDL single-question case
+
+![bit-jev AutoDL latency and memory case](docs/figures/bit-jev-autodl-case.en.svg)
+
+One fixed development request used 703 input tokens and 77 options on the same Xeon Gold 6459C / RTX 5090 host. Timings exclude model load; GPU timing also excludes warmup.
+
+| Path | Mean inference time | Repeats | Peak memory observation |
+| --- | ---: | ---: | ---: |
+| CPU, 8 threads, native I2_S | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
+| CPU, 16 threads, native I2_S | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
+| RTX 5090, FP16 mixed precision | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
+
+On this request, the GPU path latency was about 22.8 times lower than the 16-thread CPU path. The two paths use different weight formats and numeric precision, so the ratio is not an isolated hardware speedup. Process RSS and GPU allocation are different memory measures. The [sanitized samples](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json) contain no input, option text, or prediction. This small case does not establish general latency or accuracy. Download the model from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled).
 
 ## Independent public BitNet base measurement
 
@@ -57,7 +73,7 @@ The output schema contains answers, per-option logits or probabilities, and nati
 
 ## Build and run
 
-The [CPU quick start](docs/CPU_QUICKSTART.md) shows how to clone the source, install the Python launcher, fetch the pinned BitNet/llama.cpp revisions, and build the native runner. To classify a request, supply a matching tokenizer/configuration, I2_S GGUF backbone, and pointer-head sidecar with a documented redistribution basis.
+The [CPU quick start](docs/CPU_QUICKSTART.md) shows how to clone the source, install the Python launcher, fetch the pinned BitNet/llama.cpp revisions, build the native runner, and download the model package. Read its Hugging Face card for data provenance and license status.
 
 All public performance claims should identify the checkpoint, license basis, hardware, precision, request shape, repeats, memory definition, and whether model load is included. The scripts under `test/` support that measurement once suitable artifacts are available.
 

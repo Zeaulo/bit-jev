@@ -2,7 +2,7 @@
 
 [English](CPU_QUICKSTART.md) · [返回中文 README](../README.md)
 
-本指南构建原生 I2_S CPU 程序，并说明 JSONL 推理接口。**v0.7.7 的 bit-jev 部分仍只发布源码**：仓库没有公开的 bit-jev 权重包或可复现的模型答案。[微软公开基础模型基准](BENCHMARKS.zh-CN.md#微软公开-bitnet-基础模型独立实测)只测骨干执行，不是分类结果。真正运行判断，需要用户自己准备兼容且有权使用的分词器、I2_S GGUF 骨干和训练好的指针头。只有 Microsoft BitNet 基础模型并不包含 bit-jev 的判断头。
+本指南构建原生 I2_S CPU 程序，并说明 JSONL 推理接口。bit-jev-2b-distilled 的 I2_S CPU 模型包现已发布在 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)；本仓库仍不存放检查点。[微软公开基础模型基准](BENCHMARKS.zh-CN.md#微软公开-bitnet-基础模型独立实测)测的是另一个原版骨干，不是 bit-jev 分类结果。下载前请阅读 Hugging Face 模型卡中的 Yelp 数据说明、指标边界和许可证状态。
 
 Python 启动器负责编码请求并管理常驻原生进程；原生程序完成骨干推理和指针头评分。这条路径提供命令行 JSONL 接口，不是 HTTP 服务。
 
@@ -50,20 +50,21 @@ cmake --build core/build/bit-jev-cpu --target bit-jev-cpu -j 4
 
 `questions` 不能为空。请求可同时包含 `choice`、`noul` 和 `score`。上面只有输入，没有“预期输出”；仓库未发布可供执行这一请求的 bit-jev 训练权重。
 
-## 4. 使用自己有权使用的模型文件运行
+## 4. 下载并运行公开 I2_S 模型
 
-以下两个占位路径必须替换为**本地目录**：`--run` 指向匹配的分词器目录；`--artifact` 指向含 `backbone-i2_s.gguf` 和 `head.f32` 的导出目录。指针头元数据建议与文件一起保存，以记录匹配关系；目前 CLI 直接读取 GGUF 和 `head.f32`。若自己的模型包把这些文件放在一起，两项可指向同一目录。
+先从 Hugging Face 下载模型文件。`--run` 指向 tokenizer/config 目录；`--artifact` 指向含 `backbone-i2_s.gguf` 和 `head.f32` 的导出目录。本模型包把两类文件放在同一目录，因此两个参数使用相同路径。
 
 ```powershell
+hf download jinghao1632/bit-jev-2b-distilled --local-dir './models/bit-jev-2b-distilled'
 python -m bit_jev.cpu `
-  --run './path/to/authorized-run' `
-  --artifact './path/to/authorized-export' `
+  --run './models/bit-jev-2b-distilled' `
+  --artifact './models/bit-jev-2b-distilled' `
   --binary './core/build/bit-jev-cpu/bit-jev-cpu.exe' `
   --input './test/my-request.jsonl' `
   --out './test/my-result.jsonl' `
   --threads 8 --batch 128
 ```
 
-Linux 用户需换成不带 `.exe` 的程序路径，并使用 shell 对应的续行语法。输出包含结构化答案、选项分数与概率以及原生计算耗时；实际数值由用户提供的模型决定。请将此工作区的自建输入、运行结果和临时脚本放在根目录 `test/` 下。
+Linux 用户需换成不带 `.exe` 的程序路径，并使用 shell 对应的续行语法。输出包含结构化答案、选项分数与概率以及原生计算耗时。该模型的 Yelp 数据许可申请仍待权利方书面答复，模型卡没有为权重指定开放许可证；代码 Apache-2.0 不覆盖模型权重。请将自建输入、运行结果和临时脚本放在根目录 `test/` 下。
 
 当前原生程序**每个问题运行一条因果序列**。它不逐 token 生成答案，但多个问题会重复读取共享内容，长候选项也会增加工作量。加载耗时、常驻推理耗时和峰值内存请按[性能测量规范](BENCHMARKS.zh-CN.md)分开记录。
