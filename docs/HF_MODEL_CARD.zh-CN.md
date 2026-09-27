@@ -15,6 +15,10 @@ tags:
 
 [English model card](HF_MODEL_CARD.md) · [源码仓库](https://github.com/Zeaulo/bit-jev)
 
+![bit-jev 训练、蒸馏与 I2_S CPU 推理流程](figures/project-cover.zh-CN.png)
+
+图中三值符号只代表量化 BitLinear 权重；训练与推理是分开的流程。
+
 > 本仓库提供 bit-jev 的 I2_S CPU 推理模型包。权重来自包含 Yelp 评论数据的多源决策训练集。Yelp 权利方许可申请已发出，截至 2026-09-28 尚未收到书面答复。本模型卡公开说明来源与限制；项目代码仓库的 Apache-2.0 许可证不自动适用于此检查点。
 
 ## 模型简介

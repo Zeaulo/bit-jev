@@ -99,3 +99,9 @@
 - 更新 test/package_release.py，保证本地重新打包时对相同字段执行 schema 规范化；新增 test/test_release_config.py，覆盖空值转换、已有数组保留和清单哈希一致性。
 - 修复 Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled 的 config.json 并更新 SHA256SUMS.json；从 Hub 下载复核字段为 []、配置长度和摘要均与清单一致，提交 revision 为 3a0495c3ad2d8ae0e19d1382b14b9126b679d88b。
 - 更新 versions/project_overall/index.html，记录配置修复、发布维护入口与当前版本。
+
+[2026-09-28 02:12:13] v0.11.1（中版本，新增中英文项目主视觉并接入公开页面）
+- 新增 docs/figures/project-cover.zh-CN.png 与 project-cover.en.png：双层图分别展示训练蒸馏和原生 CPU 候选项评分；三值符号限定为量化 BitLinear 权重，不写未经验证的性能数字。
+- GitHub 中文默认 README、英文 README 和中文兼容入口改用对应主视觉；原有准确的公开基础模型图与 AutoDL 单题延迟/内存图继续提供可核对数字。
+- Hugging Face 中英文模型卡新增对应主视觉；发布包加入两张 PNG。更新 .gitignore、X 首发配图规划和版本项目总览的目录树、关键文件职责及发布状态。
+- 使用 test/example_cpu_request.jsonl 的手写客服工单实际运行本地 I2_S CPU 包，X 示例引用真实选项概率与评分，并注明它与 AutoDL 性能测试题不是同一输入。

@@ -4,7 +4,9 @@ BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问
 
 [English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases) · [Hugging Face 模型与模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
-![bit-jev 项目流程图](docs/figures/model-highlights.zh-CN.svg)
+![bit-jev 双层训练与推理流程图](docs/figures/project-cover.zh-CN.png)
+
+封面把 LoRA、教师学生蒸馏与 I2_S CPU 评分分成两条链路。图中的 `-1 / 0 / +1` 指量化 BitLinear 权重；[三值权重与公开基础模型测量详图](docs/figures/model-highlights.zh-CN.svg)保留数值来源和边界。
 
 ## 先看结论
 

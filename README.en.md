@@ -15,9 +15,9 @@ The code combines a BitNet backbone with a Kev-inspired decision interface. Comp
 
 The I2_S checkpoint and sanitized AutoDL measurements are now published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). The training set included Yelp review records. A permission request was sent; as of 2026-09-28, no written response has arrived. The model card states this provenance, the measurement limits, and that no standalone open-weights license has been specified.
 
-![bit-jev English highlights: ternary weights, public-base CPU measurements, LoRA and distillation](docs/figures/model-highlights.en.svg)
+![bit-jev training and CPU inference flow](docs/figures/project-cover.en.png)
 
-The landing figure highlights quantized BitLinear ternary weights and the LoRA → teacher–student distillation → I2_S export path. **Ternary refers to quantized BitLinear weights, not every parameter.** See the [detailed neural framework](docs/figures/model-framework.svg) for the branch mask, decoder internals and pointer-head equations.
+The cover separates LoRA and teacher–student distillation from I2_S CPU option scoring. **Ternary refers to quantized BitLinear weights, not every parameter.** The [measurement highlights](docs/figures/model-highlights.en.svg) retain source details; the [detailed neural framework](docs/figures/model-framework.svg) shows the branch mask, decoder internals, and pointer-head equations.
 
 [CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 

@@ -15,6 +15,10 @@ tags:
 
 [中文模型卡](HF_MODEL_CARD.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev)
 
+![bit-jev training, distillation, and I2_S CPU inference flow](figures/project-cover.en.png)
+
+The ternary symbols represent quantized BitLinear weights; training and inference are separate flows.
+
 > This repository provides the I2_S CPU inference package for bit-jev. The checkpoint was trained on a multi-source decision dataset that includes Yelp review records. A request for permission covering derivative weights and metrics has been sent to Yelp; as of 2026-09-28, no written reply has been received. The Apache-2.0 license for the source repository does not automatically apply to this checkpoint.
 
 ## Model summary
