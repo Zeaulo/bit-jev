@@ -1,5 +1,7 @@
 # bit-jev
 
+[简体中文](README.zh-CN.md) · English
+
 **Structured decisions with a BitNet b1.58 backbone and a Kev-inspired pointer head.** A request supplies shared `state` and typed `choice`, `noul` (yes/no), or `score` questions. The head scores explicit options from backbone hidden states and returns decision probabilities without generating answer text token by token.
 
 This is a **source-only research release**. It includes the implementation, pinned upstream bootstrap, native I2_S CPU runner, and measurement scripts. The project's trained checkpoint, its exported weights, and its benchmark results are withheld while training-data rights are reviewed. This repository does not currently offer a ready-to-run bit-jev model or a public speed/accuracy claim.
