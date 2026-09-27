@@ -75,6 +75,7 @@ python test/bootstrap_bitnet.py --check
 | [中文 CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md) | 第一次运行 | 构建、模型文件和 JSONL 调用。 |
 | [中文性能规范](docs/BENCHMARKS.zh-CN.md) | 做实验 | 加载、预热、推理、RSS、显存和线程数的统一口径。 |
 | [中文模型卡](docs/MODEL_CARD.zh-CN.md) | 评估模型 | 架构、输入契约、局限和发布边界。 |
+| [Hugging Face 中文模型卡草稿](docs/HF_MODEL_CARD.zh-CN.md) | 发布模型 | 按 Kev 风格组织训练流程、文件布局、评测切分和发布条件。 |
 | [英文 README](README.en.md) | English readers | English overview and reproduction links. |
 | [第三方许可](THIRD_PARTY_NOTICES.md) | 发布前 | BitNet、Kev、数据集和检查点的权利边界。 |
 | [项目总览网页](versions/project_overall/index.html) | 内部学习 | 代码逻辑、功能需求、数据流和关键目录。 |

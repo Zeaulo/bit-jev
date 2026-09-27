@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.8.0 中文默认 README、三值 BitNet、LoRA 与蒸馏、AutoDL 案例测量、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.9.0 中文默认 README、三值 BitNet、LoRA 与蒸馏、Kev 风格 Hugging Face 模型卡、AutoDL 案例测量、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.8.0 中文默认 README 与双路径测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.9.0 中文默认 README、模型卡与双路径测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -168,6 +168,7 @@
             <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
             <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
             <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
+            <div><dt>docs/HF_MODEL_CARD.zh-CN.md / docs/HF_MODEL_CARD.md</dt><dd>按 Kev 风格整理的 Hugging Face 中文与英文模型卡草稿，记录任务定义、训练蒸馏链路、文件布局、评测指标和权重发布前置条件。</dd></div>
             <div><dt>versions/update.log / project_overall/</dt><dd>时间戳版本记录与本页共同维护；每次代码变更同步检查流程、目录树和发布状态。</dd></div>
           </dl></article>
         </div>
@@ -199,15 +200,15 @@
 
       <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.8.0 中文默认 README、双语核心图与双路径测量</h2>
+        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.9.0 中文默认 README、Kev 风格模型卡与双路径测量</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
-          <div class="status"><span class="status-dot pending"></span><b>权重与结果</b><p>历史训练数据包含权利边界未确认的评论数据。当前不公开该检查点、由其生成的模型包或衍生测量结果；后续应使用权利清晰的数据重新训练并验证。</p></div>
+          <div class="status"><span class="status-dot pending"></span><b>权重与结果</b><p>Hugging Face 中文与英文模型卡草稿已准备，上传清单、指标口径和许可边界均已写明。当前仍需 HF CLI 鉴权及 Yelp 权利方书面答复，检查点和由其生成的派生指标暂不公开。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.8.0 中文默认 README、双语核心图与双路径测量范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.9.0 中文默认 README、Kev 风格模型卡与双路径测量范围</footer>
   </div>
 </body>
 </html>

@@ -82,3 +82,8 @@
 - 重排首页为项目定位、三值 BitLinear、CPU 友好路径、LoRA→教师学生蒸馏→I2_S 导出、公开基础模型测量和 AutoDL 单题案例；明确两类测量不可混用。
 - 更新中英文模型卡、性能规范和文档导航，补充 Yelp 许可申请已发出但检查点与派生指标尚待书面答复的发布边界。
 - 更新 versions/project_overall/index.html 的版本、默认 README、双路径测量和图片说明。GPT 图像生成服务本轮返回额度限制，因此未伪造新图片；现有精确 SVG 图继续作为可审阅技术图，后续可在额度恢复后替换主视觉。
+
+[2026-09-27 23:07:21] v0.9.0（中版本，新增 Kev 风格 Hugging Face 发布草稿）
+- 新增 docs/HF_MODEL_CARD.zh-CN.md 与 docs/HF_MODEL_CARD.md，按 Kev 的模型卡结构整理任务定义、训练与蒸馏流程、文件布局、评测口径和发布边界。
+- 在根目录中文 README 的文档导航中加入 Hugging Face 中文模型卡草稿，明确模型权重尚未上传、Yelp 权利方书面答复尚未收到，并保留公开源码可复核的发布路径。
+- 同步更新 versions/project_overall/index.html 的版本号、目录树和发布状态，记录 Hugging Face 鉴权与数据许可是实际上传前置条件。
