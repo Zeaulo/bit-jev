@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="bit-jev v0.4.5 源码架构、数据流、构建路径与关键文件内部手册">
+  <title>bit-jev · 项目总览</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body class="min-h-screen text-slate-900 antialiased">
+  <!-- 环境光与玻璃层仅用于区分阅读层级。 -->
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
+    <!-- 导航锚点与下方各章节的 id 一一对应。 -->
+    <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
+      <div><p class="eyebrow">内部开发手册 · v0.4.5 纯源码版</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
+        <a class="nav-pill" href="#summary">项目简述</a>
+        <a class="nav-pill" href="#architecture">项目架构</a>
+        <a class="nav-pill" href="#flow">数据流动</a>
+        <a class="nav-pill" href="#files">目录与文件</a>
+        <a class="nav-pill" href="#build">构建与验证</a>
+        <a class="nav-pill" href="#boundary">发布边界</a>
+      </nav>
+    </header>
+
+    <main class="mt-12 space-y-8">
+      <!-- 项目简述明确核心链路、技术选型与当前发布范围。 -->
+      <section id="summary" class="glass hero scroll-mt-28 rounded-[2rem] p-8 md:p-12">
+        <p class="eyebrow">01 / 项目简述</p>
+        <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并提供原生 CPU 推理源码。</h2>
+        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。本次公开发布仅包含源码、许可、架构文档与构建脚本；训练权重、模型包、推理结果、性能图和原始报告均不在仓库内。</p>
+        <div class="mt-8 grid gap-3 sm:grid-cols-3">
+          <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
+          <div class="metric"><strong>Pointer</strong><span>从选项与决策位置隐藏状态计算分数</span></div>
+          <div class="metric"><strong>JSONL</strong><span>常驻原生 CPU 进程逐条读写请求</span></div>
+        </div>
+      </section>
+
+      <!-- 架构按用户指定的代码逻辑层与功能需求层拆解。 -->
+      <section id="architecture" class="scroll-mt-28">
+        <div class="section-heading"><p class="eyebrow">02 / 项目架构拆解</p><h2>代码逻辑层与功能需求层</h2></div>
+        <div class="grid gap-5 lg:grid-cols-2">
+          <article class="glass card"><h3>代码逻辑层</h3><ol class="step-list">
+            <li><b>输入规范化</b><span><code>core/bit_jev/api.py</code> 校验 state、instructions、Noul、Choice、Score 字段，统一答案输出结构；用户文本在 <code>model.py</code> 编码前处理控制分隔符。</span></li>
+            <li><b>问题编码</b><span><code>core/bit_jev/model.py</code> 把 state、问题、选项和 decide 位置变成 BitNet 预留 token 与正文 token 序列；记录每个选项结束位置及对应问题的决定位置。</span></li>
+            <li><b>分支掩码</b><span>同文件的 block-causal mask 使问题读取共享 state 与自身分支，阻断跨问题信息；打包 PyTorch 前向可复用一次 state 计算。</span></li>
+            <li><b>骨干与指针头</b><span><code>DecisionModel</code> 取得隐藏状态，<code>PointerHead</code> 对选项与决定位置分别投影、点积、缩放，再把候选分数转成概率。</span></li>
+            <li><b>训练与评估</b><span><code>train.py</code> 管理监督训练；<code>distill.py</code> 读取离线教师分数并更新学生；<code>eval.py</code> 生成逐题结果与准确率、校准统计。输入数据和模型均由操作者自行提供。</span></li>
+            <li><b>导出协议</b><span><code>export_distilled.py</code> 校验本地检查点并转换 I2_S GGUF；<code>cpu_head.py</code> 将 q/k 参数写成原生 float32 文件；<code>manifest.json</code> 记录导出文件摘要。</span></li>
+            <li><b>CPU 请求路径</b><span><code>cpu.py</code> 将多题请求拆成多条“共享 state + 单题分支”因果行；<code>native/main.cpp</code> 常驻加载 GGUF 和指针头、读取隐藏状态、返回 JSONL 选项分布；Python 恢复 TypeSafe 答案。</span></li>
+            <li><b>依赖构建</b><span><code>test/bootstrap_bitnet.py</code> 核对固定 BitNet 与 llama.cpp 提交、浅拉取子模块并应用两份补丁；<code>core/native/CMakeLists.txt</code> 构建 CPU 可执行文件。</span></li>
+          </ol></article>
+          <article class="glass card"><h3>功能需求层</h3><ol class="step-list">
+            <li><b>结构化输出</b><span>Choice 返回候选项概率，Noul 返回真假判断，Score 返回有序评分分布；每题只在调用方给出的候选集合内选择。</span></li>
+            <li><b>题目隔离</b><span>训练路径用注意力掩码隔离分支；原生路径逐题清理 KV 缓存后执行独立因果行，保证一个问题不能看到另一个问题文本。</span></li>
+            <li><b>一次读出</b><span>每条原生因果行以前向计算取得所有候选分数；没有逐个生成答案 token 的循环。多题原生请求仍逐题重算共享 state。</span></li>
+            <li><b>量化兼容</b><span>导出器按在线量化对应的三元舍入规则写 I2_S；原生 runner 从 GGUF 取得骨干隐藏状态，从 <code>head.f32</code> 取得指针头参数。</span></li>
+            <li><b>可复现源码</b><span>仓库固定上游提交和补丁，允许在独立机器上检查依赖源码、构建可执行文件及运行命令帮助；真实分类需要额外提供合法取得的兼容检查点。</span></li>
+            <li><b>性能研究</b><span><code>test/</code> 保留 CPU/GPU 和 I2_S/F16 测量脚本，供操作者在自有模型与请求上生成本地报告；当前仓库不发布既有检查点的结果或图。</span></li>
+            <li><b>数据权限</b><span>训练脚本属于研究实现，不承诺其历史数据配方可用于公开权重分发。任何新训练、教师输出、模型与评估结果都须按各自数据和模型条款审查。</span></li>
+          </ol></article>
+        </div>
+      </section>
+
+      <!-- 数据流同时区分需要本地资产的模型路径与无需模型的源码验证路径。 -->
+      <section id="flow" class="scroll-mt-28">
+        <div class="section-heading"><p class="eyebrow">03 / 数据流动层</p><h2>输入如何走到候选项答案</h2></div>
+        <div class="glass rounded-[2rem] p-6 md:p-9">
+          <div class="flow-grid">
+            <div class="flow-node"><small>1 / 输入</small><b>TypeSafe JSON</b><span>state、instructions、questions、候选项；由 api.py 规范化。</span></div>
+            <div class="flow-node"><small>2 / 编码</small><b>model.py</b><span>插入保留分隔符、转义用户控制文本，保存 option-close 与 decide 位置。</span></div>
+            <div class="flow-node"><small>3 / 训练前向</small><b>分支掩码 + BitNet</b><span>共享 state 一次，多个问题分支并行读取各自上下文。</span></div>
+            <div class="flow-node"><small>4 / 决策读出</small><b>PointerHead</b><span>选项隐藏状态与决定隐藏状态投影、点积、温度缩放、softmax。</span></div>
+            <div class="flow-node"><small>5 / 本地导出</small><b>GGUF + head.f32</b><span>兼容检查点由 export_distilled.py 和 cpu_head.py 转成原生 CPU 文件；输出留在本机。</span></div>
+            <div class="flow-node"><small>6 / CPU 编码</small><b>cpu.py</b><span>把一个多题请求拆成每题一条因果行，保留共享 state 的文字内容。</span></div>
+            <div class="flow-node"><small>7 / 原生计算</small><b>native/main.cpp</b><span>逐行清 KV、运行 I2_S 骨干、读取指定隐藏状态、应用指针头。</span></div>
+            <div class="flow-node"><small>8 / 输出</small><b>JSONL → TypeSafe</b><span>原生程序返回 logits 和概率；cpu.py 恢复 Choice、Noul、Score 答案。</span></div>
+            <div class="flow-node"><small>源码验证支线</small><b>bootstrap → CMake</b><span>固定上游 Git 提交、应用补丁、构建原生程序、检查命令帮助；无需训练权重。</span></div>
+          </div>
+          <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/source-architecture.svg" alt="bit-jev 源码中的请求、训练、导出及原生 CPU 推理路径"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">架构图只展示源码职责与数据流，不包含既有检查点的测量结果。</figcaption></figure>
+          <p class="mt-6 text-sm leading-7 text-slate-600"><b>执行边界：</b>GGUF 只装 backbone；原生指针头需独立的 <code>head.f32</code>。纯源码克隆可以验证编译和接口，无法直接产生真实分类答案。若请求包含多个问题，当前原生路径逐题重算 state；这与打包 PyTorch 前向的一次共享 state 路径不同。</p>
+        </div>
+      </section>
+
+      <!-- 目录树只列公开仓库中的源码和文档；本地资产单列说明。 -->
+      <section id="files" class="scroll-mt-28">
+        <div class="section-heading"><p class="eyebrow">04 / 核心目录树与关键文件说明</p><h2>从入口文件定位到执行职责</h2></div>
+        <div class="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+          <div class="glass card"><h3>公开目录树</h3><pre class="tree"><code>bit-jev/
+├─ README.md
+├─ LICENSE
+├─ THIRD_PARTY_NOTICES.md
+├─ .gitignore / .gitattributes
+├─ core/
+│  ├─ README.md / pyproject.toml
+│  ├─ bit_jev/
+│  │  ├─ api.py / model.py / hub.py
+│  │  ├─ train.py / distill.py / eval.py
+│  │  ├─ checkpoint.py / convert.py
+│  │  ├─ export_distilled.py / cpu_head.py
+│  │  └─ cpu.py / serve.py / __version__.py
+│  ├─ native/
+│  │  ├─ main.cpp
+│  │  └─ CMakeLists.txt
+│  ├─ data/
+│  │  └─ api_request.json
+│  └─ scripts/
+│     ├─ setup_autodl.sh / run_train.sh
+│     ├─ run_distill.sh / run_eval.sh
+│     └─ fetch_kev_suites.py
+├─ test/
+│  ├─ bootstrap_bitnet.py
+│  ├─ patches/
+│  │  ├─ bitnet-converter.patch
+│  │  └─ llama-relu2.patch
+│  ├─ benchmark_native_formats.py
+│  ├─ benchmark_gpu.py
+│  ├─ package_release.py
+│  └─ verify_release_package.py
+├─ docs/
+│  ├─ CPU_QUICKSTART.md / BENCHMARKS.md
+│  ├─ MODEL_CARD.md / RELEASE_CHECKLIST.md
+│  ├─ X_LAUNCH.md
+│  └─ figures/source-architecture.svg
+└─ versions/
+   ├─ update.log
+   └─ project_overall/
+      ├─ index.html
+      ├─ styles.css
+      └─ app.js</code></pre>
+            <p class="mt-5 text-sm leading-7 text-slate-600"><code>learning/</code> 的上游源码、<code>runs/</code> 的本地检查点、<code>export/</code> 的 GGUF、<code>core/build/</code> 的二进制、<code>test/release/</code> 的模型包及测试结果均是本地生成或下载资产，不属于公开仓库。</p>
+          </div>
+          <article class="glass card"><h3>关键文件职责</h3><dl class="file-list">
+            <div><dt>README.md / core/README.md</dt><dd>首页说明源码发布范围；核心手册说明请求编码、构建、运行入口和兼容检查点要求。</dd></div>
+            <div><dt>core/bit_jev/api.py / model.py</dt><dd>前者界定输入输出协议；后者控制分隔符、分支掩码、BitNet 前向和指针头读出。</dd></div>
+            <div><dt>core/bit_jev/train.py / distill.py / eval.py</dt><dd>监督训练、离线教师分数蒸馏和本地评估分别实现；输出都保存在操作者工作区。</dd></div>
+            <div><dt>core/bit_jev/hub.py / checkpoint.py</dt><dd>定位基础模型与 tokenizer，优先接受本地 tokenizer 目录；恢复本地运行目录中的骨干、头和温度信息。</dd></div>
+            <div><dt>core/bit_jev/export_distilled.py / cpu_head.py</dt><dd>检查导出来源和 GGUF 内容；把指针头的 q/k 权重、偏置写成固定顺序的 float32 文件。</dd></div>
+            <div><dt>core/bit_jev/cpu.py / native/main.cpp</dt><dd>Python 负责请求拆行和答案格式；C++ 负责模型常驻、隐藏状态读取、指针头计算和 JSONL 响应。</dd></div>
+            <div><dt>test/bootstrap_bitnet.py / test/patches/</dt><dd>固定 BitNet 与 llama.cpp 修订版，核对两份补丁后应用；失败时报告具体依赖或补丁步骤。</dd></div>
+            <div><dt>test/benchmark_native_formats.py / benchmark_gpu.py</dt><dd>仅提供操作者可在自有模型上运行的原生 CPU 格式计时和 GPU 对照代码；既有结果文件不纳入 Git。</dd></div>
+            <div><dt>test/package_release.py / verify_release_package.py</dt><dd>历史本地打包和逐成员哈希校验工具留作维护源码；当前不运行公开模型发布流程。</dd></div>
+            <div><dt>docs/figures/source-architecture.svg</dt><dd>公开架构图只描绘请求、训练、导出和 CPU 路径；不包含任何既有检查点性能指标。</dd></div>
+            <div><dt>versions/update.log / project_overall/</dt><dd>时间戳版本记录与本页共同维护；每次代码变更同步检查流程、目录树和发布状态。</dd></div>
+          </dl></article>
+        </div>
+      </section>
+
+      <!-- 构建步骤的通过范围与网络限制分开记录，避免把本地模型测试误称为公开体验。 -->
+      <section id="build" class="scroll-mt-28">
+        <div class="section-heading"><p class="eyebrow">05 / 构建与验证</p><h2>源码克隆后可独立检查的步骤</h2></div>
+        <div class="glass rounded-[2rem] p-6 md:p-9">
+          <ol class="step-list">
+            <li><b>安装包</b><span>在项目根目录执行 <code>python -m pip install -e ./core</code>，确认 Python 包元数据和模块入口可加载。</span></li>
+            <li><b>取得依赖</b><span>执行 <code>python test/bootstrap_bitnet.py</code>；脚本取得固定 BitNet 提交，浅拉取其 llama.cpp 子模块，应用仓库内转换器与 ReLU² 补丁。</span></li>
+            <li><b>核对补丁</b><span>执行 <code>python test/bootstrap_bitnet.py --check</code>，比对两个 Git 提交和补丁状态；该步骤不需要训练权重。</span></li>
+            <li><b>构建原生程序</b><span>通过 <code>cmake -S core/native -B core/build/bit-jev-cpu</code> 配置，再用 <code>cmake --build core/build/bit-jev-cpu --target bit-jev-cpu</code> 编译；具体生成器和编译器按平台选择。</span></li>
+            <li><b>检查命令</b><span>执行 <code>python -m bit_jev.cpu --help</code> 查看 JSONL 推理参数。要产生答案，还需自行提供有权使用的兼容 run、GGUF、head 与 tokenizer。</span></li>
+          </ol>
+          <p class="mt-6 text-sm leading-7 text-slate-600">独立临时工作区曾从本机 Git 镜像完成固定提交核对、补丁应用和原生编译；直接从公共 GitHub 拉取 llama.cpp 子模块的网络传输没有完成，因此公开网络首次克隆仍需另行验证。这是源码构建链路的验证边界。</p>
+        </div>
+      </section>
+
+      <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
+      <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
+        <p class="eyebrow">06 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.4.5 仅发布可审阅源码</h2>
+        <div class="mt-6 grid gap-4 md:grid-cols-3">
+          <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>本地测试工具</b><p>保留评估和计时脚本的实现；既有输出文件、模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
+          <div class="status"><span class="status-dot pending"></span><b>权重与结果</b><p>历史训练数据包含权利边界未确认的评论数据。当前不公开该检查点、由其生成的模型包或衍生测量结果；后续应使用权利清晰的数据重新训练并验证。</p></div>
+        </div>
+      </section>
+    </main>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.4.5 公开源码范围</footer>
+  </div>
+</body>
+</html>

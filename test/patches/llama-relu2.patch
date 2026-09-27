@@ -1,0 +1,13 @@
+diff --git a/src/models/bitnet.cpp b/src/models/bitnet.cpp
+--- a/src/models/bitnet.cpp
++++ b/src/models/bitnet.cpp
+@@ -130,7 +130,8 @@ llama_model_bitnet::graph::graph(const llama_model & model, const llm_graph_para
+                 model.layers[il].ffn_gate, NULL, model.layers[il].ffn_gate_s,
+                 NULL,                      NULL, NULL,
+                 NULL,
+-                LLM_FFN_SILU, LLM_FFN_PAR, il);
++                // 蒸馏检查点的 hidden_act 为 relu2，必须与 Transformers 前向保持一致。
++                LLM_FFN_RELU_SQR, LLM_FFN_PAR, il);
+         cb(cur, "ffn_sub_out", il);
+ 
+         cur = build_norm(cur,

@@ -1,0 +1,34 @@
+# 本地训练检查点、模型导出和上游完整仓库不随公开源码发布。
+/runs/
+/export/
+/learning/
+/core/build/
+/test/build-*/
+/test/clean-*/
+/test/clean_*/
+/test/patch-verification*/
+/test/dependency_validation/
+/test/release/
+/test/release_smoke/
+/test/*.gguf
+/test/*.exe
+
+# 公开源码仅保留手写请求样例，所有模型输出和评测数据都留在本地。
+/test/*.json
+/test/*.jsonl
+!/test/example_cpu_request.jsonl
+!/test/cpu_smoke_request.jsonl
+/docs/figures/*.png
+/docs/figures/*.svg
+!/docs/figures/source-architecture.png
+!/docs/figures/source-architecture.svg
+/test/*.log
+/test/*.stderr
+/test/*_wall_seconds.txt
+/test/remote_hardware.txt
+**/__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+*.pem

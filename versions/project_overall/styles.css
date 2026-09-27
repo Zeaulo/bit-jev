@@ -1,0 +1,42 @@
+/* 页面背景采用低对比渐变，让长篇工程内容保持可读。 */
+body { background: linear-gradient(145deg, #f6f8fc 0%, #edf3f8 45%, #f8f5f2 100%); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; }
+/* 柔和的环境光只承担空间层次，不遮盖正文。 */
+.ambient { position: fixed; z-index: 0; width: 35rem; height: 35rem; border-radius: 50%; filter: blur(90px); pointer-events: none; opacity: .5; }
+.ambient-one { top: -12rem; left: -10rem; background: #c9dcfa; }
+.ambient-two { right: -12rem; bottom: -14rem; background: #f5dcca; }
+/* 毛玻璃卡片统一边线、阴影和模糊度。 */
+.glass { background: rgba(255,255,255,.69); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 18px 55px rgba(53,74,104,.08); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+.eyebrow { color: #5571a0; font-size: .72rem; font-weight: 750; letter-spacing: .15em; text-transform: uppercase; }
+.nav-pill { border-radius: 999px; padding: .48rem .8rem; color: #475569; transition: background .18s, color .18s; }
+.nav-pill:hover, .nav-pill.active { color: #1d4ed8; background: rgba(219,234,254,.72); }
+.hero { overflow: hidden; }
+.metric { display: flex; flex-direction: column; gap: .4rem; padding: 1.2rem 1.35rem; border-radius: 1.25rem; background: rgba(248,250,252,.78); border: 1px solid #fff; }
+.metric strong { color: #263f72; font-size: 1.75rem; letter-spacing: -.04em; }
+.metric span { color: #64748b; font-size: .8rem; line-height: 1.5; }
+.section-heading { margin: 2rem 0 1.15rem; }
+.section-heading h2 { margin-top: .4rem; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 650; letter-spacing: -.035em; }
+.card { border-radius: 1.8rem; padding: 1.7rem; }
+.card h3 { margin-bottom: 1.15rem; font-size: 1.1rem; font-weight: 700; }
+.step-list { display: grid; gap: .85rem; counter-reset: steps; }
+.step-list li { display: grid; grid-template-columns: minmax(6.5rem, 8.5rem) 1fr; gap: 1rem; padding: .8rem 0; border-top: 1px solid rgba(148,163,184,.18); line-height: 1.65; }
+.step-list b { color: #304e80; font-size: .9rem; }
+.step-list span { color: #475569; font-size: .88rem; }
+code { color: #244d8d; font-size: .91em; }
+.flow-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; }
+.flow-node { position: relative; display: flex; flex-direction: column; min-height: 9rem; gap: .48rem; padding: 1.15rem; border-radius: 1.1rem; background: rgba(248,250,252,.83); border: 1px solid #fff; }
+.flow-node small { color: #6580ac; font-weight: 700; }
+.flow-node b { overflow-wrap: anywhere; font-size: .92rem; }
+.flow-node span { color: #64748b; font-size: .78rem; line-height: 1.5; }
+.tree { overflow-x: auto; border-radius: 1rem; background: rgba(235,241,250,.66); padding: 1.2rem; color: #334155; font-size: .8rem; line-height: 1.55; }
+.tree code { color: inherit; }
+.file-list { display: grid; gap: .8rem; }
+.file-list div { padding-bottom: .8rem; border-bottom: 1px solid rgba(148,163,184,.18); }
+.file-list dt { color: #244d8d; font-size: .83rem; font-weight: 700; overflow-wrap: anywhere; }
+.file-list dd { margin-top: .25rem; color: #64748b; font-size: .82rem; line-height: 1.55; }
+.status { border-radius: 1.15rem; padding: 1.1rem; background: rgba(248,250,252,.78); border: 1px solid #fff; }
+.status b { display: inline-block; margin-left: .35rem; font-size: .9rem; }
+.status p { margin-top: .7rem; color: #64748b; font-size: .82rem; line-height: 1.6; }
+.status-dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; }
+.status-dot.done { background: #3b9c76; }.status-dot.ongoing { background: #e4a449; }.status-dot.pending { background: #8da0b7; }
+@media (max-width: 760px) { .flow-grid { grid-template-columns: 1fr 1fr; } .step-list li { grid-template-columns: 1fr; gap: .2rem; } }
+@media (max-width: 520px) { .flow-grid { grid-template-columns: 1fr; } .card { padding: 1.2rem; } }

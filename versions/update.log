@@ -1,0 +1,46 @@
+[2026-09-26 13:48:54] v0.2.0（中版本，新增蒸馏模型 I2_S 导出功能）
+- 新增 core/bit_jev/export_distilled.py：校验本地检查点、safetensors 分片和转换依赖；生成 GGUF 骨干、指针头元数据及导出清单；导出失败时清理临时权重链接。
+- 修复本地 BitNet 转换器的分片遍历和裸 BitNetModel 子层归一化映射；新增 test/ 中的张量映射、来源和失败清理检查代码。
+- 更新 core/README.md 和 versions/project_overall/，明确 GGUF 仅装骨干，完整分类还需要指针头与原生读取路径。
+- 本地检查过导出结构与在线/离线量化路径；该检查不能替代公开模型的端到端验证。既有检查点的尺寸、预测和逐题数值保留在本地，未写入本次公开日志。
+
+[2026-09-26 15:07:44] v0.3.0（中版本，新增原生 CPU 分类路径）
+- 新增 core/bit_jev/cpu_head.py，将本地 head.pt 中的 q/k 权重、偏置和温度写为原生 float32 sidecar，并在导出清单中登记摘要。
+- 新增 core/native/CMakeLists.txt 与 core/native/main.cpp：常驻加载 GGUF，逐题清理 KV 缓存，读取 option-close 和 decide 位置隐藏状态，执行指针头与 softmax。
+- 新增 core/bit_jev/cpu.py：复用 TypeSafe 规范化和 token 编码，将多题请求拆为独立因果行，并恢复 Choice、Noul、Score 答案；当前实现逐题重算 state。
+- 修正本地 llama.cpp BitNet 前馈激活为 ReLU²；更新包版本、core/README.md 和项目总览。原生程序的构建与本地请求执行曾通过；既有检查点结果不进入公开日志。
+
+[2026-09-26 21:20:36] v0.3.1（小版本，完善 CPU 与 PyTorch 逐题对照工具）
+- 新增 test/compare_cpu_development.py：按记录 ID、题目 ID 和候选数对齐输入、原生输出及 PyTorch 参考；检查概率、有限值与 TypeSafe 字段，并汇总预测差异。
+- 本地曾执行 development 对照；其输入、逐题输出、汇总准确率和延迟均属于历史检查点的衍生资料，现排除在公开仓库之外。
+- 将包版本由 0.3.0 更新为 0.3.1；同步维护 core/README.md 和项目总览。
+
+[2026-09-26 22:35:55] v0.3.2（小版本，新增 CPU/GPU 基准测试工具）
+- 新增 test/benchmark_gpu.py 和 test/compare_cpu_gpu_speed.py：按逐题因果行记录模型加载、预热、常驻推理与显存；对齐 CPU/GPU 预测并检查非有限 logits。
+- 测试进程对 ReLU²、门控乘积、前馈归一化和残差采用 FP32 中间计算；正式服务路径没有改用此测试方案。
+- 将包版本由 0.3.1 更新为 0.3.2，并更新 core/README.md 与项目总览。历史测量值和预测对照不在公开日志中。
+
+[2026-09-26 23:52:54] v0.3.3（小版本，新增同权重 CPU 格式基准工具）
+- 新增根目录 README.md 与 .gitignore，介绍 BitNet + Kev 式决策链路并排除本地模型、构建与大文件。
+- 新增 test/dequantize_gguf_f16.py、prepare_native_benchmark.py、benchmark_native_formats.py、summarize_cpu_format_benchmark.py 和 compare_cpu_runs.py：提供 I2_S/F16 格式转换、固定输入、原生计时、工作集采样及逐题对照代码。
+- 曾在本地试验隐藏状态读取、共享 state KV、tinyBLAS 与线程配置；未把试验性执行逻辑并入正式 CPU 路径。
+- 包版本由 0.3.2 更新为 0.3.3，pyproject 增加可选 psutil 基准依赖。历史检查点的文件大小、性能、内存和数值结果留在本地。
+
+[2026-09-27 03:53:25] v0.4.3（中版本，新增模型包复现工具与发布准备文档）
+- core/pyproject.toml 与 core/bit_jev/__version__.py 从 0.3.3 更新为 0.4.3；新增 test/bootstrap_bitnet.py 和 test/patches/ 的固定上游提交及转换器、ReLU² 补丁；根 .gitignore 排除本地上游仓库、训练、导出和构建产物。
+- 新增 test/package_release.py 与 verify_release_package.py：允许本地按白名单组装兼容模型文件、逐成员 SHA-256 校验，并检验解包后的路径结构；core/bit_jev/hub.py 改为优先识别本地 tokenizer 目录。
+- 新增 LICENSE、THIRD_PARTY_NOTICES.md 和发布准备文档；本地模型包曾通过成员校验与解包后原生运行检查，但未上传。
+- 历史训练分区包含 Yelp 评论数据，其衍生权重及结果的公开分发依据尚未确认；本次公开源码版剔除模型包、性能图和由该检查点生成的报告。旧日志中关于内存单位的勘误仅保留在本地原始测量记录中。
+
+[2026-09-27 14:38:15] v0.4.4（小版本，减小 llama.cpp 子模块首次拉取量）
+- test/bootstrap_bitnet.py 初始化 llama.cpp 子模块时使用浅拉取；BitNet、llama.cpp 的固定提交和仓库内两份补丁保持一致。
+- core 包版本由 0.4.3 更新为 0.4.4；同步更新源码说明和内部项目总览。
+- 独立临时工作区通过本机 Git 镜像完成依赖检出、补丁核对与原生程序编译。直接从公共 GitHub 获取子模块的网络链路尚未完成验证。
+- 此版曾生成本地模型包并通过完整性检查；文件摘要、推理结果和包本体均不进入公开源码版。
+
+[2026-09-27 14:53:41] v0.4.5（小版本，调整为仅发布源码）
+- 用户确认没有或不确定是否取得 Yelp 训练数据衍生权重及结果的公开授权，因此公开范围收敛为 Python/C++ 源码、固定上游补丁、构建脚本、许可、架构图和说明文档。
+- core/pyproject.toml 与 core/bit_jev/__version__.py 从 0.4.4 更新为 0.4.5；core/README.md 改成纯源码操作手册，明确没有可下载权重、模型包或即开即用的分类结果。
+- 从公开 Git 索引排除历史检查点生成的 JSON/JSONL 报告、性能图片与其他模型衍生物；本地文件可继续保留用于维护，但公开文档不再引用其数值或发布链接。
+- versions/project_overall/ 重写为当前源码链路：逐层记录 TypeSafe 输入、分支编码、指针头、I2_S 导出、原生逐题计算、依赖构建及文件职责；新增 docs/figures/source-architecture.svg 作为无性能数据的架构图。
+- 历史版本条目保留原时间戳和实际代码改动，但移除既有检查点的准确率、速度、内存、哈希及预测细节。发布前仍须核对实际 Git 索引与公开页面是否完全属于纯源码范围。

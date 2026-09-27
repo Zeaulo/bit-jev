@@ -1,0 +1,23 @@
+diff --git a/utils/convert-hf-to-gguf-bitnet.py b/utils/convert-hf-to-gguf-bitnet.py
+--- a/utils/convert-hf-to-gguf-bitnet.py
++++ b/utils/convert-hf-to-gguf-bitnet.py
+@@ -57,7 +57,8 @@ class Model(ABC):
+         self.use_temp_file = use_temp_file
+         self.is_safetensors = self._is_model_safetensors()
+         self.num_parts = Model.count_model_parts(self.dir_model, ".safetensors" if self.is_safetensors else ".bin")
+-        self.part_names = self._get_part_names()
++        # BitNet 转换需要两次遍历权重分片；先固化名称，避免生成器在第一轮被耗尽。
++        self.part_names = tuple(self._get_part_names())
+         self.hparams = Model.load_hparams(self.dir_model)
+         self.gguf_writer = gguf.GGUFWriter(fname_out, gguf.MODEL_ARCH_NAMES[self.model_arch], endianess=self.endianess, use_temp_file=self.use_temp_file)
+         self.block_count = self.find_hparam(["n_layers", "num_hidden_layers", "n_layer"])
+@@ -109,6 +110,9 @@ class Model(ABC):
+ 
+     def map_tensor_name(self, name: str, try_suffixes: Sequence[str] = (".weight", ".bias")) -> str:
+         new_name = self.tensor_map.get_name(key=name, try_suffixes=try_suffixes)
++        # 蒸馏检查点保存裸骨干层；子层归一化映射只登记了 model.layers 前缀。
++        if new_name is None and self.model_arch == gguf.MODEL_ARCH.BITNET_B158 and name.startswith("layers."):
++            new_name = self.tensor_map.get_name(key="model." + name, try_suffixes=try_suffixes)
+         if new_name is None:
+             raise ValueError(f"Can not map tensor {name!r}")
+         return new_name

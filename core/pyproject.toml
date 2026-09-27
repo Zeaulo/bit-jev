@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bit-jev"
+version = "0.4.5"
+description = "A Jev/Kev-style decision model on Microsoft's 1.58-bit BitNet b1.58 backbone"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "transformers>=4.48,<5",
+    "peft==0.14.0",
+    "accelerate>=1.3",
+    "numpy<2",
+    "huggingface_hub",
+    "safetensors>=0.5",
+    "sentencepiece",
+]
+
+[project.optional-dependencies]
+serve = ["fastapi", "uvicorn"]
+data = ["datasets"]
+benchmark = ["psutil>=5.9"]
+
+[tool.setuptools.packages.find]
+include = ["bit_jev*"]

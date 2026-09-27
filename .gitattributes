@@ -1,0 +1,8 @@
+# 固定补丁和脚本的换行符，避免跨平台检出影响源码复现。
+*.patch text eol=lf whitespace=-blank-at-eol
+*.py text eol=lf
+*.sh text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.svg text eol=lf
+*.png binary

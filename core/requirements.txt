@@ -1,0 +1,13 @@
+# bit-jev, pinned for AutoDL's PyTorch 2.8 / CUDA 12.8 image (torch ships with the image).
+transformers>=4.52.1,<5  # 4.52.1 is the first release with BitNetForCausalLM; 4.48 lacks it, 5.x needs trust_remote_code=False on Windows
+peft==0.14.0
+accelerate>=1.3
+datasets
+sentencepiece
+protobuf
+numpy<2
+modelscope              # AutoDL/aliyun cannot reach huggingface.co; ModelScope mirrors everything bit-jev needs
+huggingface_hub
+safetensors>=0.5  # 蒸馏导出前校验权重分片完整性
+fastapi
+uvicorn
