@@ -1,66 +1,98 @@
 # bit-jev
 
-[简体中文](README.zh-CN.md) · English
+BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。
 
-## bit-jev = bitnet + jev !!!
+[English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases)
 
-The backbone's BitLinear weights use ternary values **{-1, 0, +1}** for quantized inference. This makes a compact CPU deployment possible. The pointer head and some other tensors retain higher precision; the repository has no public bit-jev checkpoint from which to measure its end-to-end speed or loaded memory.
+![bit-jev 项目流程图](docs/figures/model-highlights.zh-CN.svg)
 
-The code combines a BitNet backbone with a Kev-inspired decision interface. Comparisons with Kev require runnable public checkpoints, matched requests, and a common measurement protocol; no such comparison is claimed here.
+## 先看结论
 
-> **Q: What is a jev / kev model?**
-> A: Given one shared piece of content and several questions, the model computes scores and probabilities over the caller-supplied options — no answer text is generated token by token.
+| 重点 | 说明 |
+| --- | --- |
+| 三值骨干 | 量化后的 BitLinear 权重使用 `-1 / 0 / +1`；这不是所有张量都只有三值。 |
+| CPU 友好 | I2_S GGUF 压缩骨干配合原生 CPU runner，适合低内存部署。 |
+| 非自回归决策 | 指针头直接读取隐藏状态，对选项打分；不需要逐 token 生成答案。 |
+| 训练链路 | BitNet BF16 基础模型 → LoRA 微调 → teacher-student 蒸馏 → I2_S 导出。 |
+| 任务类型 | `choice` 多选、`noul` 是/否、`score` 有序评分。 |
 
-This is a **source-only research release**. It includes the implementation, pinned upstream bootstrap, native I2_S CPU runner, and measurement scripts. The project's trained checkpoint, its exported weights, and its benchmark results are withheld while training-data rights are reviewed. This repository does not currently offer a ready-to-run bit-jev model or a public speed/accuracy claim.
+## 这个项目解决什么问题
 
-![bit-jev English highlights: ternary weights, public-base CPU measurements, LoRA and distillation](docs/figures/model-highlights.en.svg)
+通用语言模型擅长生成文本，但很多业务任务只需要在固定选项中做判断。bit-jev 把这类任务改成结构化推理：共享 `state` 只作为上下文输入，调用方声明问题和候选项，模型输出每个问题的答案、选项分数和概率。
 
-The landing figure highlights quantized BitLinear ternary weights, independent CPU measurements of Microsoft's public base model, and the LoRA → teacher–student distillation → I2_S export path. **Ternary refers to quantized BitLinear weights, not every parameter; the memory and speed numbers measure the public BitNet base, not bit-jev.** See the [detailed neural framework](docs/figures/model-framework.svg) for the branch mask, decoder internals and pointer-head equations.
+模型不会自回归地“蹦”出答案 token。需要注意的是，省去的是答案解码循环，输入仍然要经过 BitNet 骨干的前向计算；当前原生 CPU 路径对多问题请求按问题构造因果序列，因此不能把一次请求简单描述成“一次前向计算”。
 
-[CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+## 模型流程
 
-## What the code implements
+![bit-jev 模型流程与推理边界](docs/figures/model-framework.svg)
 
-1. `core/bit_jev/api.py` defines the structured request and answer shapes.
-2. `core/bit_jev/model.py` encodes the shared state, question branches, option boundaries, and pointer-head readout for the PyTorch path.
-3. `core/bit_jev/export_distilled.py` and `core/bit_jev/cpu_head.py` prepare a compatible trained backbone and pointer head for native inference.
-4. `core/bit_jev/cpu.py` encodes JSONL requests; `core/native/main.cpp` runs a quantized GGUF backbone and float32 pointer head, then returns option scores and probabilities.
+1. `train.py` 在 Microsoft BitNet BF16 骨干上训练 LoRA 与指针头。
+2. `distill.py export_teacher` 提取教师模型对候选项的 logits。
+3. `distill.py train` 使用 teacher logits 训练不带 LoRA 的完整学生骨干。
+4. `export_distilled.py` 将学生骨干导出为 I2_S GGUF，并配套 float32 指针头。
+5. 原生 runner 读取 JSONL 请求，返回结构化判断结果。
 
-The PyTorch packed path uses a block-causal mask so question branches can share the state computation while remaining isolated. The **native CPU runner evaluates one causal row per question** and repeats the shared state for multiquestion requests. A question can require several internal prefill batches. The absence of answer-token decoding does not mean every request completes in one hardware forward call or has negligible latency.
+## 速度与内存
 
-I2_S storage is intended to reduce backbone memory relative to less compressed formats. Actual process memory and request latency depend on the authorized model artifacts, input length, candidate count, CPU, thread count, and build. The [benchmark protocol](docs/BENCHMARKS.md) explains how to measure those quantities without conflating model load time and resident inference.
+公开报告必须同时写清检查点、格式、精度、硬件、输入形状、重复次数和内存口径。仓库保留两类测量：微软公开 BitNet 基础模型的可复现实测，以及本项目训练检查点的 AutoDL 案例数据。两类数据不混在同一张图里。
 
-## Independent public BitNet base measurement
+### 微软公开 BitNet 基础模型
 
-These charts measure **Microsoft's public original BitNet b1.58 2B GGUF backbone**, using the same I2_S file on both paths. They do **not** measure a bit-jev classification request or its withheld checkpoint. The Vulkan path is hybrid: some I2_S weights remain CPU mapped.
+![公开 BitNet 基础模型吞吐](docs/figures/public-base-speed.svg)
 
-![Public BitNet base CPU and hybrid GPU throughput](docs/figures/public-base-speed.svg)
+![公开 BitNet 基础模型内存](docs/figures/public-base-memory.svg)
 
-![Public BitNet base RAM and VRAM observations](docs/figures/public-base-memory.svg)
+这是骨干模型的合成 prefill/decode 测量，不是 bit-jev 分类请求。完整样本和复现命令见[性能测量规范](docs/BENCHMARKS.zh-CN.md)。
 
-| Path | 128 input token prefill | 32 output token decode | Peak process RAM | GPU global VRAM rise |
-| --- | ---: | ---: | ---: | ---: |
-| Ryzen 7 4800H, 8 threads, native CPU | 56.23 tokens/s; 2.28 s | 4.57 tokens/s; 7.01 s | 1.20 GiB | 0 GiB |
-| RTX 2060, Vulkan hybrid | 45.20 tokens/s; 2.83 s | 3.56 tokens/s; 9.00 s | 1.91 GiB | 0.71 GiB |
+### bit-jev AutoDL 单题案例
 
-Values are medians of five repetitions per phase; throughput **excludes model loading**. RAM is peak process RSS during loading and tests. VRAM is the change in global GPU use from the pre-run baseline, not process-exclusive allocation. The GGUF file is 1,844,472,032 bytes (1.72 GiB). On this setup the CPU path is faster; this does not generalize to other GPUs or bit-jev requests. See the [public base measurement record](docs/BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) for samples, hashes and reproduction steps.
+AutoDL 的 CPU/GPU 单题报告和图表已经在本地整理，但由于它们来自 Yelp 训练检查点，暂不放入公开仓库。许可确认后再补充脱敏图表、模型哈希、完整硬件条件和复现命令；在此之前不要把本地 `test/release/` 草稿当成公开发布物。
 
-## Request shape
+## 快速开始
 
-The JSONL CLI accepts one request per line. This is an **input example**, not a saved model prediction:
-
-```json
-{"state":"A customer reports a duplicate charge.","questions":{"team":{"type":"choice","instructions":"Which team should handle this?","criteria":{"billing":"Payment and refund issues","shipping":"Delivery issues"}},"escalate":{"type":"noul","instructions":"Does this require escalation?"}}}
+```powershell
+git clone https://github.com/Zeaulo/bit-jev.git
+Set-Location bit-jev
+python -m pip install -e './core'
+python test/bootstrap_bitnet.py
+python test/bootstrap_bitnet.py --check
 ```
 
-The output schema contains answers, per-option logits or probabilities, and native compute latency. An actual answer depends on the model supplied by the user; none is implied by this example.
+构建原生程序不需要下载本项目检查点。实际推理需要兼容的 tokenizer/config、I2_S GGUF 骨干和指针头 sidecar；请先确认模型与数据拥有可公开使用的权利。
 
-## Build and run
+## 请求格式
 
-The [CPU quick start](docs/CPU_QUICKSTART.md) shows how to clone the source, install the Python launcher, fetch the pinned BitNet/llama.cpp revisions, and build the native runner. To classify a request, supply your **own compatible model artifacts with rights to use them**: a matching tokenizer/configuration, I2_S GGUF backbone, and pointer-head sidecar. The repository does not download or publish the withheld trained checkpoint.
+```json
+{"state":"客户报告同一订单被重复扣款。","questions":{"team":{"type":"choice","instructions":"哪个团队应处理这个问题？","criteria":{"billing":"支付与退款","shipping":"配送问题"}},"escalate":{"type":"noul","instructions":"是否需要升级处理？"}}}
+```
 
-All public performance claims should identify the checkpoint, license basis, hardware, precision, request shape, repeats, memory definition, and whether model load is included. The scripts under `test/` support that measurement once suitable artifacts are available.
+一个 UTF-8 JSONL 文件每行一个请求。`state` 在问题之间共享；`questions` 的键由调用方命名。兼容模型返回问题答案、候选项分数、概率和原生计算耗时。
 
-## Attribution and license
+## 文档地图
 
-bit-jev is a separate implementation inspired by [Kev](https://github.com/jaredpalmer/kev). [Microsoft BitNet](https://github.com/microsoft/BitNet) supplies the backbone family and native inference foundation. Repository code is licensed under [Apache-2.0](LICENSE); upstream source, base-model, and dataset terms are described in [third-party notices](THIRD_PARTY_NOTICES.md).
+| 文档 | 适合谁 | 内容 |
+| --- | --- | --- |
+| [中文 CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md) | 第一次运行 | 构建、模型文件和 JSONL 调用。 |
+| [中文性能规范](docs/BENCHMARKS.zh-CN.md) | 做实验 | 加载、预热、推理、RSS、显存和线程数的统一口径。 |
+| [中文模型卡](docs/MODEL_CARD.zh-CN.md) | 评估模型 | 架构、输入契约、局限和发布边界。 |
+| [英文 README](README.en.md) | English readers | English overview and reproduction links. |
+| [第三方许可](THIRD_PARTY_NOTICES.md) | 发布前 | BitNet、Kev、数据集和检查点的权利边界。 |
+| [项目总览网页](versions/project_overall/index.html) | 内部学习 | 代码逻辑、功能需求、数据流和关键目录。 |
+
+## 代码入口
+
+- [`core/bit_jev/api.py`](core/bit_jev/api.py)：请求和答案结构。
+- [`core/bit_jev/model.py`](core/bit_jev/model.py)：PyTorch 骨干、分支掩码和指针头。
+- [`core/bit_jev/cpu.py`](core/bit_jev/cpu.py)：JSONL 编码与原生进程调用。
+- [`core/native/main.cpp`](core/native/main.cpp)：GGUF 骨干和 float32 指针头的 CPU 推理。
+- [`core/bit_jev/train.py`](core/bit_jev/train.py)：LoRA 与指针头训练。
+- [`core/bit_jev/distill.py`](core/bit_jev/distill.py)：教师 logits 导出和学生蒸馏。
+- [`test/`](test/)：构建、基准测试、图表渲染和发布校验脚本。
+
+## 发布状态与许可
+
+仓库代码采用 [Apache-2.0](LICENSE)。BitNet 上游、基础模型、教师模型、Yelp 数据及训练后的检查点各自保留原有条款。Yelp 检查点公开发布需以数据权利方书面许可为依据；许可申请已经发出，正式权重包和派生指标在收到答复前保持待发布状态。
+
+## 引用与致谢
+
+项目实现受 [Kev](https://github.com/jaredpalmer/kev) 的结构化判断接口启发，骨干和原生推理基础来自 [Microsoft BitNet](https://github.com/microsoft/BitNet)。bit-jev 与这些项目的权重、训练结果和许可相互独立。

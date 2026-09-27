@@ -1,6 +1,6 @@
 # CPU 源码构建与使用
 
-[English](CPU_QUICKSTART.md) · [返回中文 README](../README.zh-CN.md)
+[English](CPU_QUICKSTART.md) · [返回中文 README](../README.md)
 
 本指南构建原生 I2_S CPU 程序，并说明 JSONL 推理接口。**v0.7.7 的 bit-jev 部分仍只发布源码**：仓库没有公开的 bit-jev 权重包或可复现的模型答案。[微软公开基础模型基准](BENCHMARKS.zh-CN.md#微软公开-bitnet-基础模型独立实测)只测骨干执行，不是分类结果。真正运行判断，需要用户自己准备兼容且有权使用的分词器、I2_S GGUF 骨干和训练好的指针头。只有 Microsoft BitNet 基础模型并不包含 bit-jev 的判断头。
 

@@ -1,6 +1,8 @@
-# bit-jev
+# bit-jev 中文说明（兼容入口）
 
-简体中文 · [English](README.md)
+> GitHub 默认入口已改为根目录 [README.md](README.md)。本文件保留原有中文说明，便于旧链接继续访问。
+
+简体中文 · [English](README.en.md)
 
 ## bit-jev = bitnet + jev ！！！
 

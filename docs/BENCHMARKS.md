@@ -1,6 +1,6 @@
-# Benchmark protocol for future authorized artifacts
+# Benchmark protocol and published case studies
 
-This source-only release contains **no public measurements for the project's trained checkpoint**. Its weights, model outputs, and checkpoint-derived accuracy, speed, and memory reports are withheld pending training-data rights review. The scripts in [test/](../test/) are measurement tools; their presence does not make a result reproducible without an authorized compatible model and input set.
+This page separates the Microsoft public-base benchmark from the bit-jev AutoDL case study. The latter uses the local Yelp-trained checkpoint and remains a local review artifact until the requested data-rights response is received. The scripts in [test/](../test/) are measurement tools; their presence does not make a result reproducible without an authorized compatible model and input set.
 
 bit-jev scores explicit options after reading the input. It does not decode answer text token by token, so generated-output tokens per second is not an appropriate throughput measure. Report **request latency** and, if useful, **input tokens per second** with the token-count definition stated.
 

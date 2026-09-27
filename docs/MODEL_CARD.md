@@ -2,7 +2,7 @@
 
 ## Release status
 
-Version **v0.7.7 ships bit-jev source only**. No trained bit-jev checkpoint, I2_S GGUF, pointer-head weights, tokenizer bundle, model output, or checkpoint-derived benchmark report is distributed. The separate [public BitNet backbone measurements](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) use an official Microsoft base-model file and do not measure bit-jev classification. A local research checkpoint used training material whose redistribution conditions have not been resolved, including Yelp review data. The project withholds that checkpoint and its derived measurements.
+The current release contains source, public-base measurements, and a documented bit-jev case study. The Yelp-trained checkpoint, I2_S GGUF, pointer-head weights, and checkpoint-derived benchmark bundle remain pending the written data-rights response requested from Yelp. The separate [public BitNet backbone measurements](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) do not measure bit-jev classification.
 
 This page documents the **code interface and requirements for a future model artifact**. It is not a performance card for a model available to download.
 

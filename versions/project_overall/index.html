@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.7.7 三值 BitNet、LoRA 与蒸馏、CPU 基础模型测量、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.8.0 中文默认 README、三值 BitNet、LoRA 与蒸馏、AutoDL 案例测量、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.7.7 中英文核心图与公开基础模型测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.8.0 中文默认 README 与双路径测量</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -32,8 +32,8 @@
       <section id="summary" class="glass hero scroll-mt-28 rounded-[2rem] p-8 md:p-12">
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并提供原生 CPU 推理源码。</h2>
-        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。本次公开发布包含源码、许可、架构文档、构建脚本，以及微软公开 BitNet 基础模型的独立测量图和逐次样本；历史 bit-jev 训练权重、模型包及其衍生结果仍不公开。</p>
-        <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-highlights.zh-CN.svg" alt="三值 BitLinear 权重、微软公开 BitNet 基础模型的 CPU 实测，以及 LoRA 微调后教师学生蒸馏的流程"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">首页中文核心图对应 README.zh-CN.md；README.md 使用独立的英文图。量化后三值只作用于 BitLinear 权重，指针头与部分张量保留较高精度。图中 1.20 GiB RSS、56.23 输入 token/s 预填充及 4.57 输出 token/s 解码是公开基础模型实测，不是 bit-jev 检查点成绩。</figcaption></figure>
+        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 用 Python、PyTorch、Transformers 编码多题决策请求；block-causal 注意力隔离题目分支，指针头对给定选项评分；兼容检查点可导出 I2_S GGUF 和 float32 指针头，由 C++ 原生程序在 CPU 上逐题完成分类。根目录 README.md 现在是中文主入口，英文说明放在 README.en.md；公开页面区分微软基础模型测量与仍待许可确认的 AutoDL 单题案例，避免把不同模型、格式和精度混成一个速度结论。</p>
+        <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-highlights.zh-CN.svg" alt="三值 BitLinear 权重、BitNet 基础模型测量，以及 LoRA 微调和教师学生蒸馏流程"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">根目录 README.md 是中文默认入口，README.en.md 使用英文核心图。量化后三值只作用于 BitLinear 权重，指针头与部分张量保留较高精度；AutoDL 检查点案例保留在本地发布草稿，等待许可确认后再制作公开图表。</figcaption></figure>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
           <div class="metric"><strong>Pointer</strong><span>从选项与决策位置隐藏状态计算分数</span></div>
@@ -199,7 +199,7 @@
 
       <!-- 发布状态让内部人员区分已公开源码与仍留在本地的衍生资产。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.7.7 双语核心图、源码与公开基础模型测量</h2>
+        <p class="eyebrow">07 / 发布边界</p><h2 class="mt-2 text-2xl font-semibold">v0.8.0 中文默认 README、双语核心图与双路径测量</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码</b><p>保留 Python、C++、固定依赖补丁、构建脚本、许可与架构图，便于审阅实现和复现构建。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
@@ -207,7 +207,7 @@
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.7.7 双语核心图、公开源码与基础模型测量范围</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.8.0 中文默认 README、双语核心图与双路径测量范围</footer>
   </div>
 </body>
 </html>
