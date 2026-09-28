@@ -125,3 +125,9 @@
 - native_build.py 在 CMake 配置失败时附上 Windows C++ 工具页，并识别 Release 目录的既有构建结果；已提供 native_source 时不要求 Git。Git 只用于默认路径获取和核对固定 BitNet/llama.cpp 提交、初始化子模块与应用 ReLU² 补丁，不用于正常推理。
 - README.md、README.en.md、core/README.md、双语 GGUF 包指南与 PyPI 实施文档补充首次加载前置工具、官方链接、Windows 检查命令和避开自动构建的 binary 入口；项目总览同步修改执行顺序、关键文件与发布状态。
 - PyPI 包版本由 0.8.7 升为 0.8.8。test/test_native_preflight.py 的五项检查通过；wheel 与源码包通过 twine check 和归档内容检查。PyPI 公开索引显示 0.8.8，wheel 60,216 字节、源码包 54,260 字节，两个文件的 SHA-256 均与本地一致。
+
+[2026-09-28 16:03:16] v0.12.4（小版本，修复 Windows MSVC 读取原生 UTF-8 源码失败）
+- 另一台简体中文 Windows 主机在 bit-jev 0.8.8 首次构建 main.cpp 时出现 MSVC C2001、C2447 与后续连锁语法错误；发行 wheel 内的无 BOM UTF-8 源码与仓库一致，问题定位为 MSVC 未显式使用 UTF-8 源码字符集。
+- core/native/CMakeLists.txt 仅对 MSVC 编译 bit-jev-cpu 目标添加 /utf-8，保持其他编译器选项不变；包版本从 0.8.8 升到 0.8.9，使新版本使用独立原生构建缓存。
+- 本机 MSVC 19.43 使用固定 BitNet 0b341e58 / llama.cpp 390c3077、仅 ReLU² 补丁完成 CPU 构建；test/test_pypi_inference.py 对公开 GGUF 在同一进程连续两次推理成功，返回 Choice、Noul、Score 结构化答案。
+- wheel 60,320 字节和源码包 54,368 字节通过归档内容检查及 twine check；wheel 内 CMakeLists.txt 已核对包含 /utf-8。PyPI 0.8.9 公开索引上两文件 SHA-256 与本地构建产物相同。README、GGUF 包指南、PyPI 实施文档和项目总览同步更新。

@@ -7,8 +7,8 @@ from pathlib import Path
 
 # PyPI 包只允许代码、许可证和小型原生构建输入。
 DIST = Path(__file__).resolve().parent / "pypi-dist"
-WHEEL = DIST / "bit_jev-0.8.8-py3-none-any.whl"
-SOURCE = DIST / "bit_jev-0.8.8.tar.gz"
+WHEEL = DIST / "bit_jev-0.8.9-py3-none-any.whl"
+SOURCE = DIST / "bit_jev-0.8.9.tar.gz"
 REQUIRED_WHEEL = {"bit_jev/gguf.py", "bit_jev/encoding.py", "bit_jev/native_build.py",
                   "bit_jev/_native/main.cpp", "bit_jev/_native/CMakeLists.txt",
                   "bit_jev/_native/llama-relu2.patch"}
@@ -17,7 +17,7 @@ def main():
     with zipfile.ZipFile(WHEEL) as archive:
         wheel_names = set(archive.namelist())
     with tarfile.open(SOURCE, "r:gz") as archive:
-        source_names = {name.removeprefix("bit_jev-0.8.8/") for name in archive.getnames()}
+        source_names = {name.removeprefix("bit_jev-0.8.9/") for name in archive.getnames()}
     missing_wheel = REQUIRED_WHEEL - wheel_names
     missing_source = {"native/main.cpp", "native/CMakeLists.txt", "native/llama-relu2.patch",
                       "LICENSE", "setup.py"} - source_names

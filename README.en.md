@@ -12,7 +12,7 @@
 
 </div>
 
-> **Release update · 2026-09-28** The Python package downloads the public GGUF on first use and builds the pinned native runner on the target machine. `device="gpu"` selects Vulkan; `device="cuda"` needs a CUDA Toolkit. The first build requires [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Git pins and patches upstream source; inference does not invoke Git.
+> **Release update · 2026-09-28** PyPI 0.8.9 fixes MSVC parsing of the native runner's UTF-8 Chinese source. The package downloads the public GGUF on first use and builds the pinned runner on the target machine. `device="gpu"` selects Vulkan; `device="cuda"` needs a CUDA Toolkit. The first build requires [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Git pins and patches upstream source; inference does not invoke Git.
 
 ## Quick start
 

@@ -16,6 +16,10 @@ add_subdirectory("${BITNET_CPP_DIR}" "${CMAKE_BINARY_DIR}/bitnet_cpp")
 # 原生程序读取已编码题目与 float32 指针头，主干推理由 llama 库承担。
 add_executable(bit-jev-cpu main.cpp)
 target_compile_features(bit-jev-cpu PRIVATE cxx_std_17)
+# MSVC 对无 BOM 的 UTF-8 源文件默认可能使用系统代码页；显式指定源码和字符串编码。
+if(MSVC)
+    target_compile_options(bit-jev-cpu PRIVATE /utf-8)
+endif()
 # 设备请求必须与编译出的 GPU 后端一致，避免外部 binary 参数静默换后端。
 if(GGML_CUDA)
     target_compile_definitions(bit-jev-cpu PRIVATE BIT_JEV_BUILT_CUDA=1)

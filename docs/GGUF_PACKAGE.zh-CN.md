@@ -10,7 +10,7 @@ pip install bit-jev
 
 默认安装包含请求编码、Hugging Face 下载器和原生程序管理接口。约 1.19 GB 的 I2_S GGUF 不在 PyPI wheel 中；首次调用 `from_pretrained()` 时下载到 Hugging Face 缓存。构建原生 runner 需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器。Vulkan GPU 模式需要 Vulkan SDK，CUDA 模式需要 CUDA Toolkit。安装命令本身不下载模型或编译程序。
 
-Git 只用于首次自动构建：获取微软 BitNet 的固定提交、初始化其中的 llama.cpp 子模块、核对提交并应用本项目的 ReLU² 兼容补丁。正常推理只启动已编译的原生程序，不调用 Git。若使用经过验证的自有原生程序，可通过 `binary=` 跳过自动构建；若传入已准备并打好补丁的 `native_source=`，自动构建无需从网络检出源码。bit-jev 0.8.8 在下载大模型前检查 Git、CMake 及其版本，避免下载完成后才发现缺少构建工具。
+Git 只用于首次自动构建：获取微软 BitNet 的固定提交、初始化其中的 llama.cpp 子模块、核对提交并应用本项目的 ReLU² 兼容补丁。正常推理只启动已编译的原生程序，不调用 Git。若使用经过验证的自有原生程序，可通过 `binary=` 跳过自动构建；若传入已准备并打好补丁的 `native_source=`，自动构建无需从网络检出源码。bit-jev 0.8.9 在下载大模型前检查 Git、CMake 及其版本，并为 Windows MSVC 编译目标启用 UTF-8 源码和字符串编码。
 
 ### Windows 首次加载前检查
 
@@ -26,6 +26,8 @@ where.exe g++
 ```
 
 若 Git 或 CMake 不存在，从上面的官方链接安装；CMake 版本至少 3.28。若 `cl` 和 `g++` 均不可用，安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation) 的 **Desktop development with C++** 组件。使用 MSVC 命令行工具时，打开 **x64 Native Tools Command Prompt**，再激活原来的 Python 环境。安装工具后重新打开终端；`pip install bit-jev` 成功不代表首次原生构建已完成。Python 导入名为 `bit_jev`，不是带连字符的 PyPI 包名 `bit-jev`。
+
+如果 0.8.8 在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符` 和大量后续语法错误，更新到 0.8.9：`python -m pip install --upgrade bit-jev==0.8.9 -i https://pypi.org/simple`。0.8.9 使用新的构建缓存目录，原先失败的 0.8.8 构建不会被复用；已下载的 Hugging Face 模型缓存仍可复用。本机在 MSVC 下完成固定源码编译，并对公开 GGUF 连续运行两次结构化请求。
 
 ## Python API
 

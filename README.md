@@ -12,7 +12,7 @@
 
 </div>
 
-> **发布动态 · 2026-09-28**　公开 I2_S 模型已在 Hugging Face；PyPI 版提供按需下载和常驻 GGUF 推理入口。首次加载需要 Git、CMake 3.28+ 和 C++17 编译器构建固定版本 bitnet.cpp。`device="gpu"` 使用 Vulkan；`device="cuda"` 需要 CUDA Toolkit。
+> **发布动态 · 2026-09-28**　公开 I2_S 模型已在 Hugging Face；PyPI 0.8.9 修复 Windows MSVC 编译中文源码时的编码错误。首次加载需要 Git、CMake 3.28+ 和 C++17 编译器构建固定版本 bitnet.cpp。`device="gpu"` 使用 Vulkan；`device="cuda"` 需要 CUDA Toolkit。
 
 把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。仓库代码采用 Apache-2.0；模型权重的许可状态请读[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)。
 
