@@ -172,3 +172,9 @@
 - GitHub 中英文 README 移除原首屏大图，中文页以“普通电脑，CPU 就能跑 JEV，而且很快！”开头，随后提供 pip install bit-jev、内置 demo、Python 常驻模型 API。Supported Platforms 列明 Windows x86_64 已验证预编译路径，以及 macOS Intel、Apple Silicon 与 Linux x86_64/ARM64 尚未实测的源码构建路径。包本身保持 PyPI 0.11.10，没有重新发布。
 - 中英文基准文档与本地 Hugging Face 模型卡草稿改用分开的速度、内存图；Hub 远端模型卡及图片本次尚未同步。CPU + JEV + 火箭 Logo 生成三版候选供用户选择，未作为正式仓库主视觉发布。
 - versions/project_overall/index.html 同步首页阅读顺序、平台范围、制图脚本与图像路径、数据流及发布边界。运行制图脚本并目视检查中文 PNG；git diff --check 通过。
+
+[2026-09-28 21:37:49] v0.15.7（小版本，正式 Logo 与首页命令顺序）
+- 用户选定原始图片，直接收录为 docs/figures/bit-jev-logo.png；图中文字为 bit-jev，火箭尾迹包含 0/1 二进制元素。没有重新生成、重绘或改动图片内容。
+- GitHub 中文与英文 README 共用同一 Logo；两条 pip 安装与内置 demo 命令紧接置顶口号，图片随后展示，保留 Python 常驻模型 API、平台状态和实测图。
+- 本地 Hugging Face 双语模型卡草稿将旧主视觉引用改为 bit-jev-logo.png。huggingface.co 从当前环境连接超时，远端图片、模型卡与上一版横条图尚未同步；PyPI 0.11.10 未重新发布。
+- versions/project_overall/index.html 同步正式 Logo 的职责、文件树、GitHub 首屏阅读顺序和远端状态。

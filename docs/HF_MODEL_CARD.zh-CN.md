@@ -16,7 +16,7 @@ tags:
 
 [English model card](README.en.md) · [源码仓库](https://github.com/Zeaulo/bit-jev) · [pip 安装](https://pypi.org/project/bit-jev/)
 
-![bit-jev 三值输入、推理引擎与候选结果](decision-engine.png)
+![bit-jev：二进制轨迹与加速火箭 Logo](bit-jev-logo.png)
 
 在运行推理的同一个 Python 环境中，直接安装[官方 Windows x64 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl) 并核对版本（Python 3.11/3.12）：
 

@@ -16,7 +16,7 @@ tags:
 
 [中文模型卡](README.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/)
 
-![bit-jev ternary inputs, decision engine, and scored options](decision-engine.png)
+![bit-jev binary trail and accelerating rocket logo](bit-jev-logo.png)
 
 On Windows x64 with Python 3.11/3.12, install the [official wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl) with the interpreter that will run inference, then check the distribution version and import path:
 

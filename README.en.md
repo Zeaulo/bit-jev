@@ -1,5 +1,12 @@
 # Run JEV fast on an everyday computer—using just a CPU.
 
+```bash
+pip install bit-jev
+python -m bit_jev.demo
+```
+
+<p align="center"><img src="docs/figures/bit-jev-logo.png" alt="bit-jev binary trail and accelerating rocket logo" width="360"></p>
+
 bit-jev scores explicit options over a BitNet backbone and returns structured answers without generating answer text token by token.
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
@@ -8,12 +15,7 @@ bit-jev scores explicit options over a BitNet backbone and returns structured an
 
 ## Quick start
 
-```bash
-pip install bit-jev
-python -m bit_jev.demo
-```
-
-The second command runs a bundled customer-routing question and prints the real model result. The first model load downloads about 1.19 GB from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Inference needs `bit-jev 0.11.10`. If an index serves an older release or an editable installation shadows it, follow the [install guide](docs/GGUF_PACKAGE.md) for the official wheel.
+The second command at the top runs a bundled customer-routing question and prints the real model result. The first model load downloads about 1.19 GB from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Inference needs `bit-jev 0.11.10`. If an index serves an older release or an editable installation shadows it, follow the [install guide](docs/GGUF_PACKAGE.md) for the official wheel.
 
 To score your own request, keep the model loaded with the Python API:
 
