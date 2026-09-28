@@ -8,11 +8,11 @@
 pip install bit-jev
 ```
 
-默认安装包含请求编码、Hugging Face 下载器和原生程序管理接口。约 1.19 GB 的 I2_S GGUF 不在 PyPI wheel 中；首次调用 `from_pretrained()` 时下载到 Hugging Face 缓存。构建原生 runner 需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器。Vulkan GPU 模式需要 Vulkan SDK，CUDA 模式需要 CUDA Toolkit。安装命令本身不下载模型或编译程序。
+默认安装包含请求编码、Hugging Face 下载器和原生程序管理接口。约 1.19 GB 的 I2_S GGUF 不在 PyPI wheel 中；首次调用 `from_pretrained()` 时下载到 Hugging Face 缓存。Windows x64 且 CPU 支持 AVX2 时，0.9.9 平台 wheel 已携带 CPU 推理程序，推理无需 Git、CMake 或 C++ 编译器。其他平台及 GPU 后端首次构建需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；Vulkan GPU 模式还需要 Vulkan SDK，CUDA 模式还需要 CUDA Toolkit。安装命令本身不下载模型或编译程序。
 
-Git 只用于首次自动构建：获取微软 BitNet 的固定提交、初始化其中的 llama.cpp 子模块、核对提交并应用本项目的 ReLU² 兼容补丁。正常推理只启动已编译的原生程序，不调用 Git。若使用经过验证的自有原生程序，可通过 `binary=` 跳过自动构建；若传入已准备并打好补丁的 `native_source=`，自动构建无需从网络检出源码。bit-jev 0.8.9 在下载大模型前检查 Git、CMake 及其版本，并为 Windows MSVC 编译目标启用 UTF-8 源码和字符串编码。
+Git 只用于源码自动构建：获取微软 BitNet 的固定提交、初始化其中的 llama.cpp 子模块、核对提交并应用本项目的 ReLU² 兼容补丁。Windows x64 AVX2 CPU 直接启动 wheel 内程序，不调用 Git 或 CMake。若使用经过验证的自有原生程序，可通过 `binary=` 指定；若传入已准备并打好补丁的 `native_source=`，则强制走本地源码构建。预编译程序由固定上游提交构建，已关闭针对构建机的原生 CPU 指令特化，并静态链接 MSVC 运行库；当前仍要求 AVX2。源码构建路径继续在下载大模型前检查工具。
 
-### Windows 首次加载前检查
+### Windows 源码构建前检查
 
 在准备运行 bit-jev 的同一个 CMD 或 PowerShell 终端执行：
 
@@ -25,9 +25,9 @@ where.exe cl
 where.exe g++
 ```
 
-若 Git 或 CMake 不存在，从上面的官方链接安装；CMake 版本至少 3.28。若 `cl` 和 `g++` 均不可用，安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation) 的 **Desktop development with C++** 组件。使用 MSVC 命令行工具时，打开 **x64 Native Tools Command Prompt**，再激活原来的 Python 环境。安装工具后重新打开终端；`pip install bit-jev` 成功不代表首次原生构建已完成。Python 导入名为 `bit_jev`，不是带连字符的 PyPI 包名 `bit-jev`。
+仅在其他平台、GPU 后端或明确传入 `native_source=` 时执行上面的检查。若 Git 或 CMake 不存在，从上面的官方链接安装；CMake 版本至少 3.28。若 `cl` 和 `g++` 均不可用，安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation) 的 **Desktop development with C++** 组件。使用 MSVC 命令行工具时，打开 **x64 Native Tools Command Prompt**，再激活原来的 Python 环境。Python 导入名为 `bit_jev`，不是带连字符的 PyPI 包名 `bit-jev`。
 
-如果 0.8.8 在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符` 和大量后续语法错误，更新到 0.8.9：`python -m pip install --upgrade bit-jev==0.8.9 -i https://pypi.org/simple`。0.8.9 使用新的构建缓存目录，原先失败的 0.8.8 构建不会被复用；已下载的 Hugging Face 模型缓存仍可复用。本机在 MSVC 下完成固定源码编译，并对公开 GGUF 连续运行两次结构化请求。
+如果旧版在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符`，在 Windows x64 AVX2 机器上更新到 0.9.9：`python -m pip install --upgrade bit-jev==0.9.9 -i https://pypi.org/simple`。新版本会直接选择 wheel 内程序；已下载的 Hugging Face 模型缓存仍可复用。确认 pip 安装日志下载的是 `win_amd64.whl`，而不是源码包。没有 AVX2 的 CPU 会在加载前收到明确错误，需要自备适配该 CPU 的原生 `binary=`。
 
 ## Python API
 

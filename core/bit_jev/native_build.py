@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import os
+import platform
 import re
 import shutil
 import subprocess
+import sys
+import ctypes
 from pathlib import Path
 
 from . import __version__
@@ -93,6 +96,24 @@ def _existing_binary(build_dir: Path, binary_name: str) -> Path | None:
     return None
 
 
+def _bundled_binary(device: str, source_dir: str | Path | None) -> Path | None:
+    """寻找适用于当前 Windows x64 CPU 的 wheel 内预编译程序。"""
+    # 指定本地原生源码意味着调用方明确要求重新构建，不能被预编译程序覆盖。
+    if device != "cpu" or source_dir is not None or sys.platform != "win32":
+        return None
+    if platform.machine().lower() not in {"amd64", "x86_64"} or sys.maxsize <= 2**32:
+        return None
+    binary = Path(__file__).resolve().parent / "_bin" / "bit-jev-cpu.exe"
+    if not binary.is_file():
+        return None
+    # 当前 I2_S 内核需要 AVX2；提前检查可避免 Windows 在启动时直接报非法指令。
+    avx2_available = bool(ctypes.windll.kernel32.IsProcessorFeaturePresent(40))
+    if not avx2_available:
+        raise RuntimeError("当前 Windows x64 CPU 不支持 AVX2，无法运行 bit-jev 预编译程序。"
+                           "请使用支持 AVX2 的机器，或传入适配本机的 binary 参数。")
+    return binary
+
+
 def preflight_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
                      source_dir: str | Path | None = None) -> Path | None:
     """在下载大模型前检查首次原生构建需要的工具。"""
@@ -101,6 +122,9 @@ def preflight_native(device: str = "cpu", *, cache_dir: str | Path | None = None
     cached_binary = _existing_binary(build_dir, binary_name)
     if cached_binary is not None:
         return cached_binary
+    packaged_binary = _bundled_binary(device, source_dir)
+    if packaged_binary is not None:
+        return packaged_binary
     # 只有默认自动获取固定上游源码时才需要 Git；可信本地源码跳过检出。
     missing = []
     if source_dir is None and not shutil.which("git"):

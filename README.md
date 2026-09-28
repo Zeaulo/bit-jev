@@ -12,7 +12,7 @@
 
 </div>
 
-> **发布动态 · 2026-09-28**　公开 I2_S 模型已在 Hugging Face；PyPI 0.8.9 修复 Windows MSVC 编译中文源码时的编码错误。首次加载需要 Git、CMake 3.28+ 和 C++17 编译器构建固定版本 bitnet.cpp。`device="gpu"` 使用 Vulkan；`device="cuda"` 需要 CUDA Toolkit。
+> **发布动态 · 2026-09-28**　PyPI 0.9.9 为 Windows x64、支持 AVX2 的 CPU 提供预编译推理程序：安装后 CPU 推理无需 Git、CMake 或 C++ 编译器。首次加载仍需下载约 1.19 GB 模型。其他平台及 GPU 后端继续按需编译；`device="gpu"` 使用 Vulkan，`device="cuda"` 需要 CUDA Toolkit。
 
 把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。仓库代码采用 Apache-2.0；模型权重的许可状态请读[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)。
 
@@ -32,7 +32,7 @@
 
 ## 快速开始
 
-安装 Python 3.11 或 3.12、[Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；Windows 可安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)。首次加载先检查构建工具，再自动下载 GGUF（约 1.19 GB）并在用户缓存中编译原生程序；再次运行复用缓存。Git 只用于获取并校验固定的 BitNet/llama.cpp 源码、应用兼容补丁，不参与日常推理。GPU 模式还需 Vulkan SDK，CUDA 模式需 CUDA Toolkit。[Windows 安装与排错步骤](docs/GGUF_PACKAGE.zh-CN.md#windows-首次加载前检查)。
+安装 Python 3.11 或 3.12。在 Windows x64 且 CPU 支持 AVX2 的机器上，`pip install bit-jev` 获取含 CPU 原生程序的平台 wheel，首次加载只需下载 GGUF（约 1.19 GB），不需要 Git、CMake 或 C++ 编译器。其他系统或 GPU 后端首次自动构建时需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；GPU 还需 Vulkan SDK 或 CUDA Toolkit。[各平台安装与排错步骤](docs/GGUF_PACKAGE.zh-CN.md)。
 
 ```bash
 pip install bit-jev

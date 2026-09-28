@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=68", "wheel>=0.45"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "bit-jev"
-version = "0.8.9"
+version = "0.9.9"
 description = "A Jev/Kev-style decision model on Microsoft's 1.58-bit BitNet b1.58 backbone"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"

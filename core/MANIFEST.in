@@ -1,4 +1,5 @@
 include native/main.cpp
 include native/CMakeLists.txt
 include native/llama-relu2.patch
+recursive-include native/prebuilt *.exe BITNET_LICENSE LLAMA_CPP_LICENSE
 include LICENSE

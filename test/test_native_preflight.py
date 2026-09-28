@@ -23,7 +23,8 @@ class NativePreflightTests(unittest.TestCase):
         """缺少 Git 和 CMake 时指出下载地址，且不触发模型下载。"""
         # 把工具检测固定为缺失，避免测试机已安装的工具影响结果。
         with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "test") as temporary_cache:
-            with patch("bit_jev.native_build.shutil.which", return_value=None):
+            with patch("bit_jev.native_build._bundled_binary", return_value=None), \
+                 patch("bit_jev.native_build.shutil.which", return_value=None):
                 with patch("bit_jev.gguf.download_model") as download:
                     with self.assertRaisesRegex(RuntimeError, "Git, CMake 3.28") as caught:
                         BitJev.from_pretrained(device="cpu", native_cache=temporary_cache)
@@ -36,7 +37,8 @@ class NativePreflightTests(unittest.TestCase):
         """CMake 版本低于 3.28 时提前给出下载地址。"""
         # Git 和 CMake 均可见，版本输出模拟用户机器上的旧版工具。
         with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "test") as temporary_cache:
-            with patch("bit_jev.native_build.shutil.which", side_effect=lambda name: name):
+            with patch("bit_jev.native_build._bundled_binary", return_value=None), \
+                 patch("bit_jev.native_build.shutil.which", side_effect=lambda name: name):
                 with patch("bit_jev.native_build._run", return_value="cmake version 3.27.9"):
                     with self.assertRaisesRegex(RuntimeError, "CMake 3.28") as caught:
                         preflight_native(cache_dir=temporary_cache)
@@ -53,11 +55,21 @@ class NativePreflightTests(unittest.TestCase):
             with patch("bit_jev.native_build.shutil.which", return_value=None):
                 self.assertEqual(preflight_native(cache_dir=temporary_cache), binary)
 
+    def test_bundled_binary_skips_build_tools(self):
+        """Windows wheel 的 CPU 程序直接使用，不触发 Git 或 CMake 检查。"""
+        # 通过伪造包内路径覆盖选择顺序，不要求测试机实际装有 wheel。
+        with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "test") as temporary_cache:
+            bundled = PROJECT_ROOT / "core" / "native" / "prebuilt" / "win_amd64" / "bit-jev-cpu.exe"
+            with patch("bit_jev.native_build._bundled_binary", return_value=bundled), \
+                 patch("bit_jev.native_build.shutil.which", return_value=None):
+                self.assertEqual(preflight_native(cache_dir=temporary_cache), bundled)
+
     def test_local_source_does_not_require_git(self):
         """调用方已准备原生源码时只要求 CMake 构建工具。"""
         # 本地源码的获取与补丁责任由调用方承担，不需要包再次执行 Git。
         with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "test") as temporary_cache:
-            with patch("bit_jev.native_build.shutil.which",
+            with patch("bit_jev.native_build._bundled_binary", return_value=None), \
+                 patch("bit_jev.native_build.shutil.which",
                        side_effect=lambda name: None if name == "git" else "cmake"):
                 with patch("bit_jev.native_build._run", return_value="cmake version 3.28.0"):
                     self.assertIsNone(preflight_native(

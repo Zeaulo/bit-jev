@@ -1,10 +1,12 @@
 """从公开模型包执行两次常驻 GGUF 推理，验证 pip 接口的真实调用。"""
 
 import argparse
+import contextlib
 import json
 import os
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 
 # 从项目根目录运行本脚本时，优先测试当前待发布的 core 源码。
@@ -19,24 +21,29 @@ def main():
     """加载模型一次、重复计算两次，并输出结构化校验结果。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", required=True)
-    parser.add_argument("--binary", required=True)
+    parser.add_argument("--binary")
+    parser.add_argument("--without-build-tools", action="store_true")
     parser.add_argument("--device", choices=("cpu", "gpu", "vulkan", "cuda"), default="cpu")
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--gpu-index", type=int)
     args = parser.parse_args()
     # 手写输入只包含客服情境，不包含 Yelp 训练样本或隐私数据。
     request = json.loads((ROOT / "test" / "example_cpu_request.jsonl").read_text(encoding="utf-8").splitlines()[0])
-    with BitJev.from_pretrained(args.model, binary=args.binary, device=args.device,
-                                threads=args.threads, batch=128,
-                                gpu_index=args.gpu_index) as model:
-        results = list(model.infer_many((request, request)))
-        if len(results) != 2 or results[0]["answers"] != results[1]["answers"]:
-            raise AssertionError("常驻推理两次结果不一致")
-        if not results[0]["answers"] or any(result["latency_ms"] <= 0 for result in results):
-            raise AssertionError("缺少结构化答案或原生计时")
-        print(json.dumps({"device": model.device, "answers": results[0]["answers"],
-                          "latency_ms": [result["latency_ms"] for result in results]},
-                         ensure_ascii=False))
+    # 关闭工具发现接口以核实 wheel 内程序无需 Git、CMake；不改变原生进程的环境。
+    build_tools = patch("bit_jev.native_build.shutil.which", return_value=None) if args.without_build_tools else contextlib.nullcontext()
+    with build_tools:
+        with BitJev.from_pretrained(args.model, binary=args.binary, device=args.device,
+                                    threads=args.threads, batch=128,
+                                    gpu_index=args.gpu_index) as model:
+            results = list(model.infer_many((request, request)))
+            if len(results) != 2 or results[0]["answers"] != results[1]["answers"]:
+                raise AssertionError("常驻推理两次结果不一致")
+            if not results[0]["answers"] or any(result["latency_ms"] <= 0 for result in results):
+                raise AssertionError("缺少结构化答案或原生计时")
+            print(json.dumps({"device": model.device, "binary": str(model.binary),
+                              "answers": results[0]["answers"],
+                              "latency_ms": [result["latency_ms"] for result in results]},
+                             ensure_ascii=False))
 
 
 if __name__ == "__main__":

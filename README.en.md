@@ -12,7 +12,7 @@
 
 </div>
 
-> **Release update · 2026-09-28** PyPI 0.8.9 fixes MSVC parsing of the native runner's UTF-8 Chinese source. The package downloads the public GGUF on first use and builds the pinned runner on the target machine. `device="gpu"` selects Vulkan; `device="cuda"` needs a CUDA Toolkit. The first build requires [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Git pins and patches upstream source; inference does not invoke Git.
+> **Release update · 2026-09-28** PyPI 0.9.9 includes a precompiled CPU runner for Windows x64 machines with AVX2: inference needs no Git, CMake, or C++ compiler. The roughly 1.19 GB GGUF still downloads on first use. Other platforms and GPU backends build the pinned runner on demand. `device="gpu"` selects Vulkan; `device="cuda"` requires a CUDA Toolkit.
 
 ## Quick start
 

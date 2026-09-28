@@ -10,7 +10,7 @@ bit-jev scores explicit options over a 1.58-bit BitNet backbone. Its I2_S GGUF i
 pip install bit-jev
 ```
 
-The wheel contains Python code and native build sources. The 1.19 GB GGUF is downloaded from Hugging Face on first use. Native compilation requires [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Git retrieves and verifies pinned BitNet and llama.cpp source and applies the ReLU² patch; normal inference does not need Git. The package checks build tools before downloading the model. Version 0.8.9 also sets MSVC's source and execution character sets to UTF-8. Vulkan GPU mode additionally requires a Vulkan SDK; CUDA mode requires a CUDA Toolkit. Neither model download nor compilation runs during `pip install`.
+The Windows x64 wheel includes a precompiled CPU runner for AVX2 processors. CPU inference on those machines needs no Git, CMake, or C++ compiler. The 1.19 GB GGUF downloads from Hugging Face on first use; installation itself does not download model weights. Other platforms and GPU backends build the native runner on demand and require [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). GPU builds also require a Vulkan SDK or CUDA Toolkit. The precompiled program uses pinned BitNet and llama.cpp source with the ReLU² runtime patch and carries their MIT license notices.
 
 ## Resident inference
 

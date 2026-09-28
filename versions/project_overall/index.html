@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.12.4 PyPI GGUF 构建工具预检查、Windows MSVC UTF-8 修复、CPU/Vulkan/CUDA 原生构建与常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.13.4 Windows x64 AVX2 预编译 CPU wheel、按需源码 GPU 构建、GGUF 常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.12.4 Windows MSVC UTF-8 构建</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.13.4 Windows CPU 预编译 wheel</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -32,7 +32,7 @@
       <section id="summary" class="glass hero scroll-mt-28 rounded-[2rem] p-8 md:p-12">
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并通过 pip 提供 GGUF 常驻推理。</h2>
-        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 使用 Transformers/PyTorch 训练 BitNet 骨干与指针头，先做 LoRA 微调，再由 Kev 教师 logits 蒸馏学生，导出 I2_S GGUF 和 float32 指针头。pip 包在首次加载时从 Hugging Face 获取 GGUF，在用户缓存编译固定提交的 bitnet.cpp/llama.cpp，然后以 CPU、Vulkan 或 CUDA 后端启动常驻 C++ 进程。轻量编码模块处理 state、问题和候选项，指针头直接返回概率而不生成答案 token。README.md 是中文主入口；微软基础模型基准与 bit-jev 检查点 AutoDL 案例仍分开说明。</p>
+        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 使用 Transformers/PyTorch 训练 BitNet 骨干与指针头，先做 LoRA 微调，再由 Kev 教师 logits 蒸馏学生，导出 I2_S GGUF 和 float32 指针头。pip 包在首次加载时从 Hugging Face 获取 GGUF；Windows x64 AVX2 CPU 优先启动 wheel 内预编译程序，其他平台和 GPU 后端在用户缓存编译固定提交的 bitnet.cpp/llama.cpp，再启动常驻 C++ 进程。轻量编码模块处理 state、问题和候选项，指针头直接返回概率而不生成答案 token。README.md 是中文主入口；微软基础模型基准与 bit-jev 检查点 AutoDL 案例仍分开说明。</p>
         <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/project-cover.zh-CN.png" alt="bit-jev 双层流程：训练与蒸馏产出 I2_S，原生 CPU 接收候选项后计算分数与决策"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">根目录 README.md 使用中文主视觉，README.en.md 使用英文主视觉；Hugging Face 模型卡也按语言引用对应 PNG。上层训练链是 BitNet BF16 → LoRA 与指针头 → Kev 9B 教师 logits → 学生蒸馏 → I2_S；下层推理链接收候选项，在原生 CPU 路径计算分数。三值只指量化 BitLinear 权重，精确性能数字仍由后面的可复核数据图提供。</figcaption></figure>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
@@ -53,14 +53,14 @@
             <li><b>训练与评估</b><span><code>train.py</code> 管理监督训练；<code>distill.py</code> 读取离线教师分数并更新学生；<code>eval.py</code> 生成逐题结果与准确率、校准统计。输入数据和模型均由操作者自行提供。</span></li>
             <li><b>导出协议</b><span><code>export_distilled.py</code> 校验本地检查点并转换 I2_S GGUF；<code>cpu_head.py</code> 将 q/k 参数写成原生 float32 文件；<code>manifest.json</code> 记录导出文件摘要。</span></li>
             <li><b>GGUF 请求路径</b><span><code>gguf.py</code> 下载或定位模型、等待原生加载握手、复用常驻进程；<code>cpu.py</code> 将多题请求拆成多条因果行；<code>native/main.cpp</code> 用选定 CPU/Vulkan/CUDA 后端读取隐藏状态、计算指针头并返回 JSONL 选项分布。</span></li>
-            <li><b>依赖构建</b><span><code>gguf.py</code> 在下载模型前调用 <code>native_build.py</code> 检查 Git、CMake 3.28+ 与缓存二进制；缺少工具时返回官方安装链接。默认自动构建再在用户缓存核对固定 BitNet 与 llama.cpp 提交并应用运行时 ReLU² 补丁；<code>core/native/CMakeLists.txt</code> 根据设备选择后端。源码实验仍可使用 <code>test/bootstrap_bitnet.py</code>。</span></li>
+            <li><b>程序选择</b><span><code>gguf.py</code> 在下载模型前调用 <code>native_build.py</code>：先找对应版本的用户缓存，再找 Windows x64 wheel 内的 CPU EXE 并检查 AVX2。两者都没有时才检查 Git 与 CMake 3.28+，默认在用户缓存核对 BitNet/llama.cpp 固定提交并应用 ReLU² 补丁；<code>native_source=</code> 则使用操作者准备的源码。GPU 的 Vulkan/CUDA 路径仍由 <code>core/native/CMakeLists.txt</code> 配置。</span></li>
           </ol></article>
           <article class="glass card"><h3>功能需求层</h3><ol class="step-list">
             <li><b>结构化输出</b><span>Choice 返回候选项概率，Noul 返回真假判断，Score 返回有序评分分布；每题只在调用方给出的候选集合内选择。</span></li>
             <li><b>题目隔离</b><span>训练路径用注意力掩码隔离分支；原生路径逐题清理 KV 缓存后执行独立因果行，保证一个问题不能看到另一个问题文本。</span></li>
             <li><b>一次读出</b><span>每条原生因果行以前向计算取得所有候选分数；没有逐个生成答案 token 的循环。多题原生请求仍逐题重算共享 state。</span></li>
             <li><b>量化兼容</b><span>导出器按在线量化对应的三元舍入规则写 I2_S；原生 runner 从 GGUF 取得骨干隐藏状态，从 <code>head.f32</code> 取得指针头参数。</span></li>
-            <li><b>可复现源码</b><span>pip wheel 内嵌原生源码与运行时补丁，首次加载从固定上游提交编译；公开兼容 GGUF 由 Hugging Face 单独提供，代码许可证不授予检查点的开放权重许可。</span></li>
+            <li><b>发行与兼容性</b><span>Windows x64 AVX2 wheel 内嵌已编译 CPU EXE、原生源码、补丁和 BitNet/llama.cpp 的 MIT 许可文本；其他平台由源码包提供构建输入。公开 GGUF 从 Hugging Face 单独获取；代码许可证不授予检查点的开放权重许可。</span></li>
             <li><b>性能研究</b><span><code>test/benchmark_public_base.py</code> 核对微软公开 GGUF 的固定大小与 SHA-256，再顺序测 CPU 原生与 Vulkan 混合路径；<code>render_public_base_figures.py</code> 从原始样本生成可公开的速度、内存图和剔除本机路径的 JSON。原 bit-jev 检查点的测量值始终留在本地。</span></li>
             <li><b>数据权限</b><span>训练脚本属于研究实现，不承诺其历史数据配方可用于公开权重分发。任何新训练、教师输出、模型与评估结果都须按各自数据和模型条款审查。</span></li>
           </ol></article>
@@ -77,10 +77,10 @@
             <div class="flow-node"><small>3 / 训练前向</small><b>分支掩码 + BitNet</b><span>共享 state 一次，多个问题分支并行读取各自上下文。</span></div>
             <div class="flow-node"><small>4 / 决策读出</small><b>PointerHead</b><span>选项隐藏状态与决定隐藏状态投影、点积、温度缩放、softmax。</span></div>
             <div class="flow-node"><small>5 / 本地导出</small><b>GGUF + head.f32</b><span>兼容检查点由 export_distilled.py 和 cpu_head.py 转成原生 CPU 文件；输出留在本机。</span></div>
-            <div class="flow-node"><small>6 / pip 加载</small><b>gguf.py / native_build.py</b><span>从 Hub 缓存取得 GGUF、头和 tokenizer；在用户缓存编译原生程序并等待模型加载完成握手。</span></div>
+            <div class="flow-node"><small>6 / pip 加载</small><b>gguf.py / native_build.py</b><span>先选已有缓存或 Windows x64 AVX2 wheel 内 EXE；其他平台/GPU 检查工具并按需构建。随后从 Hub 缓存取得 GGUF、头和 tokenizer，等待模型加载完成握手。</span></div>
             <div class="flow-node"><small>7 / 原生计算</small><b>native/main.cpp</b><span>cpu.py 将多题拆成因果行；原生程序逐行清 KV、用选定后端运行 I2_S 骨干、读取隐藏状态并应用指针头。</span></div>
             <div class="flow-node"><small>8 / 输出</small><b>JSONL → TypeSafe</b><span>原生程序返回 logits、概率和原生耗时；gguf.py 恢复 Choice、Noul、Score 答案。</span></div>
-            <div class="flow-node"><small>源码验证支线</small><b>bootstrap → CMake</b><span>固定上游 Git 提交、应用补丁、构建原生程序、检查命令帮助；无需训练权重。</span></div>
+            <div class="flow-node"><small>预编译构建支线</small><b>固定源码 → MSVC Release</b><span>BitNet 0b341e58、llama.cpp 390c3077、ReLU² 补丁；GGML_NATIVE=OFF、AVX2、静态 MSVC 运行库、OpenMP 关闭，产物经真实 GGUF 推理与 DLL 依赖检查。</span></div>
           </div>
           <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-framework.svg" alt="bit-jev 深度学习模型结构：请求打包、分支掩码、BitNet 解码层的注意力和前馈残差、256 维指针头"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">模型结构图：从共享 state、多问题封装与分支因果掩码进入 30 层 BitNet 解码器；单层依次执行注意力归一化、Q/K/V 与 RoPE、注意力输出、残差、前馈归一化、Up 与 ReLU² Gate、Down 和残差。最终隐藏状态在选项结束位置和决定位置取样，经两个 256 维线性投影、点积、温度缩放与 softmax 得到候选概率。底部区分 PyTorch 打包路径共享 state 与原生 CPU 逐题重算。图片描述源码结构，不代表已有公开 bit-jev 权重。</figcaption></figure>
           <p class="mt-6 text-sm leading-7 text-slate-600"><b>执行边界：</b>GGUF 只装 backbone；原生指针头需独立的 <code>head.f32</code>。公开模型从 Hugging Face 按需下载，约 1.19 GB，不进入 PyPI wheel。原生路径对每题重算 state；GPU 层卸载由 Vulkan/CUDA 编译后端和可见设备决定，不能把历史 FP16 PyTorch 的 5090 计时当作 GGUF GPU 性能。</p>
@@ -108,7 +108,10 @@
 │  ├─ native/
 │  │  ├─ main.cpp
 │  │  ├─ CMakeLists.txt
-│  │  └─ llama-relu2.patch
+│  │  ├─ llama-relu2.patch
+│  │  └─ prebuilt/
+│  │     ├─ win_amd64/bit-jev-cpu.exe
+│  │     └─ licenses/BITNET_LICENSE / LLAMA_CPP_LICENSE
 │  ├─ data/
 │  │  └─ api_request.json
 │  └─ scripts/
@@ -161,11 +164,11 @@
             <p class="mt-5 text-sm leading-7 text-slate-600"><code>learning/</code> 的上游源码、<code>runs/</code> 的本地检查点、<code>export/</code> 的 GGUF、<code>core/build/</code> 的二进制、<code>test/release/</code> 的模型包及测试结果均是本地生成或下载资产，不属于公开仓库。</p>
           </div>
           <article class="glass card"><h3>关键文件职责</h3><dl class="file-list">
-            <div><dt>README.md / core/README.md</dt><dd>中文首页按 bitnet.cpp 式标题导航、发布动态、快速开始、实测数据、原理与文档地图组织；core/README.md 是 PyPI 英文展示页，明确按需下载和构建前置条件。</dd></div>
+            <div><dt>README.md / core/README.md</dt><dd>中文首页按 bitnet.cpp 式标题导航、发布动态、快速开始、实测数据、原理与文档地图组织；core/README.md 是 PyPI 英文展示页，明确 Windows x64 AVX2 预编译适用范围、模型按需下载及其他平台/GPU 的源码构建前置条件。</dd></div>
             <div><dt>core/bit_jev/api.py / encoding.py / model.py</dt><dd>api.py 校验三类问题并格式化答案；encoding.py 不依赖 PyTorch，负责五个预留 token、state 与候选项位置编码；model.py 使用这些编码构造 block-causal 掩码、运行 PyTorch 骨干和指针头，供训练及评估。</dd></div>
-            <div><dt>core/bit_jev/gguf.py / native_build.py</dt><dd>gguf.py 先调用 preflight_native 检查首次构建依赖，再从 Hugging Face 下载 GGUF、头和 tokenizer，校验文件、等待原生加载握手，提供 infer、infer_many 和 close；native_build.py 固定 BitNet/llama.cpp 提交，应用 ReLU² 补丁，把 CPU、Vulkan、CUDA 构建缓存到用户目录。只有默认自动获取上游源码才需要 Git；已缓存或用户传入 binary 时跳过构建工具检查。</dd></div>
-            <div><dt>test/test_native_preflight.py / check_pypi_dist.py</dt><dd>前者模拟缺工具、旧 CMake、已有二进制、自带源码和自带 binary 的分支，核对缺工具报错在模型下载前触发；后者检查 PyPI wheel 与源码包携带构建输入且不携带权重。</dd></div>
-            <div><dt>core/setup.py / MANIFEST.in / native/</dt><dd>setup.py 将唯一的 native/main.cpp、CMakeLists.txt、ReLU² 补丁复制进 wheel；MANIFEST.in 将它们和代码许可证放进源码包。native/CMakeLists.txt 在 MSVC 编译 bit-jev-cpu 时加 /utf-8，确保无 BOM 中文 UTF-8 源码及字符串按 UTF-8 解析；native/main.cpp 按请求设备申请 GPU 层、检查可见后端、执行逐题因果前向并与 Python 进行 JSONL 通信。</dd></div>
+            <div><dt>core/bit_jev/gguf.py / native_build.py</dt><dd>gguf.py 在模型下载前调用 preflight_native，再从 Hugging Face 下载 GGUF、头和 tokenizer，校验文件、等待原生加载握手，提供 infer、infer_many 和 close；native_build.py 先返回已有用户缓存，其次在 Windows x64 AVX2 CPU 上返回 wheel 内 EXE，否则检查构建工具并按固定 BitNet/llama.cpp 提交编译。binary 显式覆盖两者；native_source 明确要求从本地源码构建。</dd></div>
+            <div><dt>test/test_native_preflight.py / check_pypi_dist.py / test_pypi_inference.py</dt><dd>单元测试覆盖缺工具、旧 CMake、已有缓存、包内 EXE、本地源码和自带 binary；发行包检查核对 win_amd64 wheel 内 EXE、两份 MIT 许可证、源码补丁与不包含 GGUF；真实推理脚本从安装后的 wheel 自动选 EXE，并可屏蔽 Git/CMake 工具发现后连跑两次请求。</dd></div>
+            <div><dt>core/setup.py / MANIFEST.in / native/prebuilt/</dt><dd>setup.py 将 native/main.cpp、CMakeLists.txt、ReLU² 补丁复制进包；Windows x64 时再复制预编译 CPU EXE 与两份 MIT 许可，并给 wheel 标 py3-none-win_amd64，使 Python 3.11/3.12 可共用。MANIFEST.in 使源码包带构建输入与预编译来源文件；native/CMakeLists.txt 为 MSVC main.cpp 加 /utf-8。预编译 EXE 来自固定源码、关闭 GGML_NATIVE 和 OpenMP、启用 AVX2、静态链接 MSVC 运行库的 Release 构建，PE 依赖仅 KERNEL32.dll 与 ADVAPI32.dll。</dd></div>
             <div><dt>core/bit_jev/train.py / distill.py / eval.py</dt><dd>监督训练、离线教师分数蒸馏和本地评估分别实现；输出都保存在操作者工作区。</dd></div>
             <div><dt>core/bit_jev/hub.py / checkpoint.py</dt><dd>定位基础模型与 tokenizer，优先接受本地 tokenizer 目录；恢复本地运行目录中的骨干、头和温度信息。</dd></div>
             <div><dt>core/bit_jev/export_distilled.py / cpu_head.py</dt><dd>检查导出来源和 GGUF 内容；把指针头的 q/k 权重、偏置写成固定顺序的 float32 文件。</dd></div>
@@ -196,13 +199,13 @@
         <div class="glass rounded-[2rem] p-6 md:p-9">
           <ol class="step-list">
             <li><b>安装包</b><span>用户执行 <code>pip install bit-jev</code>。默认依赖包含 Transformers 与 huggingface_hub；训练依赖通过 <code>bit-jev[train]</code> 安装。安装本身不下载权重、不编译上游库。</span></li>
-            <li><b>构建工具预检查</b><span><code>BitJev.from_pretrained()</code> 在下载约 1.19 GB 模型前检查是否已有对应版本 runner；没有时检查 Git（默认自动获取源码才需要）与 CMake 3.28+。缺失时返回下载链接、Git 用途与传入 binary 的替代入口；Windows C++ 构建失败附上微软安装页。</span></li>
+            <li><b>程序预检查</b><span><code>BitJev.from_pretrained()</code> 在下载约 1.19 GB 模型前，按已有版本缓存、Windows x64 AVX2 wheel 内 EXE、源码构建的次序选程序。只有第三条路径检查 Git（默认自动获取源码才需要）与 CMake 3.28+；缺失时返回官方链接，Windows C++ 构建失败附微软安装页。没有 AVX2 时在启动前返回明确错误。</span></li>
             <li><b>下载与缓存</b><span>预检查通过后从公开 Hub 仓库只取 GGUF、head、tokenizer 和配置；本地目录可直接传入。缺少文件时在启动原生程序前报错。</span></li>
-            <li><b>取得与核对依赖</b><span><code>native_build.py</code> 在用户缓存下载 BitNet 固定提交 <code>0b341e58</code> 与 llama.cpp 固定提交 <code>390c3077</code>，只应用 ReLU² 运行时补丁。源码训练/导出仍使用 <code>test/bootstrap_bitnet.py</code> 取得转换器补丁。</span></li>
-            <li><b>构建与握手</b><span>CMake 根据 cpu、vulkan 或 cuda 启用对应后端；Windows MSVC 对本项目 main.cpp 显式使用 /utf-8，避免中文字符串被本地代码页误读。C++ 载入 GGUF 和 head 后发送 ready 握手，Python 此时才返回模型对象。GPU 请求无可用设备时报错，不静默退回 CPU。</span></li>
-            <li><b>真实请求</b><span><code>test/test_pypi_inference.py</code> 用手写客服请求在同一进程调用两次 infer，核对 Choice、Noul、Score 答案一致；测试目录中的隔离上游源码不带仅供微软基础模型基准使用的 bitnet-25 补丁。</span></li>
+            <li><b>取得与核对依赖</b><span>源码构建时，<code>native_build.py</code> 在用户缓存下载 BitNet 固定提交 <code>0b341e58</code> 与 llama.cpp 固定提交 <code>390c3077</code>，只应用 ReLU² 运行时补丁。Windows x64 AVX2 预编译 CPU 推理跳过此步骤；源码训练/导出仍使用 <code>test/bootstrap_bitnet.py</code> 取得转换器补丁。</span></li>
+            <li><b>构建与握手</b><span>源码路径由 CMake 根据 cpu、vulkan 或 cuda 启用后端；Windows MSVC 对 main.cpp 使用 /utf-8。预编译路径直接启动已打包的程序。C++ 载入 GGUF 和 head 后发送 ready 握手，Python 此时才返回模型对象。GPU 请求无可用设备时报错，不静默退回 CPU。</span></li>
+            <li><b>真实请求</b><span><code>test/test_pypi_inference.py</code> 从隔离安装的 wheel 自动取得包内 CPU EXE，在模拟 Git/CMake 不可见时加载公开 GGUF，同一模型进程对手写客服请求调用两次 infer，核对 Choice、Noul、Score 答案一致；固定上游源码仅含 ReLU² 补丁。</span></li>
           </ol>
-          <p class="mt-6 text-sm leading-7 text-slate-600">Windows 本机使用 MSVC 19.43 与固定 BitNet 0b341e58 / llama.cpp 390c3077、仅 ReLU² 补丁完成 CPU 构建；公开 GGUF 常驻两次推理均返回结构化答案。Vulkan 测试和完整 wheel 安装验证结果以本次发布日志为准；CUDA Toolkit 在当前机器未安装，CUDA 后端的构建和运行不能在此机证明。首次公共网络下载的可靠性取决于部署环境。</p>
+          <p class="mt-6 text-sm leading-7 text-slate-600">Windows 本机使用 MSVC 19.43 与固定 BitNet 0b341e58 / llama.cpp 390c3077、仅 ReLU² 补丁完成 AVX2 CPU Release 构建；关闭 GGML_NATIVE/OpenMP、静态链接 MSVC 运行库后，PE 依赖仅有 KERNEL32.dll 与 ADVAPI32.dll。发行 wheel 1,628,730 字节，源码包 1,617,019 字节；wheel 经隔离安装、模拟缺少 Git/CMake 和公开 GGUF 常驻双次推理验证。Vulkan 的既有测试不等于预编译 GPU，CUDA Toolkit 在本机未安装。</p>
         </div>
       </section>
 
@@ -226,15 +229,15 @@
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.12.4 MSVC 编译修复、Hub 模型包与公开单题数据</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.13.4 Windows CPU 预编译 wheel、Hub 模型包与公开单题数据</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已发布 bit-jev 0.8.9：wheel 60,320 字节、源码包 54,368 字节；公开索引 SHA-256 与本地构建产物一致。Python 接口提供 from_pretrained、infer、infer_many、close 和 JSONL CLI；wheel 保存 C++ 源码、固定依赖补丁与许可证，不携带 GGUF 权重。首次加载先检查构建工具，再按需下载和编译；MSVC 的 UTF-8 CPU 构建及公开 GGUF 双次请求已实测通过，Vulkan 在既有环境通过，CUDA 因本机没有 Toolkit 尚未实测。</p></div>
-          <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已发布 bit-jev 0.9.9：Windows x64 AVX2 wheel 1,628,730 字节，附 CPU EXE、原生源码、固定依赖补丁与 MIT 许可文本；源码包 1,617,019 字节，保留其他平台/GPU 构建输入。两者都不带 GGUF 权重，公开索引 SHA-256 已与本地逐一核对。隔离安装、屏蔽 Git/CMake 后，公开模型仍能自动选择 EXE 并完成两次真实推理。GPU 仍从源码构建；CUDA 因本机没有 Toolkit 尚未实测。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；bit-jev 检查点另提供脱敏 AutoDL 单题 CPU/GPU 案例。两类数据使用不同模型路径和口径，不能混成一个通用加速比。</p></div>
           <div class="status"><span class="status-dot done"></span><b>权重与结果</b><p>Hugging Face 发布 I2_S GGUF、float32 指针头、分词器、配置、SHA-256 清单、双语模型卡与对应主视觉；config.json 的 modules_to_not_convert 已修正为空数组，远端清单哈希已复核。GitHub 发布脱敏 CPU/GPU 单题时间、内存和中英文图。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.12.4 / PyPI 0.8.9 Windows MSVC UTF-8 构建、Hub 模型包、公开单题案例与中文默认 README</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.13.4 / PyPI 0.9.9 Windows x64 AVX2 预编译 CPU wheel、Hub 模型包、公开单题案例与中文默认 README</footer>
   </div>
 </body>
 </html>

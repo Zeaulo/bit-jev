@@ -131,3 +131,12 @@
 - core/native/CMakeLists.txt 仅对 MSVC 编译 bit-jev-cpu 目标添加 /utf-8，保持其他编译器选项不变；包版本从 0.8.8 升到 0.8.9，使新版本使用独立原生构建缓存。
 - 本机 MSVC 19.43 使用固定 BitNet 0b341e58 / llama.cpp 390c3077、仅 ReLU² 补丁完成 CPU 构建；test/test_pypi_inference.py 对公开 GGUF 在同一进程连续两次推理成功，返回 Choice、Noul、Score 结构化答案。
 - wheel 60,320 字节和源码包 54,368 字节通过归档内容检查及 twine check；wheel 内 CMakeLists.txt 已核对包含 /utf-8。PyPI 0.8.9 公开索引上两文件 SHA-256 与本地构建产物相同。README、GGUF 包指南、PyPI 实施文档和项目总览同步更新。
+
+[2026-09-28 16:47:41] v0.13.4（中版本，Windows x64 AVX2 CPU 预编译 wheel）
+- 项目版本由 0.12.4 升为 0.13.4；PyPI 包由 0.8.9 升为 0.9.9。固定 BitNet 0b341e58 与 llama.cpp 390c3077、仅 ReLU² 补丁，在 MSVC 19.43 Release 下以 GGML_NATIVE=OFF、AVX2、OpenMP=OFF、静态 MSVC 运行库构建 CPU 程序。非 AVX2 标量构建因固定上游 I2_S 内核缺少 ROW_BLOCK_SIZE/COL_BLOCK_SIZE 定义而未通过，本次预编译明确要求 AVX2。
+- core/native/prebuilt/win_amd64/bit-jev-cpu.exe 为 3,881,472 字节，SHA-256 为 6002daf49d8d595c3f382595647cb44fb97921a4d66a80e5d7ac362e302b8ff2；PE 仅依赖 KERNEL32.dll、ADVAPI32.dll。随包提供 BitNet 与 llama.cpp 的 MIT 许可证文本。
+- setup.py 将 Windows x64 wheel 标成 py3-none-win_amd64，包内附 CPU EXE；MANIFEST.in 让 sdist 同时包含该程序、源码与许可。native_build.py 在已有用户缓存后选择包内 CPU 程序，并在启动前检查 AVX2；binary 显式覆盖、native_source 源码构建及其他平台/GPU 后端的构建流程保留。
+- test/test_native_preflight.py 六项检查通过；wheel 1,628,730 字节、sdist 1,617,019 字节，通过 twine check 与归档内容检查。pip 的 Python 3.11 Windows x64 目标标签能够选择该 wheel；Python 3.12 隔离环境安装后屏蔽 Git/CMake 工具发现，自动使用 site-packages 内 EXE 加载公开 GGUF，连续两次结果一致，原生耗时 4187.7684 / 3813.8056 ms。该单题验收不作为通用性能基准。
+- README 中英文、PyPI 展示页、GGUF 中英文指南、Hugging Face 双语模型卡、发布清单、PyPI 实施文档和 versions/project_overall/index.html 同步准确记录平台范围、首次模型下载、源码回退、目录树与执行顺序。
+- PyPI 正式发布 0.9.9 的 Windows x64 wheel 与源码包；公开索引返回的 SHA-256 分别为 c6c78ccba507dceeadecbbdb386bf9ee2cf94c4c19ce743f2a7ce14a8dc3a33d、2fcc6379cd8a65ceb358a6c59e2ed559bbada6942145684ecdc59dd81b6fb478，与本地产物逐一相同。
+- Hugging Face 模型仓库 jinghao1632/bit-jev-2b-distilled 的中英文 README 已同步 0.9.9 安装范围；权重、配置与已有测量文件未改动。

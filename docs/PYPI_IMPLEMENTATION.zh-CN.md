@@ -29,3 +29,5 @@
 - Hugging Face 双语模型卡已同步。CUDA 构建未实测，因为本机没有 CUDA Toolkit；历史 RTX 5090 FP16 数字仍独立标注。
 - PyPI 0.8.8 修复首次加载体验：在下载 GGUF 前检查 Git、CMake 3.28+；缺少工具时给出官方安装链接和 Git 在固定源码、子模块、补丁流程中的用途。已缓存原生程序或传入 `binary=` 时跳过构建工具检查。Windows 排错步骤见 [GGUF 包指南](GGUF_PACKAGE.zh-CN.md#windows-首次加载前检查)。
 - PyPI 0.8.9 为 MSVC 编译 bit-jev 原生目标添加 `/utf-8`，修复简体中文 Windows 上无 BOM UTF-8 源码被系统代码页误读的问题。本机使用固定 BitNet 与 llama.cpp 提交、仅 ReLU² 补丁通过 MSVC 编译，并对公开 GGUF 连续执行两次真实请求；发行 wheel 和源码包均通过归档与元数据检查。
+- PyPI 0.9.9 增加 Windows x64 AVX2 CPU 预编译 wheel。固定上游与 ReLU² 补丁在 MSVC Release 下构建，关闭构建机 CPU 特化和 OpenMP，静态链接 MSVC 运行库；PE 依赖只剩 KERNEL32.dll 与 ADVAPI32.dll。预编译程序本体 3,881,472 字节，wheel 1,628,730 字节，源码包 1,617,019 字节。包内附 BitNet 和 llama.cpp 的 MIT 许可证文本。
+- `native_build.py` 在已有缓存后查找 wheel 内程序，核对 Windows x64/AVX2 并直接返回；指定 `native_source=` 时继续源码构建，传入 `binary=` 时优先使用自备程序。非 Windows、GPU 后端仍按需构建。实际从 wheel 安装后屏蔽 Git/CMake 工具发现，公开 GGUF 能加载并连续两次返回同一结构化答案，原生单次计时分别为 4187.7684 ms 和 3813.8056 ms；这只是本机手写请求验收，不是跨机器性能基准。
