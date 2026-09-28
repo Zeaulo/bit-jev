@@ -1,8 +1,34 @@
+<div align="center">
+
 # bit-jev
 
-[简体中文](README.md) · English
+### Structured decisions on a 1.58-bit BitNet backbone
 
-[Hugging Face model and model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+**I2_S GGUF · CPU / GPU inference · LoRA fine-tuning · teacher–student distillation**
+
+[![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python versions](https://img.shields.io/pypi/pyversions/bit-jev)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+
+[Quick start](#quick-start) · [Benchmarks](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+
+</div>
+
+> **Release update · 2026-09-28** The Python package downloads the public GGUF on first use and builds the pinned native runner on the target machine. `device="gpu"` selects Vulkan; `device="cuda"` needs a CUDA Toolkit. A Git installation, CMake 3.28+, and a C++17 compiler are required for the first build.
+
+## Quick start
+
+```bash
+pip install bit-jev
+```
+
+```python
+from bit_jev import BitJev
+
+request = {"state": "A customer reports a duplicate charge.", "questions": {"team": {"type": "choice", "instructions": "Which team should handle this?", "criteria": {"billing": "Payment and refunds", "shipping": "Delivery"}}}}
+with BitJev.from_pretrained(device="cpu", threads=8) as model:
+    print(model.infer(request)["answers"])
+```
+
+The GGUF is about 1.19 GB and is cached outside the wheel. The model remains loaded for subsequent `infer()` calls. Native `latency_ms` excludes model loading. See the [GGUF package guide](docs/GGUF_PACKAGE.md) for GPU, CLI, and local model directories. The repository license covers code; the model card describes the checkpoint's separate rights status.
 
 ## bit-jev = bitnet + jev !!!
 
@@ -19,14 +45,14 @@ The I2_S checkpoint and sanitized AutoDL measurements are now published on [Hugg
 
 The cover separates LoRA and teacher–student distillation from I2_S CPU option scoring. **Ternary refers to quantized BitLinear weights, not every parameter.** The [measurement highlights](docs/figures/model-highlights.en.svg) retain source details; the [detailed neural framework](docs/figures/model-framework.svg) shows the branch mask, decoder internals, and pointer-head equations.
 
-[CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[GGUF package guide](docs/GGUF_PACKAGE.md) · [CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## What the code implements
 
 1. `core/bit_jev/api.py` defines the structured request and answer shapes.
 2. `core/bit_jev/model.py` encodes the shared state, question branches, option boundaries, and pointer-head readout for the PyTorch path.
 3. `core/bit_jev/export_distilled.py` and `core/bit_jev/cpu_head.py` prepare a compatible trained backbone and pointer head for native inference.
-4. `core/bit_jev/cpu.py` encodes JSONL requests; `core/native/main.cpp` runs a quantized GGUF backbone and float32 pointer head, then returns option scores and probabilities.
+4. `core/bit_jev/encoding.py` encodes requests without loading PyTorch; `gguf.py` manages downloads and resident inference; `native_build.py` builds the pinned CPU/GPU runner; `core/native/main.cpp` scores options over the GGUF backbone and float32 pointer head.
 
 The PyTorch packed path uses a block-causal mask so question branches can share the state computation while remaining isolated. The **native CPU runner evaluates one causal row per question** and repeats the shared state for multiquestion requests. A question can require several internal prefill batches. The absence of answer-token decoding does not mean every request completes in one hardware forward call or has negligible latency.
 
@@ -73,7 +99,7 @@ The output schema contains answers, per-option logits or probabilities, and nati
 
 ## Build and run
 
-The [CPU quick start](docs/CPU_QUICKSTART.md) shows how to clone the source, install the Python launcher, fetch the pinned BitNet/llama.cpp revisions, build the native runner, and download the model package. Read its Hugging Face card for data provenance and license status.
+The [GGUF package guide](docs/GGUF_PACKAGE.md) covers `pip install bit-jev`, automatic model download, native builds, CPU/GPU selection, and resident inference. The [CPU source quick start](docs/CPU_QUICKSTART.md) covers manual builds. Read the Hugging Face card for data provenance and license status.
 
 All public performance claims should identify the checkpoint, license basis, hardware, precision, request shape, repeats, memory definition, and whether model load is included. The scripts under `test/` support that measurement once suitable artifacts are available.
 

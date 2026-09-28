@@ -3,10 +3,15 @@
 /export/
 /learning/
 /core/build/
+/core/dist/
+/core/*.egg-info/
 /test/build-*/
 /test/clean-*/
 /test/clean_*/
 /test/patch-verification*/
+/test/native-source/
+/test/pypi-dist/
+/test/venv-pypi/
 /test/dependency_validation/
 /test/release/
 /test/release_smoke/

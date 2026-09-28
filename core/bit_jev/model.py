@@ -16,111 +16,16 @@ The LM head is never used: the loss and the readout come from `last_hidden_state
 boundary tokens only.
 """
 import math
-import re
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from . import hub as _hub
-from .hub import load_tokenizer as _load_tokenizer
-
-SPECIAL_TOKENS = ["<|reserved_special_token_0|>", "<|reserved_special_token_1|>",
-                  "<|reserved_special_token_2|>", "<|reserved_special_token_3|>",
-                  "<|reserved_special_token_4|>"]
-# ids under the microsoft/bitnet-b1.58-2B-4T-bf16 tokenizer, for reference only; delimiter_ids()
-# resolves them through the tokenizer at runtime (each SPECIAL token is its own id, consecutive
-# in the reserved range; the assert in delimiter_ids fails hard if this changes under us).
-DELIMITER_HINTS = {
-    "<|reserved_special_token_0|>": 128002,
-    "<|reserved_special_token_1|>": 128003,
-    "<|reserved_special_token_2|>": 128004,
-    "<|reserved_special_token_3|>": 128005,
-    "<|reserved_special_token_4|>": 128008,
-}
-
-# training context: state tokens, tokens per question branch, whole packed record
-MAX_STATE, MAX_BRANCH, MAX_PACKED = 384, 1024, 2048
-# serving context: same upper bounds kev uses; longer than training by design
-SERVE_MAX_STATE, SERVE_MAX_BRANCH = 8192, 8192
-SERVE_MAX_PACKED = SERVE_MAX_STATE + SERVE_MAX_BRANCH
-
-OPT_NONE, OPT_DECIDE = -1, -2
-
-_SPECIAL_RE = re.compile(r"<\|([A-Za-z0-9_]+)\|>")
-
-
-class ContextOverflow(ValueError):
-    """A request does not encode within its context (state, branch or packed limit)."""
-
-
-def load_tokenizer(name, revision=None):
-    return _load_tokenizer(name, revision=revision)
-
-
-def pad_id(tok):
-    return tok.pad_token_id if tok.pad_token_id is not None else 0
-
-
-def delimiter_ids(tok):
-    """Delimiter token ids, in the conventional order <state> <q> <opt> </opt> <decide>."""
-    out = []
-    for t in SPECIAL_TOKENS:
-        i = tok.convert_tokens_to_ids(t)
-        if i is None or i < 0:
-            i = DELIMITER_HINTS[t]
-        if not tok.convert_ids_to_tokens(i) == t:
-            raise ValueError(f"{t} is not a single token in this tokenizer ({tok.name_or_path}); "
-                             "bit-jev needs the five reserved special tokens of the BitNet vocab")
-        out.append(i)
-    return out
-
-
-def user_tokens(tok, text):
-    """Tokenize caller-supplied text so it can never produce delimiter/control tokens."""
-    return tok(_SPECIAL_RE.sub(r"<¦\1¦>", text), add_special_tokens=False).input_ids
-
-
-def encode(tok, rec, max_state=MAX_STATE, max_branch=MAX_BRANCH, strict=False):
-    """Pack one record: [<state> ...] then per-question [<q> instr <opt> o </opt> ... <decide>].
-
-    Returns ids, seg (0 = state, k = question k), pos (branch positions restart after the state),
-    decide_idx [Q], opt_idx [Q][K] (index of each option's closing token), and per-token `opt`.
-    Same layout as kev.encode, so records, training data and suites are interchangeable.
-    """
-    state_toks = user_tokens(tok, rec["state"])
-    if strict and len(state_toks) + 1 > max_state:
-        raise ContextOverflow(f"state exceeds {max_state} tokens: {len(state_toks) + 1}")
-    S = [delimiter_ids(tok)[0]] + state_toks[: max_state - 1]
-    ids, seg, pos, opt = list(S), [0] * len(S), list(range(len(S))), [OPT_NONE] * len(S)
-    _, q_id, o_id, c_id, d_id = delimiter_ids(tok)
-    decide_idx, opt_idx = [], []
-    for k, q in enumerate(rec["questions"], start=1):
-        instr = [q_id] + user_tokens(tok, q["instr"])
-        spans = [[o_id] + user_tokens(tok, o) + [c_id] for o in q["options"]]
-        br = instr + [t for sp in spans for t in sp] + [d_id]
-        if len(br) > max_branch - len(S):
-            raise ContextOverflow(f"branch too long: {len(br)} tokens with a {len(S)}-token state "
-                                  f"(row limit {max_branch})")
-        base = len(ids); p0 = len(S)
-        ids += br; seg += [k] * len(br); pos += list(range(p0, p0 + len(br)))
-        opt += [OPT_NONE] * len(instr) + [j for j, sp in enumerate(spans) for _ in sp] + [OPT_DECIDE]
-        ends, cursor = [], len(instr)
-        for sp in spans:
-            cursor += len(sp); ends.append(cursor - 1)
-        decide_idx.append(base + len(br) - 1); opt_idx.append([base + e for e in ends])
-    return {"ids": ids, "seg": seg, "pos": pos, "opt": opt,
-            "decide_idx": decide_idx, "opt_idx": opt_idx,
-            "labels": [q["label"] for q in rec["questions"]],
-            "state_truncated": len(state_toks) + 1 > max_state}
-
-
-def fits(rec, tok, max_state=MAX_STATE, max_branch=MAX_BRANCH, max_packed=MAX_PACKED):
-    try:
-        return len(encode(tok, rec, max_state=max_state, max_branch=max_branch, strict=True)["ids"]) <= max_packed
-    except ValueError:
-        return False
-
+from .encoding import (ContextOverflow, DELIMITER_HINTS, MAX_BRANCH, MAX_PACKED, MAX_STATE,
+                       OPT_DECIDE, OPT_NONE, SERVE_MAX_BRANCH, SERVE_MAX_PACKED,
+                       SERVE_MAX_STATE, SPECIAL_TOKENS, delimiter_ids, encode, fits,
+                       load_tokenizer, pad_id, user_tokens)
 
 def branch_mask_batch(segs, device, dtype=torch.float32, length=None):
     """attend(i, j) iff j <= i and (seg[j] == 0 or seg[j] == seg[i]). Additive [B, 1, L, L].

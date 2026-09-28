@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 from .api import to_answers, to_record
-from .model import encode, load_tokenizer
+from .encoding import encode, load_tokenizer
 
 
 def prepare_request(request, tokenizer):

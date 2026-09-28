@@ -1,5 +1,6 @@
-// bit-jev 原生 CPU 推理：逐题运行 BitNet，并在候选边界读取隐藏状态。
+// bit-jev 原生 GGUF 推理：逐题运行 BitNet，并在候选边界读取隐藏状态。
 #include "llama.h"
+#include "ggml-backend.h"
 #include "nlohmann/json.hpp"
 
 #include <algorithm>
@@ -127,7 +128,7 @@ std::vector<std::vector<float>> read_hidden(llama_context * context, const Json 
             holder.batch.logits[index] = 1;
         }
         if (llama_decode(context, holder.batch) != 0) {
-            throw std::runtime_error("BitNet CPU decode 失败");
+            throw std::runtime_error("BitNet GGUF decode 失败");
         }
         for (int index = 0; index < count; ++index) {
             const int position = static_cast<int>(start) + index;
@@ -184,21 +185,51 @@ std::string option_value(int argc, char ** argv, const std::string & name,
     return fallback;
 }
 
+// 仅检查布尔开关是否出现，不读取其后的路径或数字参数。
+bool has_option(int argc, char ** argv, const std::string & name) {
+    for (int index = 1; index < argc; ++index) {
+        if (argv[index] == name) return true;
+    }
+    return false;
+}
+
 int main(int argc, char ** argv) {
     const std::string model_path = option_value(argc, argv, "--model");
     const std::string head_path = option_value(argc, argv, "--head");
+    const std::string device = option_value(argc, argv, "--device", "cpu");
     const int threads = std::stoi(option_value(argc, argv, "--threads", "4"));
     const int batch_size = std::stoi(option_value(argc, argv, "--batch", "256"));
-    if (model_path.empty() || head_path.empty() || threads <= 0 || batch_size <= 0) {
-        std::cerr << "用法：bit-jev-cpu --model 文件.gguf --head head.f32 --threads 4 --batch 256\n";
+    if (model_path.empty() || head_path.empty() || threads <= 0 || batch_size <= 0 ||
+        (device != "cpu" && device != "vulkan" && device != "cuda")) {
+        std::cerr << "用法：bit-jev-cpu --model 文件.gguf --head head.f32 --device cpu|vulkan|cuda --threads 4 --batch 256\n";
         return 2;
     }
+    // 外部传入二进制时也强制匹配后端，不能把 Vulkan 程序当 CUDA 程序运行。
+#if !defined(BIT_JEV_BUILT_VULKAN)
+    if (device == "vulkan") {
+        std::cerr << "本程序未编入 Vulkan 后端\n";
+        return 2;
+    }
+#endif
+#if !defined(BIT_JEV_BUILT_CUDA)
+    if (device == "cuda") {
+        std::cerr << "本程序未编入 CUDA 后端\n";
+        return 2;
+    }
+#endif
     llama_log_set(native_log, nullptr);
     llama_backend_init();
     try {
-        // 主干仅加载到 CPU；嵌入输出来自最后一层的 result_norm。
+        // CPU 不卸载层；GPU 模式申请全部层，实际后端由对应的编译选项提供。
         llama_model_params model_params = llama_model_default_params();
-        model_params.n_gpu_layers = 0;
+        model_params.n_gpu_layers = device == "cpu" ? 0 : 999;
+        if (device != "cpu") {
+            // 同时检查后端能力和可见 GPU，避免用户要求 GPU 时悄悄在 CPU 上运行。
+            if (!llama_supports_gpu_offload() ||
+                ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_GPU) == nullptr) {
+                throw std::runtime_error("当前原生程序没有可用 GPU 后端或可见 GPU；请检查构建选项和驱动");
+            }
+        }
         std::unique_ptr<llama_model, decltype(&llama_model_free)> model(
             llama_model_load_from_file(model_path.c_str(), model_params), &llama_model_free);
         if (!model) throw std::runtime_error("无法加载 I2_S GGUF 模型");
@@ -217,8 +248,12 @@ int main(int argc, char ** argv) {
         context_params.pooling_type = LLAMA_POOLING_TYPE_NONE;
         std::unique_ptr<llama_context, decltype(&llama_free)> context(
             llama_init_from_model(model.get(), context_params), &llama_free);
-        if (!context) throw std::runtime_error("无法初始化 BitNet CPU 上下文");
+        if (!context) throw std::runtime_error("无法初始化 BitNet GGUF 上下文");
         llama_set_embeddings(context.get(), true);
+        // Python API 用握手确认模型已经进入内存或显存，再开始计时和请求。
+        if (has_option(argc, argv, "--ready")) {
+            std::cout << "{\"ready\":true}\n" << std::flush;
+        }
         // 模型常驻内存；stdin 每一行独立对应 stdout 的一行结果。
         std::string line;
         while (std::getline(std::cin, line)) {
@@ -239,7 +274,7 @@ int main(int argc, char ** argv) {
             std::cout << result.dump() << '\n' << std::flush;
         }
     } catch (const std::exception & error) {
-        std::cerr << "bit-jev CPU 推理失败：" << error.what() << '\n';
+        std::cerr << "bit-jev GGUF 推理失败：" << error.what() << '\n';
         llama_backend_free();
         return 1;
     }

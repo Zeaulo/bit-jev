@@ -1,6 +1,6 @@
 # CPU source quick start
 
-This guide builds the native I2_S runner and shows the JSONL inference interface. The bit-jev-2b-distilled I2_S CPU model package is published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); the GitHub repository does not store the checkpoint. The separate [Microsoft public-base benchmark](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) measures a different original backbone, not bit-jev classification. Read the Hugging Face model card for Yelp data provenance, measurement limits, and license status before downloading.
+This guide covers a manual native I2_S CPU source build and JSONL inference. For a pip install with automatic model download and GPU options, see the [GGUF package guide](GGUF_PACKAGE.md). The bit-jev-2b-distilled checkpoint is on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled), outside the GitHub repository. The separate [Microsoft public-base benchmark](BENCHMARKS.md#microsoft-public-bitnet-base-independent-measurement) measures a different backbone. Read the model card for Yelp data provenance, measurement limits, and license status before downloading.
 
 The Python launcher encodes requests and manages a persistent native process. The native binary performs backbone inference and pointer-head scoring. It does not run an HTTP server.
 

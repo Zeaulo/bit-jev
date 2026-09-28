@@ -2,7 +2,7 @@
 
 [English](CPU_QUICKSTART.md) · [返回中文 README](../README.md)
 
-本指南构建原生 I2_S CPU 程序，并说明 JSONL 推理接口。bit-jev-2b-distilled 的 I2_S CPU 模型包现已发布在 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)；本仓库仍不存放检查点。[微软公开基础模型基准](BENCHMARKS.zh-CN.md#微软公开-bitnet-基础模型独立实测)测的是另一个原版骨干，不是 bit-jev 分类结果。下载前请阅读 Hugging Face 模型卡中的 Yelp 数据说明、指标边界和许可证状态。
+本指南面向需要手动构建原生 I2_S CPU 程序的开发者。普通安装、自动下载与 GPU 选项请看 [GGUF pip 包指南](GGUF_PACKAGE.zh-CN.md)。bit-jev-2b-distilled 模型包位于 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)；本仓库不存放检查点。[微软公开基础模型基准](BENCHMARKS.zh-CN.md#微软公开-bitnet-基础模型独立实测)测的是另一个原版骨干，不是 bit-jev 分类结果。下载前请阅读 Hugging Face 模型卡中的 Yelp 数据说明、指标边界和许可证状态。
 
 Python 启动器负责编码请求并管理常驻原生进程；原生程序完成骨干推理和指针头评分。这条路径提供命令行 JSONL 接口，不是 HTTP 服务。
 
@@ -48,7 +48,7 @@ cmake --build core/build/bit-jev-cpu --target bit-jev-cpu -j 4
 {"state":"A customer reports a duplicate charge.","questions":{"team":{"type":"choice","instructions":"Which team should handle this?","criteria":{"billing":"Payment and refund issues","shipping":"Delivery issues"}}}}
 ```
 
-`questions` 不能为空。请求可同时包含 `choice`、`noul` 和 `score`。上面只有输入，没有“预期输出”；仓库未发布可供执行这一请求的 bit-jev 训练权重。
+`questions` 不能为空。请求可同时包含 `choice`、`noul` 和 `score`。上面只有输入，没有“预期输出”；公开 I2_S 检查点可以从 Hugging Face 下载，实际答案需要执行模型后读取。
 
 ## 4. 下载并运行公开 I2_S 模型
 

@@ -105,3 +105,13 @@
 - GitHub 中文默认 README、英文 README 和中文兼容入口改用对应主视觉；原有准确的公开基础模型图与 AutoDL 单题延迟/内存图继续提供可核对数字。
 - Hugging Face 中英文模型卡新增对应主视觉；发布包加入两张 PNG。更新 .gitignore、X 首发配图规划和版本项目总览的目录树、关键文件职责及发布状态。
 - 使用 test/example_cpu_request.jsonl 的手写客服工单实际运行本地 I2_S CPU 包，X 示例引用真实选项概率与评分，并注明它与 AutoDL 性能测试题不是同一输入。
+
+[2026-09-28 12:09:19] v0.12.1（中版本，新增 PyPI GGUF 常驻 CPU/GPU 推理包）
+- core/bit_jev/encoding.py 将五个 BitNet 分隔符与结构化请求编码从 PyTorch 模型模块拆出；cpu.py 和新增 gguf.py 共用该轻量编码，训练路径保留原接口。
+- core/bit_jev/gguf.py 提供公开模型按需下载、文件校验、加载完成握手、常驻 infer/infer_many、关闭和 JSONL CLI；device=cpu 不卸载层，device=gpu/vulkan 使用 Vulkan，device=cuda 使用 CUDA，gpu_index 只限定原生子进程可见设备。
+- core/bit_jev/native_build.py 在用户缓存固定 BitNet 0b341e58 与 llama.cpp 390c3077，并应用 ReLU² 运行时补丁；core/native/main.cpp 增加设备参数、后端匹配检查和 ready 握手。setup.py、MANIFEST.in 与 core/LICENSE 让 wheel/sdist 携带源码、补丁与代码许可证，不携带约 1.19 GB GGUF。
+- 包版本从 0.7.7 升为 0.8.7，项目版本从 0.11.1 升为 0.12.1；训练依赖移入 bit-jev[train]，默认 pip 安装只保留 tokenizer 与模型下载所需依赖。
+- README.md 继续作为中文默认入口，按 bitnet.cpp 的标题导航、发布动态、快速开始、原理、实测数据和文档地图重排；新增双语 GGUF 包指南、PyPI 实施文档，更新 Hugging Face 双语模型卡、源码快速开始和 versions/project_overall 内部手册。
+- 在 Windows Ryzen 7 4800H / RTX 2060 本机用隔离固定上游源码和公开 GGUF 验证 CPU、Vulkan 两条原生路径。手写三问题请求在同一模型进程连续运行两次，Choice/Noul/Score 最终答案一致；Vulkan 推理时整卡显存占用上升。两条路径概率略有数值差异；少量样本不构成通用速度结论。CUDA Toolkit 不在本机，CUDA 构建未实测。
+- PyPI 正式发布 bit-jev 0.8.7 的 58,929 字节 wheel 与 52,759 字节源码包，公开索引核对版本和文件大小；最终发行包通过 twine check、归档内容检查、wheel 安装与 CLI 帮助检查。
+- Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled 更新中英文模型卡，新增 pip CPU/GPU 示例及旧 AutoDL FP16 与新 GGUF GPU 路径的区分；远端两份 README 下载后的 SHA-256 与本地发布稿一致。

@@ -7,19 +7,20 @@ tags:
   - structured-decision
   - pointer-head
   - cpu-inference
+  - gpu-inference
   - knowledge-distillation
   - yelp
 ---
 
 # bit-jev-2b-distilled
 
-[中文模型卡](HF_MODEL_CARD.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev)
+[中文模型卡](HF_MODEL_CARD.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/)
 
 ![bit-jev training, distillation, and I2_S CPU inference flow](figures/project-cover.en.png)
 
 The ternary symbols represent quantized BitLinear weights; training and inference are separate flows.
 
-> This repository provides the I2_S CPU inference package for bit-jev. The checkpoint was trained on a multi-source decision dataset that includes Yelp review records. A request for permission covering derivative weights and metrics has been sent to Yelp; as of 2026-09-28, no written reply has been received. The Apache-2.0 license for the source repository does not automatically apply to this checkpoint.
+> This repository provides the I2_S GGUF model package for bit-jev, usable with the `bit-jev` Python package on CPU or GPU. The checkpoint was trained on a multi-source decision dataset that includes Yelp review records. A request for permission covering derivative weights and metrics has been sent to Yelp; as of 2026-09-28, no written reply has been received. The Apache-2.0 license for the source repository does not automatically apply to this checkpoint.
 
 ## Model summary
 
@@ -58,24 +59,25 @@ This release contains the I2_S artifacts for the native CPU runner, matching tok
 
 ## Inference
 
-Follow the [CPU quick start](https://github.com/Zeaulo/bit-jev/blob/main/docs/CPU_QUICKSTART.md) to install dependencies and build the native runner, then download the files:
+Install the Python package. On first load, it downloads the GGUF, pointer head, and tokenizer, then builds the pinned native runner. Git, CMake 3.28+, and a C++17 compiler are required; Vulkan GPU mode needs a Vulkan SDK and CUDA mode needs a CUDA Toolkit.
 
-```powershell
-hf download jinghao1632/bit-jev-2b-distilled --local-dir ./models/bit-jev-2b-distilled
-python -m bit_jev.cpu `
-  --run './models/bit-jev-2b-distilled' `
-  --artifact './models/bit-jev-2b-distilled' `
-  --binary './core/build/bit-jev-cpu/bit-jev-cpu.exe' `
-  --input './test/my-request.jsonl' `
-  --out './test/my-result.jsonl' `
-  --threads 16 --batch 128
+```bash
+pip install bit-jev
 ```
 
-On Linux, use `./core/build/bit-jev-cpu/bit-jev-cpu` as the binary path. The complete JSONL input format is documented in the CPU quick start. The model package does not contain a runner binary.
+```python
+from bit_jev import BitJev
+
+request = {"state": "A customer reports a duplicate charge.", "questions": {"team": {"type": "choice", "instructions": "Which team should handle it?", "criteria": {"billing": "Payment and refunds", "shipping": "Delivery"}}}}
+with BitJev.from_pretrained(device="cpu", threads=8) as model:
+    print(model.infer(request)["answers"])
+```
+
+`device="gpu"` selects Vulkan; `device="cuda"` selects a CUDA build. `infer()` reuses the resident model. See the [GGUF package guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for CLI, offline directories, and build details. This model repository contains no prebuilt runner binary.
 
 ## AutoDL case study: Xeon Gold 6459C / RTX 5090
 
-The measurements below use one fixed development request with 703 input tokens and 77 options. Inference timing excludes model loading. CPU uses the native I2_S path; GPU uses an experimental FP16 mixed-precision PyTorch path.
+The measurements below use one fixed development request with 703 input tokens and 77 options. Inference timing excludes model loading. CPU uses the native I2_S path; GPU uses an experimental FP16 mixed-precision PyTorch path. These GPU numbers do not benchmark the new pip package's GGUF/Vulkan or GGUF/CUDA path.
 
 | Path | Mean inference time | Repetitions | Observed memory |
 | --- | ---: | ---: | ---: |

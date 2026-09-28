@@ -1,8 +1,20 @@
+<div align="center">
+
 # bit-jev
 
-BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。
+### 在 1.58-bit BitNet 上直接回答结构化问题
 
-[English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases) · [Hugging Face 模型与模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+**I2_S GGUF · CPU / GPU 推理 · LoRA 微调 · 教师学生蒸馏**
+
+[![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python versions](https://img.shields.io/pypi/pyversions/bit-jev)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+
+[快速开始](#快速开始) · [实测数据](#速度与内存) · [模型流程](#模型流程) · [接口格式](#请求格式) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+
+</div>
+
+> **发布动态 · 2026-09-28**　公开 I2_S 模型已在 Hugging Face；PyPI 版提供按需下载和常驻 GGUF 推理入口。首次加载需要 Git、CMake 3.28+ 和 C++17 编译器构建固定版本 bitnet.cpp。`device="gpu"` 使用 Vulkan；`device="cuda"` 需要 CUDA Toolkit。
+
+把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。仓库代码采用 Apache-2.0；模型权重的许可状态请读[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)。
 
 ![bit-jev 双层训练与推理流程图](docs/figures/project-cover.zh-CN.png)
 
@@ -17,6 +29,36 @@ BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问
 | 非自回归决策 | 指针头直接读取隐藏状态，对选项打分；不需要逐 token 生成答案。 |
 | 训练链路 | BitNet BF16 基础模型 → LoRA 微调 → teacher-student 蒸馏 → I2_S 导出。 |
 | 任务类型 | `choice` 多选、`noul` 是/否、`score` 有序评分。 |
+
+## 快速开始
+
+安装 Python 3.11 或 3.12、Git、CMake 3.28+、C++17 编译器。首次加载自动下载 GGUF（约 1.19 GB）并在用户缓存中编译原生程序；再次运行复用缓存。GPU 模式还需 Vulkan SDK，CUDA 模式需 CUDA Toolkit。
+
+```bash
+pip install bit-jev
+```
+
+```python
+from bit_jev.gguf import BitJev
+
+request = {
+    "state": "客户报告同一订单被重复扣款。",
+    "questions": {
+        "team": {
+            "type": "choice",
+            "instructions": "哪个团队应处理？",
+            "criteria": {"billing": "支付与退款", "shipping": "物流配送"},
+        }
+    },
+}
+
+with BitJev.from_pretrained(device="cpu", threads=8) as model:
+    result = model.infer(request)
+    print(result["answers"])
+    print(result["latency_ms"])
+```
+
+把 `device` 改为 `"gpu"` 可选择 Vulkan；NVIDIA CUDA 专用构建使用 `"cuda"`。多 GPU 主机可传 `gpu_index`。推理接口不会生成 token，`latency_ms` 不含模型加载时间。完整配置、CLI、离线目录与原生构建见 [GGUF 安装与推理指南](docs/GGUF_PACKAGE.zh-CN.md)。
 
 ## 这个项目解决什么问题
 
@@ -60,19 +102,7 @@ BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问
 
 该单题上 GPU 路径约为 16 线程 CPU 路径的 22.8 倍；但两条路径使用不同权重格式和数值精度，不能据此声称纯硬件加速倍数。CPU RSS 与 GPU 分配显存口径不同。原始输入、候选内容和预测值均未公开；逐次计时、模型 SHA-256、实验边界和图表生成脚本见[公开案例数据](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json)与[性能测量规范](docs/BENCHMARKS.zh-CN.md#bit-jev-autodl-单题案例)。这组小样本不代表通用延迟或准确率。模型权重可从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载；使用前请阅读模型卡中的数据来源和许可状态。
 
-## 快速开始
-
-```powershell
-git clone https://github.com/Zeaulo/bit-jev.git
-Set-Location bit-jev
-python -m pip install -e './core'
-python test/bootstrap_bitnet.py
-python test/bootstrap_bitnet.py --check
-```
-
-构建原生程序不需要下载本项目检查点。实际推理需要兼容的 tokenizer/config、I2_S GGUF 骨干和指针头 sidecar；请先确认模型与数据拥有可公开使用的权利。
-
-公开模型包位于 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)，本项目 [CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md)含下载及运行步骤。
+源码构建与实验脚本见 [CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md)。训练、蒸馏和评估依赖可用 `pip install 'bit-jev[train]'` 安装。
 
 ## 请求格式
 
@@ -87,6 +117,7 @@ python test/bootstrap_bitnet.py --check
 | 文档 | 适合谁 | 内容 |
 | --- | --- | --- |
 | [中文 CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md) | 第一次运行 | 构建、模型文件和 JSONL 调用。 |
+| [GGUF 安装与推理指南](docs/GGUF_PACKAGE.zh-CN.md) | pip 用户 | 按需下载、CPU/GPU 构建、常驻 API 和 CLI。 |
 | [中文性能规范](docs/BENCHMARKS.zh-CN.md) | 做实验 | 加载、预热、推理、RSS、显存和线程数的统一口径。 |
 | [中文模型卡](docs/MODEL_CARD.zh-CN.md) | 评估模型 | 架构、输入契约、局限和发布边界。 |
 | [Hugging Face 中文模型卡](docs/HF_MODEL_CARD.zh-CN.md) | 评估权重 | 训练流程、AutoDL 案例、数据来源、文件哈希和限制。 |
@@ -99,6 +130,9 @@ python test/bootstrap_bitnet.py --check
 - [`core/bit_jev/api.py`](core/bit_jev/api.py)：请求和答案结构。
 - [`core/bit_jev/model.py`](core/bit_jev/model.py)：PyTorch 骨干、分支掩码和指针头。
 - [`core/bit_jev/cpu.py`](core/bit_jev/cpu.py)：JSONL 编码与原生进程调用。
+- [`core/bit_jev/encoding.py`](core/bit_jev/encoding.py)：不加载 PyTorch 的请求编码。
+- [`core/bit_jev/gguf.py`](core/bit_jev/gguf.py)：模型下载与常驻 Python API。
+- [`core/bit_jev/native_build.py`](core/bit_jev/native_build.py)：固定上游版本的按需 CPU/GPU 构建。
 - [`core/native/main.cpp`](core/native/main.cpp)：GGUF 骨干和 float32 指针头的 CPU 推理。
 - [`core/bit_jev/train.py`](core/bit_jev/train.py)：LoRA 与指针头训练。
 - [`core/bit_jev/distill.py`](core/bit_jev/distill.py)：教师 logits 导出和学生蒸馏。

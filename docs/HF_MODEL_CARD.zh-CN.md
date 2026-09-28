@@ -7,19 +7,20 @@ tags:
   - structured-decision
   - pointer-head
   - cpu-inference
+  - gpu-inference
   - knowledge-distillation
   - yelp
 ---
 
 # bit-jev-2b-distilled
 
-[English model card](HF_MODEL_CARD.md) · [源码仓库](https://github.com/Zeaulo/bit-jev)
+[English model card](HF_MODEL_CARD.md) · [源码仓库](https://github.com/Zeaulo/bit-jev) · [pip 安装](https://pypi.org/project/bit-jev/)
 
 ![bit-jev 训练、蒸馏与 I2_S CPU 推理流程](figures/project-cover.zh-CN.png)
 
 图中三值符号只代表量化 BitLinear 权重；训练与推理是分开的流程。
 
-> 本仓库提供 bit-jev 的 I2_S CPU 推理模型包。权重来自包含 Yelp 评论数据的多源决策训练集。Yelp 权利方许可申请已发出，截至 2026-09-28 尚未收到书面答复。本模型卡公开说明来源与限制；项目代码仓库的 Apache-2.0 许可证不自动适用于此检查点。
+> 本仓库提供 bit-jev 的 I2_S GGUF 模型包，可通过 `bit-jev` Python 包进行 CPU 或 GPU 推理。权重来自包含 Yelp 评论数据的多源决策训练集。Yelp 权利方许可申请已发出，截至 2026-09-28 尚未收到书面答复。本模型卡公开说明来源与限制；项目代码仓库的 Apache-2.0 许可证不自动适用于此检查点。
 
 ## 模型简介
 
@@ -60,24 +61,25 @@ I2_S GGUF + float32 指针头
 
 ## 推理示例
 
-先按[源码仓库的 CPU 快速开始](https://github.com/Zeaulo/bit-jev/blob/main/docs/CPU_QUICKSTART.zh-CN.md)安装依赖、构建原生 runner，并下载模型文件：
+推荐使用 pip 包，首次加载会按需下载 GGUF 并在本机编译原生 runner。需要 Git、CMake 3.28+、C++17 编译器；Vulkan GPU 模式还需要 Vulkan SDK，CUDA 模式需要 CUDA Toolkit。
 
-```powershell
-hf download jinghao1632/bit-jev-2b-distilled --local-dir ./models/bit-jev-2b-distilled
-python -m bit_jev.cpu `
-  --run './models/bit-jev-2b-distilled' `
-  --artifact './models/bit-jev-2b-distilled' `
-  --binary './core/build/bit-jev-cpu/bit-jev-cpu.exe' `
-  --input './test/my-request.jsonl' `
-  --out './test/my-result.jsonl' `
-  --threads 16 --batch 128
+```bash
+pip install bit-jev
 ```
 
-Linux 用户将二进制路径改为 `./core/build/bit-jev-cpu/bit-jev-cpu`。JSONL 输入格式与完整构建说明见 CPU 快速开始。模型包自身不含 runner 二进制。
+```python
+from bit_jev import BitJev
+
+request = {"state": "客户报告重复扣款。", "questions": {"team": {"type": "choice", "instructions": "哪个团队处理？", "criteria": {"billing": "支付退款", "shipping": "物流配送"}}}}
+with BitJev.from_pretrained(device="cpu", threads=8) as model:
+    print(model.infer(request)["answers"])
+```
+
+`device="gpu"` 使用 Vulkan；`device="cuda"` 使用 CUDA 构建。`infer()` 复用常驻模型并返回答案、logits、概率和原生推理耗时。完整 CLI、离线目录和构建细节见[GGUF 安装与推理指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。本模型仓库只保存模型文件，不含预编译 runner。
 
 ## 性能案例：AutoDL Xeon Gold 6459C / RTX 5090
 
-以下测量来自一道固定开发题，输入 703 tokens、77 个候选项；推理计时不含加载。CPU 使用 I2_S 原生路径，GPU 使用实验性 FP16 混合精度 PyTorch 路径。
+以下测量来自一道固定开发题，输入 703 tokens、77 个候选项；推理计时不含加载。CPU 使用 I2_S 原生路径，GPU 使用实验性 FP16 混合精度 PyTorch 路径。这组 GPU 数字不是新 pip 包的 GGUF/Vulkan 或 GGUF/CUDA 测试结果。
 
 | 路径 | 平均推理时间 | 重复次数 | 观测内存 |
 | --- | ---: | ---: | ---: |
