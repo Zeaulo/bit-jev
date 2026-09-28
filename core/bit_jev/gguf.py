@@ -13,7 +13,7 @@ from typing import Any, Iterable
 from .api import to_answers
 from .cpu import prepare_request
 from .encoding import load_tokenizer
-from .native_build import build_native
+from .native_build import build_native, preflight_native
 
 
 # 模型权重不属于 PyPI wheel；默认只按需获取运行所需文件。
@@ -94,6 +94,11 @@ class BitJev:
     def from_pretrained(cls, model: str = DEFAULT_MODEL, *, revision: str | None = None,
                         local_dir: str | Path | None = None, **kwargs: Any) -> "BitJev":
         """按需下载公开模型，然后构建或复用原生程序并加载模型。"""
+        # 缺少构建工具时先给出安装链接，避免下载大模型后才失败。
+        if kwargs.get("binary") is None:
+            preflight_native(kwargs.get("device", "cpu"),
+                             cache_dir=kwargs.get("native_cache"),
+                             source_dir=kwargs.get("native_source"))
         # model 可以是 Hugging Face repo id，也可以是已下载的本地模型目录。
         model_dir = download_model(model, revision=revision, local_dir=local_dir)
         return cls(model_dir, **kwargs)

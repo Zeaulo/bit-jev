@@ -119,3 +119,9 @@
 [2026-09-28 15:04:58] v0.12.2（小版本，修复 GitHub README 的 Python 版本徽章）
 - README.md 和 README.en.md 将返回 missing 的动态 Python 版本徽章改为明确标注 Python 3.11 / 3.12 的静态徽章，与 core/pyproject.toml 的 >=3.11,<3.13 要求一致。
 - 更新 versions/project_overall/index.html 的当前版本和发布状态，记录徽章口径；PyPI 包版本仍为 0.8.7。
+
+[2026-09-28 15:26:09] v0.12.3（小版本，首次原生构建工具预检查与安装提示）
+- core/bit_jev/gguf.py 在下载约 1.19 GB 模型前调用 native_build.py 的 preflight_native：已缓存或指定 binary 时跳过；默认自动构建检查 Git 和 CMake 3.28+，缺失时分别给出官方安装链接、Git 用途以及 Windows C++ 工具链接。
+- native_build.py 在 CMake 配置失败时附上 Windows C++ 工具页，并识别 Release 目录的既有构建结果；已提供 native_source 时不要求 Git。Git 只用于默认路径获取和核对固定 BitNet/llama.cpp 提交、初始化子模块与应用 ReLU² 补丁，不用于正常推理。
+- README.md、README.en.md、core/README.md、双语 GGUF 包指南与 PyPI 实施文档补充首次加载前置工具、官方链接、Windows 检查命令和避开自动构建的 binary 入口；项目总览同步修改执行顺序、关键文件与发布状态。
+- PyPI 包版本由 0.8.7 升为 0.8.8。test/test_native_preflight.py 的五项检查通过；wheel 与源码包通过 twine check 和归档内容检查。PyPI 公开索引显示 0.8.8，wheel 60,216 字节、源码包 54,260 字节，两个文件的 SHA-256 均与本地一致。

@@ -5,7 +5,7 @@
 ## 当前事实
 
 - 模型由 `backbone-i2_s.gguf`、`head.f32`、tokenizer/config 组成，位于 `jinghao1632/bit-jev-2b-distilled`。GGUF 文件约 1.19 GB，因此 PyPI 发行包只放代码、构建所需的小文件和下载入口；模型按需下载到 Hugging Face 缓存。
-- 已有 `core/native/main.cpp` 使用固定版本 bitnet.cpp/llama.cpp，对每道题执行因果前向并读取候选项隐藏状态；模型在进程中常驻。当前构建是 CPU，GPU 层数固定为零。
+- 已有 `core/native/main.cpp` 使用固定版本 bitnet.cpp/llama.cpp，对每道题执行因果前向并读取候选项隐藏状态；模型在进程中常驻。CPU 模式不卸载层；Vulkan 与 CUDA 模式按选定设备申请 GPU 层。
 - 公开模型权重没有单独的开放许可证；Yelp 训练数据许可申请尚无书面答复。包许可证只覆盖代码，下载入口须提示阅读模型卡。
 
 ## 实施步骤与验收
@@ -27,3 +27,4 @@
 - PyPI 已发布 `bit-jev 0.8.7`；wheel 58,929 字节，源码包 52,759 字节。公开索引、`twine check`、归档内容和 wheel 安装检查通过。
 - Windows 本机隔离源码构建的 CPU 与 Vulkan runner 均加载公开 GGUF 并在同一进程连续处理两次手写请求。Vulkan 在 RTX 2060 推理时产生可见显存占用；两条路径最终答案一致，概率有小幅浮点差异。
 - Hugging Face 双语模型卡已同步。CUDA 构建未实测，因为本机没有 CUDA Toolkit；历史 RTX 5090 FP16 数字仍独立标注。
+- PyPI 0.8.8 修复首次加载体验：在下载 GGUF 前检查 Git、CMake 3.28+；缺少工具时给出官方安装链接和 Git 在固定源码、子模块、补丁流程中的用途。已缓存原生程序或传入 `binary=` 时跳过构建工具检查。Windows 排错步骤见 [GGUF 包指南](GGUF_PACKAGE.zh-CN.md#windows-首次加载前检查)。

@@ -32,7 +32,7 @@
 
 ## 快速开始
 
-安装 Python 3.11 或 3.12、Git、CMake 3.28+、C++17 编译器。首次加载自动下载 GGUF（约 1.19 GB）并在用户缓存中编译原生程序；再次运行复用缓存。GPU 模式还需 Vulkan SDK，CUDA 模式需 CUDA Toolkit。
+安装 Python 3.11 或 3.12、[Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；Windows 可安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)。首次加载先检查构建工具，再自动下载 GGUF（约 1.19 GB）并在用户缓存中编译原生程序；再次运行复用缓存。Git 只用于获取并校验固定的 BitNet/llama.cpp 源码、应用兼容补丁，不参与日常推理。GPU 模式还需 Vulkan SDK，CUDA 模式需 CUDA Toolkit。[Windows 安装与排错步骤](docs/GGUF_PACKAGE.zh-CN.md#windows-首次加载前检查)。
 
 ```bash
 pip install bit-jev

@@ -12,7 +12,7 @@
 
 </div>
 
-> **Release update · 2026-09-28** The Python package downloads the public GGUF on first use and builds the pinned native runner on the target machine. `device="gpu"` selects Vulkan; `device="cuda"` needs a CUDA Toolkit. A Git installation, CMake 3.28+, and a C++17 compiler are required for the first build.
+> **Release update · 2026-09-28** The Python package downloads the public GGUF on first use and builds the pinned native runner on the target machine. `device="gpu"` selects Vulkan; `device="cuda"` needs a CUDA Toolkit. The first build requires [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Git pins and patches upstream source; inference does not invoke Git.
 
 ## Quick start
 

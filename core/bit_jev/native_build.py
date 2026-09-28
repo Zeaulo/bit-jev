@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -14,6 +15,9 @@ from . import __version__
 BITNET_COMMIT = "0b341e582afbf9e1011f24744b554c96a3477eb5"
 LLAMA_COMMIT = "390c307752ab78fd8189f359d6954c9ba1be74af"
 BITNET_URL = "https://github.com/microsoft/BitNet.git"
+GIT_INSTALL_URL = "https://git-scm.com/install/"
+CMAKE_INSTALL_URL = "https://cmake.org/download/"
+WINDOWS_CPP_INSTALL_URL = "https://learn.microsoft.com/cpp/build/vscpp-step-0-installation"
 
 
 def _run(arguments: list[str], *, directory: Path | None = None) -> str:
@@ -65,27 +69,76 @@ def _prepare_upstream(cache: Path) -> Path:
     return llama
 
 
-def build_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
-                 source_dir: str | Path | None = None, jobs: int = 4) -> Path:
-    """返回原生程序路径；首次使用时准备依赖并按设备构建。"""
-    # gpu 别名选择跨平台 Vulkan；需要 NVIDIA CUDA 内核时显式指定 cuda。
+def _build_location(device: str, cache_dir: str | Path | None) -> tuple[str, Path, str]:
+    """计算设备对应的构建目录和程序名，并校验设备参数。"""
+    # gpu 是 Vulkan 的便捷别名，缓存按实际后端分开保存。
     backend = "vulkan" if device == "gpu" else device
     if backend not in {"cpu", "vulkan", "cuda"}:
         raise ValueError("device 必须为 cpu、gpu、vulkan 或 cuda")
+    # 用户可以通过环境变量或参数将原生缓存放到其他磁盘。
+    cache = Path(cache_dir) if cache_dir else Path(
+        os.environ.get("BIT_JEV_CACHE", Path.home() / ".cache" / "bit-jev"))
+    build_dir = cache.expanduser().resolve() / "build" / __version__ / backend
+    binary_name = "bit-jev-cpu.exe" if os.name == "nt" else "bit-jev-cpu"
+    return backend, build_dir, binary_name
+
+
+def _existing_binary(build_dir: Path, binary_name: str) -> Path | None:
+    """复用不同 CMake 生成器已经产出的原生程序。"""
+    # 单配置和多配置生成器会把程序放在不同的目录。
+    for candidate in (build_dir / "bin" / binary_name, build_dir / binary_name,
+                      build_dir / "Release" / binary_name):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def preflight_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
+                     source_dir: str | Path | None = None) -> Path | None:
+    """在下载大模型前检查首次原生构建需要的工具。"""
+    # 已有编译产物不再依赖 Git、CMake 或本机 C++ 工具链。
+    _, build_dir, binary_name = _build_location(device, cache_dir)
+    cached_binary = _existing_binary(build_dir, binary_name)
+    if cached_binary is not None:
+        return cached_binary
+    # 只有默认自动获取固定上游源码时才需要 Git；可信本地源码跳过检出。
+    missing = []
+    if source_dir is None and not shutil.which("git"):
+        missing.append("Git")
+    cmake = shutil.which("cmake")
+    if not cmake:
+        missing.append("CMake 3.28+")
+    if missing:
+        raise RuntimeError(
+            f"首次加载需要编译原生推理程序，当前缺少：{', '.join(missing)}。\n"
+            "Git 用于获取固定版本的 BitNet 与 llama.cpp 源码、核对提交并应用 ReLU² 补丁；"
+            "正常推理时不使用 Git。\n"
+            f"Git 下载：{GIT_INSTALL_URL}\n"
+            f"CMake 下载：{CMAKE_INSTALL_URL}\n"
+            f"Windows C++ 编译工具：{WINDOWS_CPP_INSTALL_URL}\n"
+            "安装后重新打开终端；若已有自行编译的原生程序，可传入 binary 参数跳过自动构建。")
+    # CMake 过旧时提前提示，避免下载约 1.19 GB 模型之后才由配置步骤报错。
+    version_output = _run([cmake, "--version"])
+    match = re.search(r"cmake version (\d+)\.(\d+)", version_output)
+    if match is None or tuple(map(int, match.groups())) < (3, 28):
+        raise RuntimeError(
+            f"首次构建需要 CMake 3.28+；当前版本输出：{version_output[:120]}。"
+            f"下载：{CMAKE_INSTALL_URL}")
+    return None
+
+
+def build_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
+                 source_dir: str | Path | None = None, jobs: int = 4) -> Path:
+    """返回原生程序路径；首次使用时准备依赖并按设备构建。"""
     if jobs < 1:
         raise ValueError("jobs 必须大于零")
+    # 预检查与模型下载前的检查共用一套错误信息。
+    cached_binary = preflight_native(device, cache_dir=cache_dir, source_dir=source_dir)
+    if cached_binary is not None:
+        return cached_binary
     # 把构建缓存放在用户目录，pip wheel 和工作区都不会写入依赖源码。
-    cache = Path(cache_dir) if cache_dir else Path(os.environ.get("BIT_JEV_CACHE", Path.home() / ".cache" / "bit-jev"))
-    cache = cache.expanduser().resolve()
-    binary_name = "bit-jev-cpu.exe" if os.name == "nt" else "bit-jev-cpu"
-    build_dir = cache / "build" / __version__ / backend
-    binary = build_dir / "bin" / binary_name
-    if not binary.is_file():
-        binary = build_dir / binary_name
-    if binary.is_file():
-        return binary
-    if not shutil.which("cmake") or not shutil.which("git"):
-        raise RuntimeError("首次构建需要 Git、CMake 3.28+ 和 C++17 编译器")
+    backend, build_dir, binary_name = _build_location(device, cache_dir)
+    cache = build_dir.parents[2]
     # 源码参数用于可信的本地 checkout；默认从固定公开提交下载。
     llama = Path(source_dir).resolve() if source_dir else _prepare_upstream(cache)
     if not (llama / "include" / "llama.h").is_file():
@@ -106,10 +159,15 @@ def build_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
             options.extend([f"-DVulkan_INCLUDE_DIR={sdk_root / 'include'}",
                             f"-DVulkan_LIBRARY={vulkan_library}",
                             f"-DVulkan_GLSLC_EXECUTABLE={sdk_root / 'bin' / 'glslc.exe'}"])
-    _run(options)
+    try:
+        _run(options)
+    except RuntimeError as error:
+        # Windows 的 CMake 配置错误常来自尚未安装 C++ 工具链。
+        if os.name == "nt":
+            raise RuntimeError(f"{error}\nWindows C++ 编译工具：{WINDOWS_CPP_INSTALL_URL}") from error
+        raise
     _run(["cmake", "--build", str(build_dir), "--target", "bit-jev-cpu", "--parallel", str(jobs)])
-    for candidate in (build_dir / "bin" / binary_name, build_dir / binary_name,
-                      build_dir / "Release" / binary_name):
-        if candidate.is_file():
-            return candidate
+    compiled_binary = _existing_binary(build_dir, binary_name)
+    if compiled_binary is not None:
+        return compiled_binary
     raise FileNotFoundError("CMake 报告构建成功，但未找到 bit-jev 原生程序")

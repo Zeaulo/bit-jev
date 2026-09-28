@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.12.2 PyPI GGUF 按需下载、CPU/Vulkan/CUDA 原生构建与常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.12.3 PyPI GGUF 构建工具预检查、CPU/Vulkan/CUDA 原生构建与常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.12.2 GGUF pip 包与常驻推理</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.12.3 首次构建工具预检查</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -53,7 +53,7 @@
             <li><b>训练与评估</b><span><code>train.py</code> 管理监督训练；<code>distill.py</code> 读取离线教师分数并更新学生；<code>eval.py</code> 生成逐题结果与准确率、校准统计。输入数据和模型均由操作者自行提供。</span></li>
             <li><b>导出协议</b><span><code>export_distilled.py</code> 校验本地检查点并转换 I2_S GGUF；<code>cpu_head.py</code> 将 q/k 参数写成原生 float32 文件；<code>manifest.json</code> 记录导出文件摘要。</span></li>
             <li><b>GGUF 请求路径</b><span><code>gguf.py</code> 下载或定位模型、等待原生加载握手、复用常驻进程；<code>cpu.py</code> 将多题请求拆成多条因果行；<code>native/main.cpp</code> 用选定 CPU/Vulkan/CUDA 后端读取隐藏状态、计算指针头并返回 JSONL 选项分布。</span></li>
-            <li><b>依赖构建</b><span><code>native_build.py</code> 在用户缓存核对固定 BitNet 与 llama.cpp 提交并应用运行时 ReLU² 补丁；<code>core/native/CMakeLists.txt</code> 根据设备选择后端。源码实验仍可使用 <code>test/bootstrap_bitnet.py</code>。</span></li>
+            <li><b>依赖构建</b><span><code>gguf.py</code> 在下载模型前调用 <code>native_build.py</code> 检查 Git、CMake 3.28+ 与缓存二进制；缺少工具时返回官方安装链接。默认自动构建再在用户缓存核对固定 BitNet 与 llama.cpp 提交并应用运行时 ReLU² 补丁；<code>core/native/CMakeLists.txt</code> 根据设备选择后端。源码实验仍可使用 <code>test/bootstrap_bitnet.py</code>。</span></li>
           </ol></article>
           <article class="glass card"><h3>功能需求层</h3><ol class="step-list">
             <li><b>结构化输出</b><span>Choice 返回候选项概率，Noul 返回真假判断，Score 返回有序评分分布；每题只在调用方给出的候选集合内选择。</span></li>
@@ -131,6 +131,7 @@
 │  ├─ render_checkpoint_public_figures.py
 │  ├─ package_release.py
 │  ├─ test_pypi_inference.py
+│  ├─ test_native_preflight.py / check_pypi_dist.py
 │  ├─ release_config.py / test_release_config.py
 │  └─ verify_release_package.py
 ├─ docs/
@@ -162,7 +163,8 @@
           <article class="glass card"><h3>关键文件职责</h3><dl class="file-list">
             <div><dt>README.md / core/README.md</dt><dd>中文首页按 bitnet.cpp 式标题导航、发布动态、快速开始、实测数据、原理与文档地图组织；core/README.md 是 PyPI 英文展示页，明确按需下载和构建前置条件。</dd></div>
             <div><dt>core/bit_jev/api.py / encoding.py / model.py</dt><dd>api.py 校验三类问题并格式化答案；encoding.py 不依赖 PyTorch，负责五个预留 token、state 与候选项位置编码；model.py 使用这些编码构造 block-causal 掩码、运行 PyTorch 骨干和指针头，供训练及评估。</dd></div>
-            <div><dt>core/bit_jev/gguf.py / native_build.py</dt><dd>gguf.py 从 Hugging Face 下载 GGUF、头和 tokenizer，校验文件、等待原生加载握手，提供 infer、infer_many 和 close；native_build.py 固定 BitNet/llama.cpp 提交，应用 ReLU² 补丁，把 CPU、Vulkan、CUDA 构建缓存到用户目录。</dd></div>
+            <div><dt>core/bit_jev/gguf.py / native_build.py</dt><dd>gguf.py 先调用 preflight_native 检查首次构建依赖，再从 Hugging Face 下载 GGUF、头和 tokenizer，校验文件、等待原生加载握手，提供 infer、infer_many 和 close；native_build.py 固定 BitNet/llama.cpp 提交，应用 ReLU² 补丁，把 CPU、Vulkan、CUDA 构建缓存到用户目录。只有默认自动获取上游源码才需要 Git；已缓存或用户传入 binary 时跳过构建工具检查。</dd></div>
+            <div><dt>test/test_native_preflight.py / check_pypi_dist.py</dt><dd>前者模拟缺工具、旧 CMake、已有二进制、自带源码和自带 binary 的分支，核对缺工具报错在模型下载前触发；后者检查 PyPI wheel 与源码包携带构建输入且不携带权重。</dd></div>
             <div><dt>core/setup.py / MANIFEST.in / native/</dt><dd>setup.py 将唯一的 native/main.cpp、CMakeLists.txt、ReLU² 补丁复制进 wheel；MANIFEST.in 将它们和代码许可证放进源码包。native/main.cpp 按请求设备申请 GPU 层、检查可见后端、执行逐题因果前向并与 Python 进行 JSONL 通信。</dd></div>
             <div><dt>core/bit_jev/train.py / distill.py / eval.py</dt><dd>监督训练、离线教师分数蒸馏和本地评估分别实现；输出都保存在操作者工作区。</dd></div>
             <div><dt>core/bit_jev/hub.py / checkpoint.py</dt><dd>定位基础模型与 tokenizer，优先接受本地 tokenizer 目录；恢复本地运行目录中的骨干、头和温度信息。</dd></div>
@@ -194,7 +196,8 @@
         <div class="glass rounded-[2rem] p-6 md:p-9">
           <ol class="step-list">
             <li><b>安装包</b><span>用户执行 <code>pip install bit-jev</code>。默认依赖包含 Transformers 与 huggingface_hub；训练依赖通过 <code>bit-jev[train]</code> 安装。安装本身不下载权重、不编译上游库。</span></li>
-            <li><b>下载与缓存</b><span><code>BitJev.from_pretrained()</code> 从公开 Hub 仓库只取 GGUF、head、tokenizer 和配置；本地目录可直接传入。缺少文件时在启动原生程序前报错。</span></li>
+            <li><b>构建工具预检查</b><span><code>BitJev.from_pretrained()</code> 在下载约 1.19 GB 模型前检查是否已有对应版本 runner；没有时检查 Git（默认自动获取源码才需要）与 CMake 3.28+。缺失时返回下载链接、Git 用途与传入 binary 的替代入口；Windows C++ 构建失败附上微软安装页。</span></li>
+            <li><b>下载与缓存</b><span>预检查通过后从公开 Hub 仓库只取 GGUF、head、tokenizer 和配置；本地目录可直接传入。缺少文件时在启动原生程序前报错。</span></li>
             <li><b>取得与核对依赖</b><span><code>native_build.py</code> 在用户缓存下载 BitNet 固定提交 <code>0b341e58</code> 与 llama.cpp 固定提交 <code>390c3077</code>，只应用 ReLU² 运行时补丁。源码训练/导出仍使用 <code>test/bootstrap_bitnet.py</code> 取得转换器补丁。</span></li>
             <li><b>构建与握手</b><span>CMake 根据 cpu、vulkan 或 cuda 启用对应后端；C++ 载入 GGUF 和 head 后发送 ready 握手，Python 此时才返回模型对象。GPU 请求无可用设备时报错，不静默退回 CPU。</span></li>
             <li><b>真实请求</b><span><code>test/test_pypi_inference.py</code> 用手写客服请求在同一进程调用两次 infer，核对 Choice、Noul、Score 答案一致；测试目录中的隔离上游源码不带仅供微软基础模型基准使用的 bitnet-25 补丁。</span></li>
@@ -223,15 +226,15 @@
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.12.2 PyPI GGUF 接口、Hub 模型包与公开单题数据</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.12.3 首次构建提示、Hub 模型包与公开单题数据</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已发布 bit-jev 0.8.7：wheel 58,929 字节、源码包 52,759 字节。Python 接口提供 from_pretrained、infer、infer_many、close 和 JSONL CLI；wheel 保存 C++ 源码、固定依赖补丁与许可证，不携带 GGUF 权重。首次加载按需下载和编译；CPU 与 Vulkan 已用公开 GGUF 实测，CUDA 因本机没有 Toolkit 尚未实测。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已发布 bit-jev 0.8.8：wheel 60,216 字节、源码包 54,260 字节；公开索引 SHA-256 与本地构建产物一致。Python 接口提供 from_pretrained、infer、infer_many、close 和 JSONL CLI；wheel 保存 C++ 源码、固定依赖补丁与许可证，不携带 GGUF 权重。首次加载先检查构建工具，再按需下载和编译；CPU 与 Vulkan 已用公开 GGUF 实测，CUDA 因本机没有 Toolkit 尚未实测。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
           <div class="status"><span class="status-dot done"></span><b>权重与结果</b><p>Hugging Face 发布 I2_S GGUF、float32 指针头、分词器、配置、SHA-256 清单、双语模型卡与对应主视觉；config.json 的 modules_to_not_convert 已修正为空数组，远端清单哈希已复核。GitHub 发布脱敏 CPU/GPU 单题时间、内存和中英文图。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.12.2 GGUF pip 接口、Hub 模型包、公开单题案例与中文默认 README；中英文 README 的 Python 徽章标明支持 3.11 和 3.12</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.12.3 / PyPI 0.8.8 构建预检查、Hub 模型包、公开单题案例与中文默认 README</footer>
   </div>
 </body>
 </html>
