@@ -18,14 +18,14 @@ tags:
 
 ![bit-jev 三值输入、推理引擎与候选结果](decision-engine.png)
 
-首次使用只需安装 pip 包并运行自带示例：
+在运行推理的同一个 Python 环境中，从官方 PyPI 安装并核对版本：
 
 ```bash
-python -m pip install --upgrade bit-jev
-bit-jev-demo
+python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
-第一次运行会下载约 1.19 GB 模型；后续复用缓存。`bit-jev-demo --device gpu` 选择 Vulkan。示例输出是模型实际推理结果，没有预写的预测。
+版本应为 `0.11.10`，导入路径应指向当前环境的 `site-packages/bit_jev`。然后直接运行下方的 Python 示例；无需依赖 `bit-jev-demo` 命令的 PATH。首次加载会下载约 1.19 GB 模型，后续复用缓存。镜像版本滞后及环境混用的处理见[安装指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。
 
 ![bit-jev 训练、蒸馏、量化与 CPU/Vulkan 推理流程](project-flow.zh-CN.png)
 
@@ -74,16 +74,24 @@ I2_S GGUF + float32 指针头
 
 推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.11.10 wheel 已携带 CPU 与 Vulkan GPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型。使用 `device="cpu"` 或 `device="gpu"` 推理无需 Git、CMake、C++ 编译器或 Vulkan SDK；Vulkan GPU 需要显卡驱动提供 `vulkan-1.dll`。其他系统和 CUDA 后端按需从固定源码构建，需要 Git、CMake 3.28+ 与 C++17 编译器；CUDA 构建还需要 CUDA Toolkit。
 
-```bash
-pip install bit-jev
-```
-
 ```python
-from bit_jev import BitJev
+from bit_jev.gguf import BitJev
 
-request = {"state": "客户报告重复扣款。", "questions": {"team": {"type": "choice", "instructions": "哪个团队处理？", "criteria": {"billing": "支付退款", "shipping": "物流配送"}}}}
+request = {
+    "state": "客户报告同一订单被重复扣款。",
+    "questions": {
+        "team": {
+            "type": "choice",
+            "instructions": "哪个团队应处理？",
+            "criteria": {"billing": "支付与退款", "shipping": "物流配送"},
+        }
+    },
+}
+
 with BitJev.from_pretrained(device="cpu", threads=8) as model:
-    print(model.infer(request)["answers"])
+    result = model.infer(request)
+    print(result["answers"])
+    print(result["latency_ms"])
 ```
 
 `device="gpu"` 使用 Vulkan；`device="cuda"` 使用 CUDA 构建。`infer()` 复用常驻模型并返回答案、logits、概率和原生推理耗时。完整 CLI、离线目录和构建细节见[GGUF 安装与推理指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。本模型仓库只保存模型文件；两个预编译 runner 位于 PyPI 的 Windows x64 wheel。

@@ -5,11 +5,11 @@
 ## 安装
 
 ```bash
-python -m pip install --upgrade bit-jev
-bit-jev-demo
+python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
-`bit-jev-demo` 自带一条手写客服分流请求，打印当前模型的真实答案，不需要先创建输入文件。使用 `bit-jev-demo --device gpu` 可试用 Vulkan；要传入自己的请求，继续使用下文的 Python API 或 JSONL CLI。
+安装后直接复制[中文首页的完整 Python 示例](../README.md#快速开始)运行，不需要依赖命令行脚本的 PATH。若只想运行自带的手写客服分流题，可执行 `python -m bit_jev.demo --threads 8`；要改用 Vulkan，则执行 `python -m bit_jev.demo --device gpu`。
 
 默认安装包含请求编码、Hugging Face 下载器和原生程序管理接口。约 1.19 GB 的 I2_S GGUF 不在 PyPI wheel 中；首次调用 `from_pretrained()` 时下载到 Hugging Face 缓存。Windows x64 且 CPU 支持 AVX2 时，0.11.10 平台 wheel 已携带 CPU 与 Vulkan GPU 推理程序，正常推理无需 Git、CMake、C++ 编译器或 Vulkan SDK。GPU 仍需支持 Vulkan 的显卡驱动与 `vulkan-1.dll`。其他平台及 CUDA 后端首次源码构建需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；自行编译 Vulkan 需要 SDK，CUDA 需要 CUDA Toolkit。安装命令本身不下载模型或编译程序。
 
@@ -32,7 +32,9 @@ where.exe g++
 
 如果旧版在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符`，在 Windows x64 AVX2 机器上更新到 0.11.10：`python -m pip install --upgrade bit-jev==0.11.10 -i https://pypi.org/simple`。新版本会直接选择 wheel 内程序；已下载的 Hugging Face 模型缓存仍可复用。确认 pip 安装日志下载的是 `win_amd64.whl`，而不是源码包。没有 AVX2 的 CPU 会在加载前收到明确错误，需要自备适配该 CPU 的原生 `binary=`。
 
-如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像还没有提供新版本。使用 `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10`，再用 `python -c "import bit_jev; print(bit_jev.__version__)"` 核对运行时版本。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
+如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像可能还没有提供新版本。使用 `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10`，再用上面的 `importlib.metadata.version('bit-jev')` 和 `bit_jev.__file__` 同时核对**安装包元数据**与**实际导入路径**。仅打印 `bit_jev.__version__` 可能读到当前源码目录里的文件，不能证明当前 Python 环境已安装对应 wheel。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
+
+如果安装日志还显示 `peft==0.14.0`、`unsloth ... requires peft>=0.18.0`，说明旧版 bit-jev 的依赖已经影响了这个 Conda 环境；0.11.10 的默认推理安装不会依赖 `peft`。建议先在新的 Python 3.11/3.12 环境中按上面的命令安装并运行示例，再单独处理原环境的 Unsloth 依赖。若出现 `WARNING: Ignoring invalid distribution ~umpy`，这是该环境已有的 NumPy 安装残留警告，与模型推理接口不是同一故障。
 
 发布初期如果官方 simple 索引也暂时没有 0.11.10，Windows x64 用户可直接安装 [PyPI 官方 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl)：`python -m pip install --upgrade "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"`。SHA-256：`ffc8ad7756ad9b221536ef5dcddfebead025aa66abbf06244a15e3983169b1b4`；索引更新后继续使用普通安装命令。
 

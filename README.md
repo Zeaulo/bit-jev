@@ -4,22 +4,9 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[安装运行](#两条命令开始) · [Python 接口](#快速开始) · [训练与推理流程](#模型流程) · [实测数据](#速度与内存) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[快速开始](#快速开始) · [安装排错](docs/GGUF_PACKAGE.zh-CN.md) · [训练与推理流程](#模型流程) · [实测数据](#速度与内存) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
 ![bit-jev 三值输入经过决策引擎输出候选结果的浅色主视觉](docs/figures/decision-engine.png)
-
-## 两条命令开始
-
-```bash
-python -m pip install --upgrade bit-jev
-bit-jev-demo
-```
-
-`bit-jev-demo` 自带一条客服分流示例，运行后打印**模型实际给出的**答案和原生推理耗时，无需准备 JSONL 文件。首次执行会从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载约 1.19 GB 模型，后续复用缓存；安装命令本身不下载权重。想用 Vulkan GPU，执行 `bit-jev-demo --device gpu`。
-
-若安装后找不到 `bit-jev-demo`，请先核对 `python -c "import bit_jev; print(bit_jev.__version__)"` 是否为 **0.11.10**；镜像或索引尚未同步时，可按[安装指南中的 PyPI 官方 wheel 直链](docs/GGUF_PACKAGE.zh-CN.md)安装。
-
-Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序，推理不需要 Git、CMake、编译器或 Vulkan SDK；GPU 仍需兼容的显卡驱动。其他平台及 CUDA 后端会按需从固定源码构建，详见[安装与排错指南](docs/GGUF_PACKAGE.zh-CN.md)。代码采用 Apache-2.0；[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)单独说明权重的数据来源和许可状态。
 
 ## 先看结论
 
@@ -33,7 +20,14 @@ Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序
 
 ## 快速开始
 
-需要自行传入问题时使用 Python API。支持 Python 3.11 和 3.12；`from_pretrained()` 在第一次调用时下载并加载模型，`infer()` 返回当前模型的实际结果。
+在准备运行代码的**同一个 Python 环境**中从官方 PyPI 安装（Python 3.11/3.12；Windows x64 提供预编译 wheel）：
+
+```bash
+python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
+```
+
+第二行应显示发行版版本 `0.11.10` 和当前环境的 `site-packages/bit_jev/__init__.py`。如果显示 `0.4.3` 或导入路径指向另一份源码，请看[安装排错](docs/GGUF_PACKAGE.zh-CN.md)。模型权重不在 wheel 中；第一次调用 `from_pretrained()` 才会下载约 1.19 GB，之后复用缓存。
 
 ```python
 from bit_jev.gguf import BitJev
@@ -55,7 +49,11 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
     print(result["latency_ms"])
 ```
 
+Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序，推理不需要 Git、CMake、编译器或 Vulkan SDK；GPU 仍需兼容的显卡驱动。其他平台及 CUDA 后端会按需从固定源码构建，详见[安装与排错指南](docs/GGUF_PACKAGE.zh-CN.md)。代码采用 Apache-2.0；[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)单独说明权重的数据来源和许可状态。
+
 把 `device` 改为 `"gpu"` 可选择 Vulkan；NVIDIA CUDA 专用构建使用 `"cuda"`。多 GPU 主机可传 `gpu_index`。推理接口不会生成 token，`latency_ms` 不含模型加载时间。完整配置、CLI、离线目录与原生构建见 [GGUF 安装与推理指南](docs/GGUF_PACKAGE.zh-CN.md)。
+
+若想直接运行内置题目，也可执行 `python -m bit_jev.demo --threads 8`；此调用不依赖 `bit-jev-demo` 命令是否已经加入 PATH。
 
 ## 这个项目解决什么问题
 

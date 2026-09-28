@@ -18,14 +18,14 @@ tags:
 
 ![bit-jev ternary inputs, decision engine, and scored options](decision-engine.png)
 
-Install the package and run its built-in example:
+Install from official PyPI with the Python interpreter that will run inference, then check the distribution version and import path:
 
 ```bash
-python -m pip install --upgrade bit-jev
-bit-jev-demo
+python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
-The first run downloads the roughly 1.19 GB model; later runs reuse the cache. Use `bit-jev-demo --device gpu` for Vulkan. The demo prints an actual prediction, not a fixed sample answer.
+The version should be `0.11.10`, and the import path should point into the active environment's `site-packages/bit_jev`. Then run the Python example below, which does not depend on the `bit-jev-demo` console script being on PATH. The first model load downloads roughly 1.19 GB; later runs reuse the cache. See the [install guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for stale mirrors and mixed environments.
 
 ![bit-jev training, distillation, quantization, and CPU/Vulkan inference](project-flow.en.png)
 
@@ -72,16 +72,24 @@ This release contains the I2_S artifacts for the native CPU runner, matching tok
 
 Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.11.10 wheel includes precompiled CPU and Vulkan GPU runners. For `device="cpu"` or `device="gpu"`, inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan needs a compatible graphics driver that supplies `vulkan-1.dll`. The roughly 1.19 GB model still downloads on first use. Other platforms and CUDA build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; CUDA needs the CUDA Toolkit.
 
-```bash
-pip install bit-jev
-```
-
 ```python
-from bit_jev import BitJev
+from bit_jev.gguf import BitJev
 
-request = {"state": "A customer reports a duplicate charge.", "questions": {"team": {"type": "choice", "instructions": "Which team should handle it?", "criteria": {"billing": "Payment and refunds", "shipping": "Delivery"}}}}
+request = {
+    "state": "A customer reports a duplicate charge on the same order.",
+    "questions": {
+        "team": {
+            "type": "choice",
+            "instructions": "Which team should handle it?",
+            "criteria": {"billing": "Payment and refunds", "shipping": "Delivery"},
+        }
+    },
+}
+
 with BitJev.from_pretrained(device="cpu", threads=8) as model:
-    print(model.infer(request)["answers"])
+    result = model.infer(request)
+    print(result["answers"])
+    print(result["latency_ms"])
 ```
 
 `device="gpu"` selects Vulkan; `device="cuda"` selects a CUDA build. `infer()` reuses the resident model. See the [GGUF package guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for CLI, offline directories, and build details. This model repository contains model files; both precompiled runners are distributed in the PyPI Windows x64 wheel.

@@ -4,34 +4,44 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[Run in two commands](#run-in-two-commands) · [Python API](#quick-start) · [Architecture](#what-the-code-implements) · [Measurements](#bit-jev-autodl-single-question-case) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[Quick start](#quick-start) · [Install troubleshooting](docs/GGUF_PACKAGE.md) · [Architecture](#what-the-code-implements) · [Measurements](#bit-jev-autodl-single-question-case) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
 ![Minimal illustration of ternary inputs, a decision engine, and scored options](docs/figures/decision-engine.png)
 
-## Run in two commands
+## Quick start
+
+Install from official PyPI with the same Python interpreter that will run inference (Python 3.11 or 3.12):
 
 ```bash
-python -m pip install --upgrade bit-jev
-bit-jev-demo
+python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
-The demo runs a built-in customer-routing request and prints the **actual model output**; no JSONL file is needed. The first run downloads the roughly 1.19 GB model from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Installation itself does not download weights. Use `bit-jev-demo --device gpu` for Vulkan.
+The second command should show distribution version `0.11.10` and a `site-packages/bit_jev/__init__.py` path in the active environment. If it shows `0.4.3` or another source path, see [install troubleshooting](docs/GGUF_PACKAGE.md). The first `from_pretrained()` call downloads roughly 1.19 GB from Hugging Face; later calls reuse the cache.
 
-If `bit-jev-demo` is unavailable after installation, check that `python -c "import bit_jev; print(bit_jev.__version__)"` returns **0.11.10**. The [installation guide](docs/GGUF_PACKAGE.md) includes a direct official wheel link for stale package indexes.
+```python
+from bit_jev.gguf import BitJev
+
+request = {
+    "state": "A customer reports a duplicate charge on the same order.",
+    "questions": {
+        "team": {
+            "type": "choice",
+            "instructions": "Which team should handle this?",
+            "criteria": {"billing": "Payment and refunds", "shipping": "Delivery"},
+        }
+    },
+}
+
+with BitJev.from_pretrained(device="cpu", threads=8) as model:
+    result = model.infer(request)
+    print(result["answers"])
+    print(result["latency_ms"])
+```
 
 On Windows x64 with AVX2, the 0.11.10 wheel includes precompiled CPU and Vulkan runners, so inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan requires a compatible graphics driver. Other platforms and CUDA build from pinned source on demand; see the [installation guide](docs/GGUF_PACKAGE.md). The Apache-2.0 license covers code; the [model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) separately documents checkpoint provenance and rights.
 
-## Quick start
-
-```python
-from bit_jev import BitJev
-
-request = {"state": "A customer reports a duplicate charge.", "questions": {"team": {"type": "choice", "instructions": "Which team should handle this?", "criteria": {"billing": "Payment and refunds", "shipping": "Delivery"}}}}
-with BitJev.from_pretrained(device="cpu", threads=8) as model:
-    print(model.infer(request)["answers"])
-```
-
-The GGUF is about 1.19 GB and is cached outside the wheel. The model remains loaded for subsequent `infer()` calls. Native `latency_ms` excludes model loading. See the [GGUF package guide](docs/GGUF_PACKAGE.md) for GPU, CLI, and local model directories. The repository license covers code; the model card describes the checkpoint's separate rights status.
+The model remains loaded for subsequent `infer()` calls. Native `latency_ms` excludes model loading. For Vulkan, use `device="gpu"`. To run the built-in example without relying on a console script being on PATH, use `python -m bit_jev.demo --threads 8`.
 
 ## bit-jev = bitnet + jev !!!
 
