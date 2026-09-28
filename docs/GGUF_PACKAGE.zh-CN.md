@@ -34,6 +34,8 @@ where.exe g++
 
 如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像可能还没有提供新版本；目前官方 simple 索引在本机网络下也可能返回旧缓存。Windows x64 用户使用本节开头的官方 wheel 直链，再用 `importlib.metadata.version('bit-jev')` 和 `bit_jev.__file__` 同时核对**安装包元数据**与**实际导入路径**。仅打印 `bit_jev.__version__` 可能读到当前源码目录里的文件，不能证明当前 Python 环境已安装对应 wheel。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
 
+若 `python -m pip show bit-jev` 同时显示 `Version: 0.4.3` 和 `Editable project location:`，说明当前环境保留了旧版可编辑安装。导入可能读取工作区中已更新为 0.11.10 的源码，但发行版元数据和控制台入口仍属于 0.4.3。这正是 `bit_jev.__version__` 看似正确、`bit-jev-demo` 却不存在的原因。若要保留训练/Unsloth 环境，建议另建干净的推理环境安装官方 wheel；若确定要把当前环境改为发行版安装，再卸载旧可编辑版并安装本节的 wheel。
+
 如果安装日志还显示 `peft==0.14.0`、`unsloth ... requires peft>=0.18.0`，说明旧版 bit-jev 的依赖已经影响了这个 Conda 环境；0.11.10 的默认推理安装不会依赖 `peft`。建议先在新的 Python 3.11/3.12 环境中按上面的命令安装并运行示例，再单独处理原环境的 Unsloth 依赖。若出现 `WARNING: Ignoring invalid distribution ~umpy`，这是该环境已有的 NumPy 安装残留警告，与模型推理接口不是同一故障。
 
 发布初期如果官方 simple 索引也暂时没有 0.11.10，Windows x64 用户可直接安装 [PyPI 官方 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl)：`python -m pip install --upgrade "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"`。SHA-256：`ffc8ad7756ad9b221536ef5dcddfebead025aa66abbf06244a15e3983169b1b4`；索引更新后继续使用普通安装命令。
