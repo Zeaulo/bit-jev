@@ -240,7 +240,7 @@
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
         <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.15.5 安装即用、双语模型流程与图片路径修复</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>0.11.10 Windows x64 AVX2 wheel 含 CPU/Vulkan 两个 EXE 与 bit-jev-demo 命令，模型权重仍单独托管在 Hugging Face。wheel 16,390,228 字节、sdist 16,135,660 字节，发行内容和元数据检查通过；隔离安装后的 CPU 与 Vulkan 自带示例均使用本地公开 GGUF 完成真实请求。普通 Windows Vulkan 推理需要显卡驱动与系统 loader，不需要 SDK；CUDA 因本机没有 Toolkit 尚未实测。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>GitHub main 已发布新首页；PyPI 已接收 0.11.10 Windows x64 AVX2 wheel，含 CPU/Vulkan 两个 EXE 与 bit-jev-demo 命令，模型权重仍单独托管在 Hugging Face。wheel 16,390,228 字节、sdist 16,135,660 字节，公开 JSON 的大小和 SHA-256 与本地一致。发布初期当前代理的 simple 索引仍有旧缓存，中英文安装指南提供本版官方 wheel 直链。隔离安装后 CPU/Vulkan 自带示例均完成真实请求；普通 Windows Vulkan 推理需要显卡驱动与系统 loader，不需要 SDK。CUDA 因本机没有 Toolkit 尚未实测。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；bit-jev 检查点另提供脱敏 AutoDL 单题 CPU/GPU 案例。两类数据使用不同模型路径和口径，不能混成一个通用加速比。</p></div>
           <div class="status"><span class="status-dot done"></span><b>权重、模型卡与图片</b><p>Hugging Face 保存 I2_S GGUF、float32 指针头、分词器、配置与 SHA-256 清单；config.json 的 modules_to_not_convert 是空数组。模型卡中英文切换链接指向实际 README 文件；无文字主视觉和中英文流程 PNG 上传到仓库根目录后，Markdown 使用根目录相对路径，AutoDL 案例图也改用根目录已有 PNG。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>

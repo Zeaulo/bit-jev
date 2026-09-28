@@ -34,6 +34,8 @@ where.exe g++
 
 如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像还没有提供新版本。使用 `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10`，再用 `python -c "import bit_jev; print(bit_jev.__version__)"` 核对运行时版本。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
 
+发布初期如果官方 simple 索引也暂时没有 0.11.10，Windows x64 用户可直接安装 [PyPI 官方 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl)：`python -m pip install --upgrade "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"`。SHA-256：`ffc8ad7756ad9b221536ef5dcddfebead025aa66abbf06244a15e3983169b1b4`；索引更新后继续使用普通安装命令。
+
 
 ## Python API
 

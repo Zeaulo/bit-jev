@@ -17,6 +17,8 @@ bit-jev-demo
 
 `bit-jev-demo` 自带一条客服分流示例，运行后打印**模型实际给出的**答案和原生推理耗时，无需准备 JSONL 文件。首次执行会从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载约 1.19 GB 模型，后续复用缓存；安装命令本身不下载权重。想用 Vulkan GPU，执行 `bit-jev-demo --device gpu`。
 
+若安装后找不到 `bit-jev-demo`，请先核对 `python -c "import bit_jev; print(bit_jev.__version__)"` 是否为 **0.11.10**；镜像或索引尚未同步时，可按[安装指南中的 PyPI 官方 wheel 直链](docs/GGUF_PACKAGE.zh-CN.md)安装。
+
 Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序，推理不需要 Git、CMake、编译器或 Vulkan SDK；GPU 仍需兼容的显卡驱动。其他平台及 CUDA 后端会按需从固定源码构建，详见[安装与排错指南](docs/GGUF_PACKAGE.zh-CN.md)。代码采用 Apache-2.0；[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)单独说明权重的数据来源和许可状态。
 
 ## 先看结论

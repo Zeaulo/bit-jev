@@ -17,6 +17,8 @@ bit-jev-demo
 
 The demo runs a built-in customer-routing request and prints the **actual model output**; no JSONL file is needed. The first run downloads the roughly 1.19 GB model from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Installation itself does not download weights. Use `bit-jev-demo --device gpu` for Vulkan.
 
+If `bit-jev-demo` is unavailable after installation, check that `python -c "import bit_jev; print(bit_jev.__version__)"` returns **0.11.10**. The [installation guide](docs/GGUF_PACKAGE.md) includes a direct official wheel link for stale package indexes.
+
 On Windows x64 with AVX2, the 0.11.10 wheel includes precompiled CPU and Vulkan runners, so inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan requires a compatible graphics driver. Other platforms and CUDA build from pinned source on demand; see the [installation guide](docs/GGUF_PACKAGE.md). The Apache-2.0 license covers code; the [model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) separately documents checkpoint provenance and rights.
 
 ## Quick start
