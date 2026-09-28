@@ -12,7 +12,7 @@
 
 </div>
 
-> **Release update · 2026-09-28** PyPI 0.9.10 includes a precompiled CPU runner for Windows x64 machines with AVX2: inference needs no Git, CMake, or C++ compiler. The roughly 1.19 GB GGUF still downloads on first use. Other platforms and GPU backends build the pinned runner on demand. `device="gpu"` selects Vulkan; `device="cuda"` requires a CUDA Toolkit.
+> **Release update · 2026-09-28** PyPI 0.10.10 includes precompiled CPU and Vulkan GPU runners for Windows x64 machines with AVX2. Inference needs no Git, CMake, C++ compiler, or Vulkan SDK; Vulkan still needs a compatible graphics driver. The roughly 1.19 GB GGUF downloads on first use. Other platforms and CUDA builds still compile from pinned source.
 
 ## Quick start
 

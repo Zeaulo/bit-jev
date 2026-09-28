@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bit-jev"
-version = "0.9.10"
+version = "0.10.10"
 description = "A Jev/Kev-style decision model on Microsoft's 1.58-bit BitNet b1.58 backbone"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"

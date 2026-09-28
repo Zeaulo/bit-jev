@@ -21,7 +21,7 @@ BITNET_URL = "https://github.com/microsoft/BitNet.git"
 GIT_INSTALL_URL = "https://git-scm.com/install/"
 CMAKE_INSTALL_URL = "https://cmake.org/download/"
 WINDOWS_CPP_INSTALL_URL = "https://learn.microsoft.com/cpp/build/vscpp-step-0-installation"
-VULKAN_SDK_INSTALL_URL = "https://vulkan.lunarg.com/sdk/home"
+VULKAN_BUILD_GUIDE_URL = "https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md"
 
 
 def _run(arguments: list[str], *, directory: Path | None = None) -> str:
@@ -98,13 +98,16 @@ def _existing_binary(build_dir: Path, binary_name: str) -> Path | None:
 
 
 def _bundled_binary(device: str, source_dir: str | Path | None) -> Path | None:
-    """寻找适用于当前 Windows x64 CPU 的 wheel 内预编译程序。"""
+    """寻找适用于当前 Windows x64 CPU 或 Vulkan 后端的预编译程序。"""
     # 指定本地原生源码意味着调用方明确要求重新构建，不能被预编译程序覆盖。
-    if device != "cpu" or source_dir is not None or sys.platform != "win32":
+    backend = "vulkan" if device == "gpu" else device
+    if backend not in {"cpu", "vulkan"} or source_dir is not None or sys.platform != "win32":
         return None
     if platform.machine().lower() not in {"amd64", "x86_64"} or sys.maxsize <= 2**32:
         return None
-    binary = Path(__file__).resolve().parent / "_bin" / "bit-jev-cpu.exe"
+    # CPU 与 Vulkan 分别编译；GPU 路径不能误用没有 Vulkan 后端的 CPU 文件。
+    binary_name = "bit-jev-cpu.exe" if backend == "cpu" else "bit-jev-vulkan.exe"
+    binary = Path(__file__).resolve().parent / "_bin" / binary_name
     if not binary.is_file():
         return None
     # 当前 I2_S 内核需要 AVX2；提前检查可避免 Windows 在启动时直接报非法指令。
@@ -112,6 +115,13 @@ def _bundled_binary(device: str, source_dir: str | Path | None) -> Path | None:
     if not avx2_available:
         raise RuntimeError("当前 Windows x64 CPU 不支持 AVX2，无法运行 bit-jev 预编译程序。"
                            "请使用支持 AVX2 的机器，或传入适配本机的 binary 参数。")
+    if backend == "vulkan":
+        # SDK 只用于编译；已编译程序运行时只需显卡驱动提供 Vulkan loader。
+        try:
+            ctypes.WinDLL("vulkan-1.dll")
+        except OSError as error:
+            raise RuntimeError("系统缺少 Vulkan 运行时 vulkan-1.dll。"
+                               "请更新支持 Vulkan 的显卡驱动；普通推理无需安装 Vulkan SDK。") from error
     return binary
 
 
@@ -187,12 +197,12 @@ def build_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
     try:
         _run(options)
     except RuntimeError as error:
-        # Vulkan 配置失败通常是 SDK 的库、头文件或 glslc 缺失，不能误报成 C++ 编译器问题。
+        # 只有显式源码构建或没有预编译包时才会到达此分支。
         if backend == "vulkan" and "Could NOT find Vulkan" in str(error):
             raise RuntimeError(
                 f"{error}\n缺少 Vulkan SDK 的库、头文件或 glslc。"
-                f"请安装完整的 Vulkan SDK：{VULKAN_SDK_INSTALL_URL}\n"
-                "Windows 安装后重新打开终端，检查 VULKAN_SDK 环境变量和 glslc --version。"
+                "普通 Windows x64 AVX2 推理请安装含预编译 Vulkan 程序的 bit-jev 版本；"
+                f"自行编译的配置说明：{VULKAN_BUILD_GUIDE_URL}"
             ) from error
         # Windows 的 CMake 配置错误常来自尚未安装 C++ 工具链。
         if os.name == "nt":

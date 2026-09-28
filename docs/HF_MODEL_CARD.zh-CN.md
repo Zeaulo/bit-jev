@@ -61,7 +61,7 @@ I2_S GGUF + float32 指针头
 
 ## 推理示例
 
-推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.9.10 wheel 已携带 CPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型，推理无需 Git、CMake 或 C++ 编译器。其他系统及 GPU 后端按需从固定源码构建，需要 Git、CMake 3.28+ 和 C++17 编译器；Vulkan 还需要 Vulkan SDK，CUDA 还需要 CUDA Toolkit。
+推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.10.10 wheel 已携带 CPU 与 Vulkan GPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型。使用 `device="cpu"` 或 `device="gpu"` 推理无需 Git、CMake、C++ 编译器或 Vulkan SDK；Vulkan GPU 需要显卡驱动提供 `vulkan-1.dll`。其他系统和 CUDA 后端按需从固定源码构建，需要 Git、CMake 3.28+ 与 C++17 编译器；CUDA 构建还需要 CUDA Toolkit。
 
 ```bash
 pip install bit-jev
@@ -75,7 +75,7 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
     print(model.infer(request)["answers"])
 ```
 
-`device="gpu"` 使用 Vulkan；`device="cuda"` 使用 CUDA 构建。`infer()` 复用常驻模型并返回答案、logits、概率和原生推理耗时。完整 CLI、离线目录和构建细节见[GGUF 安装与推理指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。本模型仓库只保存模型文件；预编译 runner 位于 PyPI 的 Windows x64 wheel。
+`device="gpu"` 使用 Vulkan；`device="cuda"` 使用 CUDA 构建。`infer()` 复用常驻模型并返回答案、logits、概率和原生推理耗时。完整 CLI、离线目录和构建细节见[GGUF 安装与推理指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。本模型仓库只保存模型文件；两个预编译 runner 位于 PyPI 的 Windows x64 wheel。
 
 ## 性能案例：AutoDL Xeon Gold 6459C / RTX 5090
 

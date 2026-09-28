@@ -148,3 +148,10 @@
 - 新增 test/test_version_consistency.py，验证 pyproject.toml、运行时版本和原生缓存目录一致；test/test_native_preflight.py 新增 Vulkan SDK 缺失的定向诊断测试。两组共八项检查通过。0.9.10 wheel 1,628,945 字节、源码包 1,617,229 字节，均通过 twine check 与发行包内容检查；隔离安装后屏蔽 Git/CMake，公开 GGUF 两次常驻推理成功。
 - 更新 README 中英文、GGUF 中英文指南、Hugging Face 双语模型卡和 versions/project_overall/index.html 的版本、执行路径、错误诊断及关键文件职责。
 - PyPI 已接收 bit-jev 0.9.10 的 Windows x64 wheel 与源码包；公开版本 JSON 的两份文件大小和 SHA-256 与本地产物一致。Hugging Face 双语模型卡已上传 0.9.10 文案。公开 simple 索引在发布后短时间仍可能返回旧缓存，安装说明保留 `--no-cache-dir` 与官方索引参数。
+
+[2026-09-28 18:21:56] v0.14.5（中版本，Windows x64 AVX2 Vulkan GPU 预编译 wheel）
+- 项目版本由 0.13.5 升为 0.14.5，PyPI 包版本由 0.9.10 升为 0.10.10。core/setup.py 将 CPU 与 Vulkan 两个预编译 EXE 一起装进 Windows x64 wheel；native_build.py 按 cpu 与 gpu/vulkan 选择目标，保留 binary、native_source、CUDA 和其他平台的现有分流。
+- Vulkan EXE 使用 BitNet 0b341e58、llama.cpp 390c3077 与 ReLU² 补丁，MinGW Release 配置 GGML_NATIVE=OFF、AVX2=ON、BMI2=OFF、OpenMP=OFF、Vulkan=ON、CUDA=OFF，静态链接 GCC 运行库。core/native/prebuilt/win_amd64/bit-jev-vulkan.exe 为 45,801,472 字节，SHA-256 为 CF2BB4815DE2CABC6C88B790B55A4A39B6D270CEEC3E791E4F634B211B74E516。dumpbin 仅显示 Windows 系统/UCRT DLL 和 vulkan-1.dll，不要求安装 SDK 或 MinGW 运行库。
+- GPU 包内路径在下载模型前检查 Windows AVX2 和系统 Vulkan loader；缺 loader 时提示更新显卡驱动。只有操作者显式源码构建 Vulkan 时才需要 SDK 头文件、库与 glslc；移除故障提示中用户无法访问的 LunarG SDK 页面链接，改指向项目构建指南。正常 Windows x64 AVX2 的 CPU/GPU 推理均无需 Git、CMake 或 C++ 编译器。
+- test/test_native_preflight.py 八项、test/test_version_consistency.py 一项通过；发行包内容检查和 twine check 通过。0.10.10 wheel 16,388,760 字节、sdist 16,133,285 字节。隔离安装 wheel 后限制 PATH 为 Windows 系统目录、屏蔽 Git/CMake 工具发现，RTX 2060 的公开 GGUF Vulkan 路径连续两次真实推理成功，Choice、Noul、Score 答案一致。该验收不代表 Vulkan 比 CPU 快，也不代表 RTX 5090 性能。
+- 更新中英文 README、GGUF 指南、Hugging Face 双语模型卡、发行清单、PyPI 实施文档与 versions/project_overall/index.html；总览按当前加载顺序、两套预编译程序、运行时依赖和真实测试边界维护。

@@ -8,9 +8,9 @@
 pip install bit-jev
 ```
 
-默认安装包含请求编码、Hugging Face 下载器和原生程序管理接口。约 1.19 GB 的 I2_S GGUF 不在 PyPI wheel 中；首次调用 `from_pretrained()` 时下载到 Hugging Face 缓存。Windows x64 且 CPU 支持 AVX2 时，0.9.10 平台 wheel 已携带 CPU 推理程序，推理无需 Git、CMake 或 C++ 编译器。其他平台及 GPU 后端首次构建需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；Vulkan GPU 模式还需要 Vulkan SDK，CUDA 模式还需要 CUDA Toolkit。安装命令本身不下载模型或编译程序。
+默认安装包含请求编码、Hugging Face 下载器和原生程序管理接口。约 1.19 GB 的 I2_S GGUF 不在 PyPI wheel 中；首次调用 `from_pretrained()` 时下载到 Hugging Face 缓存。Windows x64 且 CPU 支持 AVX2 时，0.10.10 平台 wheel 已携带 CPU 与 Vulkan GPU 推理程序，正常推理无需 Git、CMake、C++ 编译器或 Vulkan SDK。GPU 仍需支持 Vulkan 的显卡驱动与 `vulkan-1.dll`。其他平台及 CUDA 后端首次源码构建需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器；自行编译 Vulkan 需要 SDK，CUDA 需要 CUDA Toolkit。安装命令本身不下载模型或编译程序。
 
-Git 只用于源码自动构建：获取微软 BitNet 的固定提交、初始化其中的 llama.cpp 子模块、核对提交并应用本项目的 ReLU² 兼容补丁。Windows x64 AVX2 CPU 直接启动 wheel 内程序，不调用 Git 或 CMake。若使用经过验证的自有原生程序，可通过 `binary=` 指定；若传入已准备并打好补丁的 `native_source=`，则强制走本地源码构建。预编译程序由固定上游提交构建，已关闭针对构建机的原生 CPU 指令特化，并静态链接 MSVC 运行库；当前仍要求 AVX2。源码构建路径继续在下载大模型前检查工具。
+Git 只用于源码自动构建：获取微软 BitNet 的固定提交、初始化其中的 llama.cpp 子模块、核对提交并应用本项目的 ReLU² 兼容补丁。Windows x64 AVX2 的 CPU/Vulkan 推理直接启动 wheel 内对应程序，不调用 Git 或 CMake。若使用经过验证的自有原生程序，可通过 `binary=` 指定；若传入已准备并打好补丁的 `native_source=`，则强制走本地源码构建。两个预编译程序均由固定上游提交构建，关闭针对构建机的原生 CPU 指令特化，仍要求 AVX2；CPU EXE 静态链接 MSVC 运行库，Vulkan EXE 静态链接 MinGW 运行库、动态使用系统的 `vulkan-1.dll`。源码构建路径继续在下载大模型前检查工具。
 
 ### Windows 源码构建前检查
 
@@ -25,11 +25,11 @@ where.exe cl
 where.exe g++
 ```
 
-仅在其他平台、GPU 后端或明确传入 `native_source=` 时执行上面的检查。若 Git 或 CMake 不存在，从上面的官方链接安装；CMake 版本至少 3.28。若 `cl` 和 `g++` 均不可用，安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation) 的 **Desktop development with C++** 组件。使用 MSVC 命令行工具时，打开 **x64 Native Tools Command Prompt**，再激活原来的 Python 环境。Python 导入名为 `bit_jev`，不是带连字符的 PyPI 包名 `bit-jev`。
+仅在其他平台、CUDA 后端或明确传入 `native_source=` 时执行上面的检查。若 Git 或 CMake 不存在，从上面的官方链接安装；CMake 版本至少 3.28。若 `cl` 和 `g++` 均不可用，安装 [Visual Studio C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation) 的 **Desktop development with C++** 组件。使用 MSVC 命令行工具时，打开 **x64 Native Tools Command Prompt**，再激活原来的 Python 环境。Python 导入名为 `bit_jev`，不是带连字符的 PyPI 包名 `bit-jev`。
 
-如果旧版在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符`，在 Windows x64 AVX2 机器上更新到 0.9.10：`python -m pip install --upgrade bit-jev==0.9.10 -i https://pypi.org/simple`。新版本会直接选择 wheel 内程序；已下载的 Hugging Face 模型缓存仍可复用。确认 pip 安装日志下载的是 `win_amd64.whl`，而不是源码包。没有 AVX2 的 CPU 会在加载前收到明确错误，需要自备适配该 CPU 的原生 `binary=`。
+如果旧版在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符`，在 Windows x64 AVX2 机器上更新到 0.10.10：`python -m pip install --upgrade bit-jev==0.10.10 -i https://pypi.org/simple`。新版本会直接选择 wheel 内程序；已下载的 Hugging Face 模型缓存仍可复用。确认 pip 安装日志下载的是 `win_amd64.whl`，而不是源码包。没有 AVX2 的 CPU 会在加载前收到明确错误，需要自备适配该 CPU 的原生 `binary=`。
 
-如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像还没有提供新版本。使用 `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.9.10`，再用 `python -c "import bit_jev; print(bit_jev.__version__)"` 核对运行时版本。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
+如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像还没有提供新版本。使用 `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.10.10`，再用 `python -c "import bit_jev; print(bit_jev.__version__)"` 核对运行时版本。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
 
 ## Python API
 
@@ -57,7 +57,7 @@ with BitJev.from_pretrained(device="cpu", threads=8, batch=128) as model:
 
 设备选项：`cpu` 不卸载层；`gpu` 是 `vulkan` 的便捷别名；`cuda` 使用 NVIDIA CUDA 构建。多 GPU 主机可传入 `gpu_index=1` 选择 Vulkan/CUDA 可见设备序号；它只修改原生子进程的环境。GPU 模式在没有可用 GPU 后端或可见 GPU 时返回错误，不自动退回 CPU。I2_S Vulkan 后端可能保留部分权重在 CPU 内存，因此 GPU 路径不等于全部权重位于显存。不同硬件和输入长度的性能需要自行测量；原有 AutoDL RTX 5090 数据来自 FP16 PyTorch 路径，不能当作此 GGUF GPU 路径的速度。
 
-Windows 上的 `device="gpu"` 首次运行会编译 Vulkan 程序，需要安装[完整的 LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home)，仅安装显卡驱动或 Vulkan Runtime 不够。安装后重开终端，执行 `echo %VULKAN_SDK%`、`where.exe glslc`、`glslc --version`；CMake 还需要能找到 SDK 的 `Include/vulkan/vulkan.h` 与 `Lib/vulkan-1.lib`。若 CMake 提示 `Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)`，问题在 SDK 配置，CPU 预编译推理不受影响。
+Windows x64 AVX2 上的 `device="gpu"` 直接启动 wheel 内的 Vulkan EXE，不需要 Vulkan SDK；显卡驱动必须提供 `vulkan-1.dll` 和可用设备。若系统报告缺少 `vulkan-1.dll`，请更新显卡厂商的驱动。只有操作者显式传入 `native_source=`，或在没有对应 wheel 的平台自行构建 Vulkan 后端时，才需要 SDK 的库、头文件和 `glslc`；原先报 `Could NOT find Vulkan` 的机器安装新 wheel 后无需重试该构建步骤。GPU 即使正常运行，也不保证比 CPU 快：I2_S Vulkan 路径可能保留部分权重和计算在 CPU。
 
 ## 已下载模型与自有二进制
 

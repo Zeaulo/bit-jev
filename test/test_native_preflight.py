@@ -64,6 +64,15 @@ class NativePreflightTests(unittest.TestCase):
                  patch("bit_jev.native_build.shutil.which", return_value=None):
                 self.assertEqual(preflight_native(cache_dir=temporary_cache), bundled)
 
+    def test_bundled_vulkan_skips_build_tools(self):
+        """已有 Vulkan 预编译程序时 GPU 请求无需发现构建工具。"""
+        # gpu 别名对应 vulkan 缓存，预检查应直接返回 wheel 内的 GPU 程序。
+        with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "test") as temporary_cache:
+            bundled = PROJECT_ROOT / "core" / "native" / "prebuilt" / "win_amd64" / "bit-jev-vulkan.exe"
+            with patch("bit_jev.native_build._bundled_binary", return_value=bundled), \
+                 patch("bit_jev.native_build.shutil.which", return_value=None):
+                self.assertEqual(preflight_native("gpu", cache_dir=temporary_cache), bundled)
+
     def test_local_source_does_not_require_git(self):
         """调用方已准备原生源码时只要求 CMake 构建工具。"""
         # 本地源码的获取与补丁责任由调用方承担，不需要包再次执行 Git。
@@ -94,9 +103,10 @@ class NativePreflightTests(unittest.TestCase):
             with patch("bit_jev.native_build.preflight_native", return_value=None), \
                  patch("bit_jev.native_build._run",
                        side_effect=RuntimeError("Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)")):
-                with self.assertRaisesRegex(RuntimeError, "https://vulkan.lunarg.com/sdk/home") as caught:
+                with self.assertRaisesRegex(RuntimeError, "docs/GGUF_PACKAGE.zh-CN.md") as caught:
                     build_native("gpu", cache_dir=temporary_cache, source_dir=source)
         self.assertNotIn("Windows C++ 编译工具", str(caught.exception))
+        self.assertNotIn("vulkan.lunarg.com/sdk/home", str(caught.exception))
 
 
 if __name__ == "__main__":

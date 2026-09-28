@@ -10,7 +10,7 @@ bit-jev scores explicit options over a 1.58-bit BitNet backbone. Its I2_S GGUF i
 pip install bit-jev
 ```
 
-The Windows x64 wheel includes a precompiled CPU runner for AVX2 processors. CPU inference on those machines needs no Git, CMake, or C++ compiler. The 1.19 GB GGUF downloads from Hugging Face on first use; installation itself does not download model weights. Other platforms and GPU backends build the native runner on demand and require [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). GPU builds also require a Vulkan SDK or CUDA Toolkit. The precompiled program uses pinned BitNet and llama.cpp source with the ReLU² runtime patch and carries their MIT license notices.
+The Windows x64 wheel includes precompiled CPU and Vulkan GPU runners for AVX2 processors. Inference on those machines needs no Git, CMake, C++ compiler, or Vulkan SDK. Vulkan GPU inference still needs a compatible graphics driver and its `vulkan-1.dll` runtime. The 1.19 GB GGUF downloads from Hugging Face on first use; installation itself does not download model weights. Other platforms build the native runner on demand and require [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Source builds of Vulkan also need its SDK; CUDA builds need a CUDA Toolkit. Both precompiled programs use pinned BitNet and llama.cpp source with the ReLU² runtime patch and carry their MIT license notices.
 
 ## Resident inference
 

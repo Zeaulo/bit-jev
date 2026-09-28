@@ -59,7 +59,7 @@ This release contains the I2_S artifacts for the native CPU runner, matching tok
 
 ## Inference
 
-Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.9.10 wheel includes a precompiled CPU runner, so inference needs no Git, CMake, or C++ compiler. The roughly 1.19 GB model still downloads on first use. Other platforms and GPU backends build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; Vulkan also needs a Vulkan SDK and CUDA needs a CUDA Toolkit.
+Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.10.10 wheel includes precompiled CPU and Vulkan GPU runners. For `device="cpu"` or `device="gpu"`, inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan needs a compatible graphics driver that supplies `vulkan-1.dll`. The roughly 1.19 GB model still downloads on first use. Other platforms and CUDA build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; CUDA needs the CUDA Toolkit.
 
 ```bash
 pip install bit-jev
@@ -73,7 +73,7 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
     print(model.infer(request)["answers"])
 ```
 
-`device="gpu"` selects Vulkan; `device="cuda"` selects a CUDA build. `infer()` reuses the resident model. See the [GGUF package guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for CLI, offline directories, and build details. This model repository contains model files; the precompiled runner is distributed in the PyPI Windows x64 wheel.
+`device="gpu"` selects Vulkan; `device="cuda"` selects a CUDA build. `infer()` reuses the resident model. See the [GGUF package guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for CLI, offline directories, and build details. This model repository contains model files; both precompiled runners are distributed in the PyPI Windows x64 wheel.
 
 ## AutoDL case study: Xeon Gold 6459C / RTX 5090
 

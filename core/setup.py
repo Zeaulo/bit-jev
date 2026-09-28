@@ -1,4 +1,4 @@
-"""构建 wheel 时附加源码和 Windows x64 CPU 预编译程序。"""
+"""构建 wheel 时附加源码和 Windows x64 CPU/Vulkan 预编译程序。"""
 
 import platform
 import sys
@@ -11,7 +11,7 @@ from wheel.bdist_wheel import bdist_wheel
 
 
 def _supports_windows_binary():
-    """只在 64 位 x86 Windows 上发放对应架构的 CPU 程序。"""
+    """只在 64 位 x86 Windows 上发放对应架构的原生程序。"""
     # 可执行文件使用 AVX2 指令，但不与 CPython 的 ABI 绑定。
     return sys.platform == "win32" and platform.machine().lower() in {"amd64", "x86_64"} and sys.maxsize > 2**32
 
@@ -33,8 +33,10 @@ class BuildWithNative(build_py):
         if _supports_windows_binary():
             binary_target = Path(self.build_lib) / "bit_jev" / "_bin"
             binary_target.mkdir(parents=True, exist_ok=True)
-            copy2(native_source / "prebuilt" / "win_amd64" / "bit-jev-cpu.exe",
-                  binary_target / "bit-jev-cpu.exe")
+            # CPU 与 Vulkan 分别选择，两个程序均不需要在用户机器编译。
+            for filename in ("bit-jev-cpu.exe", "bit-jev-vulkan.exe"):
+                copy2(native_source / "prebuilt" / "win_amd64" / filename,
+                      binary_target / filename)
             # 第三方 MIT 许可文本随二进制一起安装，满足再分发要求。
             for filename in ("BITNET_LICENSE", "LLAMA_CPP_LICENSE"):
                 copy2(native_source / "prebuilt" / "licenses" / filename,

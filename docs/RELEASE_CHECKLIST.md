@@ -1,6 +1,6 @@
 # v0.10.0 source, Hugging Face model and benchmark publication record
 
-This checklist records the **GitHub code release**, the Windows x64 AVX2 precompiled CPU runner, independent Microsoft BitNet base-model figures, and the separate [Hugging Face bit-jev model package](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). GitHub contains code and the small CPU executable; the GGUF model remains on Hugging Face.
+This checklist records the **GitHub code release**, the Windows x64 AVX2 precompiled CPU and Vulkan GPU runners, independent Microsoft BitNet base-model figures, and the separate [Hugging Face bit-jev model package](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). GitHub contains code and both native executables; the GGUF model remains on Hugging Face.
 
 ## Public source boundary
 
