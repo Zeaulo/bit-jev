@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.12.1 PyPI GGUF 按需下载、CPU/Vulkan/CUDA 原生构建与常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.12.2 PyPI GGUF 按需下载、CPU/Vulkan/CUDA 原生构建与常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.12.1 GGUF pip 包与常驻推理</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.12.2 GGUF pip 包与常驻推理</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -223,7 +223,7 @@
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.12.1 PyPI GGUF 接口、Hub 模型包与公开单题数据</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.12.2 PyPI GGUF 接口、Hub 模型包与公开单题数据</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已发布 bit-jev 0.8.7：wheel 58,929 字节、源码包 52,759 字节。Python 接口提供 from_pretrained、infer、infer_many、close 和 JSONL CLI；wheel 保存 C++ 源码、固定依赖补丁与许可证，不携带 GGUF 权重。首次加载按需下载和编译；CPU 与 Vulkan 已用公开 GGUF 实测，CUDA 因本机没有 Toolkit 尚未实测。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；历史 bit-jev 检查点的模型推理数字、对照图和逐题报告不进入公开仓库。</p></div>
@@ -231,7 +231,7 @@
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.12.1 GGUF pip 接口、Hub 模型包、公开单题案例与中文默认 README</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.12.2 GGUF pip 接口、Hub 模型包、公开单题案例与中文默认 README；中英文 README 的 Python 徽章标明支持 3.11 和 3.12</footer>
   </div>
 </body>
 </html>

@@ -6,7 +6,7 @@
 
 **I2_S GGUF · CPU / GPU 推理 · LoRA 微调 · 教师学生蒸馏**
 
-[![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python versions](https://img.shields.io/pypi/pyversions/bit-jev)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
 [快速开始](#快速开始) · [实测数据](#速度与内存) · [模型流程](#模型流程) · [接口格式](#请求格式) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 

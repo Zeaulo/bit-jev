@@ -115,3 +115,7 @@
 - 在 Windows Ryzen 7 4800H / RTX 2060 本机用隔离固定上游源码和公开 GGUF 验证 CPU、Vulkan 两条原生路径。手写三问题请求在同一模型进程连续运行两次，Choice/Noul/Score 最终答案一致；Vulkan 推理时整卡显存占用上升。两条路径概率略有数值差异；少量样本不构成通用速度结论。CUDA Toolkit 不在本机，CUDA 构建未实测。
 - PyPI 正式发布 bit-jev 0.8.7 的 58,929 字节 wheel 与 52,759 字节源码包，公开索引核对版本和文件大小；最终发行包通过 twine check、归档内容检查、wheel 安装与 CLI 帮助检查。
 - Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled 更新中英文模型卡，新增 pip CPU/GPU 示例及旧 AutoDL FP16 与新 GGUF GPU 路径的区分；远端两份 README 下载后的 SHA-256 与本地发布稿一致。
+
+[2026-09-28 15:04:58] v0.12.2（小版本，修复 GitHub README 的 Python 版本徽章）
+- README.md 和 README.en.md 将返回 missing 的动态 Python 版本徽章改为明确标注 Python 3.11 / 3.12 的静态徽章，与 core/pyproject.toml 的 >=3.11,<3.13 要求一致。
+- 更新 versions/project_overall/index.html 的当前版本和发布状态，记录徽章口径；PyPI 包版本仍为 0.8.7。

@@ -6,7 +6,7 @@
 
 **I2_S GGUF · CPU / GPU inference · LoRA fine-tuning · teacher–student distillation**
 
-[![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python versions](https://img.shields.io/pypi/pyversions/bit-jev)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
 [Quick start](#quick-start) · [Benchmarks](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
