@@ -233,7 +233,7 @@
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
         <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.14.5 Windows CPU / Vulkan 预编译 wheel、Hub 模型包与公开单题数据</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>bit-jev 0.10.10 Windows x64 AVX2 wheel 含 CPU 与 Vulkan 两个 EXE、原生源码、固定依赖补丁和 MIT 许可文本；wheel 16,388,760 字节，源码包 16,133,285 字节，都不带 GGUF 权重。隔离安装后限制 PATH、屏蔽 Git/CMake，RTX 2060 上自动选择包内 Vulkan EXE 并对公开模型完成两次真实推理。普通 Windows Vulkan 推理只需显卡驱动与系统 Vulkan loader，不需 SDK。CUDA 因本机没有 Toolkit 尚未实测。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>GitHub main 已推送；PyPI 已接收 bit-jev 0.10.10 Windows x64 AVX2 wheel，含 CPU 与 Vulkan 两个 EXE、原生源码、固定依赖补丁和 MIT 许可文本；wheel 16,388,760 字节，源码包 16,133,285 字节，都不带 GGUF 权重。公开版本 JSON 与本地 SHA-256 一致；simple 索引发布初期可能仍返回缓存，双语指南提供官方 wheel 直链。隔离安装后限制 PATH、屏蔽 Git/CMake，RTX 2060 上自动选择包内 Vulkan EXE 并对公开模型完成两次真实推理。普通 Windows Vulkan 推理只需显卡驱动与系统 Vulkan loader，不需 SDK。CUDA 因本机没有 Toolkit 尚未实测。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；bit-jev 检查点另提供脱敏 AutoDL 单题 CPU/GPU 案例。两类数据使用不同模型路径和口径，不能混成一个通用加速比。</p></div>
           <div class="status"><span class="status-dot done"></span><b>权重与结果</b><p>Hugging Face 发布 I2_S GGUF、float32 指针头、分词器、配置、SHA-256 清单、双语模型卡与对应主视觉；config.json 的 modules_to_not_convert 已修正为空数组，远端清单哈希已复核。GitHub 发布脱敏 CPU/GPU 单题时间、内存和中英文图。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>

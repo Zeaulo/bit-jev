@@ -6,6 +6,8 @@ Install with `pip install bit-jev`. Version 0.10.10 provides precompiled CPU and
 
 If your pip configuration uses a mirror that still reports an older version, run `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.10.10`. Check the runtime version with `python -c "import bit_jev; print(bit_jev.__version__)"`. Windows GPU users should update their graphics driver if the Vulkan loader is missing. SDK headers and `glslc` are needed only when explicitly building a Vulkan runner from source; see the repository's [GGUF build guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md).
 
+If the official simple index itself still serves a stale cache, Windows x64 users can install the [official PyPI 0.10.10 wheel](https://files.pythonhosted.org/packages/b4/ae/23540a10d714eae771dcf4dc184d0a95d30ce9370fc4b9f54db84334a82e/bit_jev-0.10.10-py3-none-win_amd64.whl) directly with `python -m pip install --upgrade "https://files.pythonhosted.org/packages/b4/ae/23540a10d714eae771dcf4dc184d0a95d30ce9370fc4b9f54db84334a82e/bit_jev-0.10.10-py3-none-win_amd64.whl"`. Its SHA-256 is `146baa2a035e9873de9284dbb1c20299f4bd01ea68f741096dbd45ef6dc8a2a1`.
+
 ```python
 from bit_jev.gguf import BitJev
 

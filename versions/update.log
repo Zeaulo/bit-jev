@@ -155,3 +155,4 @@
 - GPU 包内路径在下载模型前检查 Windows AVX2 和系统 Vulkan loader；缺 loader 时提示更新显卡驱动。只有操作者显式源码构建 Vulkan 时才需要 SDK 头文件、库与 glslc；移除故障提示中用户无法访问的 LunarG SDK 页面链接，改指向项目构建指南。正常 Windows x64 AVX2 的 CPU/GPU 推理均无需 Git、CMake 或 C++ 编译器。
 - test/test_native_preflight.py 八项、test/test_version_consistency.py 一项通过；发行包内容检查和 twine check 通过。0.10.10 wheel 16,388,760 字节、sdist 16,133,285 字节。隔离安装 wheel 后限制 PATH 为 Windows 系统目录、屏蔽 Git/CMake 工具发现，RTX 2060 的公开 GGUF Vulkan 路径连续两次真实推理成功，Choice、Noul、Score 答案一致。该验收不代表 Vulkan 比 CPU 快，也不代表 RTX 5090 性能。
 - 更新中英文 README、GGUF 指南、Hugging Face 双语模型卡、发行清单、PyPI 实施文档与 versions/project_overall/index.html；总览按当前加载顺序、两套预编译程序、运行时依赖和真实测试边界维护。
+- GitHub main 推送提交 9f2cd53；PyPI 接收 0.10.10 wheel 与 sdist，公开版本 JSON 文件大小及 SHA-256 与本地一致。发布当时官方 simple 索引经当前网络代理仍返回旧缓存，GGUF 双语指南增加 PyPI 官方 wheel 直链和校验值。Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled 的中英文模型卡已同步，远端回读 SHA-256 与本地一致。
