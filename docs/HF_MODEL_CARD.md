@@ -18,10 +18,10 @@ tags:
 
 ![bit-jev ternary inputs, decision engine, and scored options](decision-engine.png)
 
-Install from official PyPI with the Python interpreter that will run inference, then check the distribution version and import path:
+On Windows x64 with Python 3.11/3.12, install the [official wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl) with the interpreter that will run inference, then check the distribution version and import path:
 
 ```bash
-python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
 python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 

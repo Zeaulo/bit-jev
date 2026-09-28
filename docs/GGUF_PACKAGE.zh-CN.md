@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
 python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
@@ -32,7 +32,7 @@ where.exe g++
 
 如果旧版在 MSVC 编译 `main.cpp` 时出现 `error C2001: 常量中有换行符`，在 Windows x64 AVX2 机器上更新到 0.11.10：`python -m pip install --upgrade bit-jev==0.11.10 -i https://pypi.org/simple`。新版本会直接选择 wheel 内程序；已下载的 Hugging Face 模型缓存仍可复用。确认 pip 安装日志下载的是 `win_amd64.whl`，而不是源码包。没有 AVX2 的 CPU 会在加载前收到明确错误，需要自备适配该 CPU 的原生 `binary=`。
 
-如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像可能还没有提供新版本。使用 `python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10`，再用上面的 `importlib.metadata.version('bit-jev')` 和 `bit_jev.__file__` 同时核对**安装包元数据**与**实际导入路径**。仅打印 `bit_jev.__version__` 可能读到当前源码目录里的文件，不能证明当前 Python 环境已安装对应 wheel。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
+如果终端显示 `Looking in indexes: https://mirrors.aliyun.com/pypi/simple/` 并继续提示旧版 `Requirement already satisfied`，则镜像可能还没有提供新版本；目前官方 simple 索引在本机网络下也可能返回旧缓存。Windows x64 用户使用本节开头的官方 wheel 直链，再用 `importlib.metadata.version('bit-jev')` 和 `bit_jev.__file__` 同时核对**安装包元数据**与**实际导入路径**。仅打印 `bit_jev.__version__` 可能读到当前源码目录里的文件，不能证明当前 Python 环境已安装对应 wheel。请使用当前环境的 `python -m pip`，避免 `pip` 和 `python` 指向不同 Conda 环境。
 
 如果安装日志还显示 `peft==0.14.0`、`unsloth ... requires peft>=0.18.0`，说明旧版 bit-jev 的依赖已经影响了这个 Conda 环境；0.11.10 的默认推理安装不会依赖 `peft`。建议先在新的 Python 3.11/3.12 环境中按上面的命令安装并运行示例，再单独处理原环境的 Unsloth 依赖。若出现 `WARNING: Ignoring invalid distribution ~umpy`，这是该环境已有的 NumPy 安装残留警告，与模型推理接口不是同一故障。
 

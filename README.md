@@ -20,10 +20,10 @@
 
 ## 快速开始
 
-在准备运行代码的**同一个 Python 环境**中从官方 PyPI 安装（Python 3.11/3.12；Windows x64 提供预编译 wheel）：
+在准备运行代码的**同一个 Python 环境**中安装。当前 PyPI 索引可能仍返回旧版；Windows x64、Python 3.11/3.12 可以直接安装[官方 0.11.10 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl)：
 
 ```bash
-python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
 python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 

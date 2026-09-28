@@ -2,10 +2,10 @@
 
 [中文](GGUF_PACKAGE.zh-CN.md) · [Hugging Face model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
-Install from official PyPI and verify the distribution version and import path with the Python interpreter you will use for inference:
+On Windows x64 with Python 3.11/3.12, install the official wheel directly and verify the distribution version and import path with the interpreter you will use for inference:
 
 ```bash
-python -m pip install --upgrade --no-cache-dir --index-url https://pypi.org/simple bit-jev==0.11.10
+python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
 python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
