@@ -51,6 +51,14 @@
 !/docs/figures/bit-jev-autodl-case.zh-CN.svg
 !/docs/figures/bit-jev-autodl-case.en.png
 !/docs/figures/bit-jev-autodl-case.en.svg
+!/docs/figures/bit-jev-case-speed.zh-CN.png
+!/docs/figures/bit-jev-case-speed.zh-CN.svg
+!/docs/figures/bit-jev-case-speed.en.png
+!/docs/figures/bit-jev-case-speed.en.svg
+!/docs/figures/bit-jev-case-memory.zh-CN.png
+!/docs/figures/bit-jev-case-memory.zh-CN.svg
+!/docs/figures/bit-jev-case-memory.en.png
+!/docs/figures/bit-jev-case-memory.en.svg
 /test/*.log
 /test/*.stderr
 /test/*_wall_seconds.txt

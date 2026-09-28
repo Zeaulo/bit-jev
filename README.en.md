@@ -1,23 +1,21 @@
-# bit-jev
+# Run JEV fast on an everyday computer—using just a CPU.
 
-**Install a BitNet model that answers structured questions.** Supply context, a question, and options; get scores and an answer without generating answer text token by token.
+bit-jev scores explicit options over a BitNet backbone and returns structured answers without generating answer text token by token.
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[Quick start](#quick-start) · [Install troubleshooting](docs/GGUF_PACKAGE.md) · [Architecture](#what-the-code-implements) · [Measurements](#bit-jev-autodl-single-question-case) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
-
-![Minimal illustration of ternary inputs, a decision engine, and scored options](docs/figures/decision-engine.png)
+[Quick start](#quick-start) · [Supported Platforms](#supported-platforms) · [Measurements](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
 ## Quick start
 
-Install with the same Python interpreter that will run inference. While the package index is stale, Windows x64 users on Python 3.11/3.12 can install the [official 0.11.10 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl) directly:
-
 ```bash
-python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
-python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
+pip install bit-jev
+python -m bit_jev.demo
 ```
 
-The second command should show distribution version `0.11.10` and a `site-packages/bit_jev/__init__.py` path in the active environment. If it shows `0.4.3` or another source path, see [install troubleshooting](docs/GGUF_PACKAGE.md). The first `from_pretrained()` call downloads roughly 1.19 GB from Hugging Face; later calls reuse the cache.
+The second command runs a bundled customer-routing question and prints the real model result. The first model load downloads about 1.19 GB from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Inference needs `bit-jev 0.11.10`. If an index serves an older release or an editable installation shadows it, follow the [install guide](docs/GGUF_PACKAGE.md) for the official wheel.
+
+To score your own request, keep the model loaded with the Python API:
 
 ```python
 from bit_jev.gguf import BitJev
@@ -39,9 +37,20 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
     print(result["latency_ms"])
 ```
 
-On Windows x64 with AVX2, the 0.11.10 wheel includes precompiled CPU and Vulkan runners, so inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan requires a compatible graphics driver. Other platforms and CUDA build from pinned source on demand; see the [installation guide](docs/GGUF_PACKAGE.md). The Apache-2.0 license covers code; the [model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) separately documents checkpoint provenance and rights.
+The model stays loaded for subsequent `infer()` calls. Native `latency_ms` excludes download and model loading. For Vulkan, use `device="gpu"`; a CUDA source build uses `device="cuda"`. See the [package guide](docs/GGUF_PACKAGE.md) for offline models and the JSONL CLI.
 
-The model remains loaded for subsequent `infer()` calls. Native `latency_ms` excludes model loading. For Vulkan, use `device="gpu"`. To run the built-in example without relying on a console script being on PATH, use `python -m bit_jev.demo --threads 8`.
+## Supported Platforms
+
+Python 3.11 / 3.12 is required. Prebuilt and tested paths are distinguished from source-build paths that have not yet been tested on the named platform.
+
+| Platform | Current status |
+| --- | --- |
+| **Windows** (x86_64) | **Tested**: wheel bundles CPU and Vulkan runners for AVX2 CPUs. CPU inference needs no Git, CMake, or compiler. Vulkan needs a compatible graphics driver. |
+| **macOS** (Intel / x86_64) | **Not tested**: CPU source-build path requires Git, CMake 3.28+, and a C++17 compiler; no prebuilt wheel. |
+| **macOS** (Apple Silicon / arm64) | **Not tested**: CPU source-build path requires Git, CMake 3.28+, and a C++17 compiler; no prebuilt wheel. |
+| **Linux** (x86_64, ARM64) | **Not tested**: CPU source-build path requires Git, CMake 3.28+, and a C++17 compiler; no prebuilt wheel. |
+
+Compatibility of the current I2_S kernel on other platforms requires testing on those machines. The Apache-2.0 license covers code; the [model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) documents the checkpoint's separate provenance and rights.
 
 ## bit-jev = bitnet + jev !!!
 
@@ -73,7 +82,9 @@ I2_S storage is intended to reduce backbone memory relative to less compressed f
 
 ### bit-jev AutoDL single-question case
 
-![bit-jev AutoDL latency and memory case](docs/figures/bit-jev-autodl-case.en.svg)
+![bit-jev AutoDL single-question inference latency comparison](docs/figures/bit-jev-case-speed.en.svg)
+
+![bit-jev AutoDL peak memory observation comparison](docs/figures/bit-jev-case-memory.en.svg)
 
 One fixed development request used 703 input tokens and 77 options on the same Xeon Gold 6459C / RTX 5090 host. Timings exclude model load; GPU timing also excludes warmup.
 

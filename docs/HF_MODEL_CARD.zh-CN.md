@@ -106,9 +106,11 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 | CPU，16 线程 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
 | RTX 5090 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
 
-![bit-jev AutoDL 单题延迟和内存对比](bit-jev-autodl-case.zh-CN.png)
+![bit-jev AutoDL 单题推理耗时横条对比](bit-jev-case-speed.zh-CN.png)
 
-[English chart](bit-jev-autodl-case.en.png)
+![bit-jev AutoDL 峰值占用横条对比](bit-jev-case-memory.zh-CN.png)
+
+[English charts](bit-jev-case-speed.en.png)
 
 同一道题上，16 线程 CPU 与 RTX 5090 GPU 路径的延迟比约为 22.8。两条路径使用不同权重格式和数值精度，因此该比值不能解释为纯硬件加速比。CPU RSS 与 GPU 分配量是不同口径。此单题少量重复只作为案例，不代表通用吞吐或准确率承诺。详细的脱敏计时数据见 `benchmark_case_autodl.json`；本包没有收录输入文本、候选内容或预测结果。模型不生成答案 token，因此不适用生成 tokens/s 指标。准确率、Brier、NLL 与 ECE 尚无可复核的公开留出集报告，本页不填入推测值。
 

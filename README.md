@@ -1,33 +1,21 @@
-# bit-jev
+# 普通电脑，CPU 就能跑 JEV，而且很快！
 
-**安装即用的 BitNet 结构化决策模型。** 给定上下文、问题和候选项，直接返回答案与概率；不用逐 token 生成回答文本。
+bit-jev 在 BitNet 骨干上对候选项直接评分，返回结构化答案，不逐 token 生成回答文本。
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [安装排错](docs/GGUF_PACKAGE.zh-CN.md) · [训练与推理流程](#模型流程) · [实测数据](#速度与内存) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
-
-![bit-jev 三值输入经过决策引擎输出候选结果的浅色主视觉](docs/figures/decision-engine.png)
-
-## 先看结论
-
-| 重点 | 说明 |
-| --- | --- |
-| 三值骨干 | 量化后的 BitLinear 权重使用 `-1 / 0 / +1`；这不是所有张量都只有三值。 |
-| CPU 友好 | I2_S GGUF 压缩骨干配合原生 CPU runner，适合低内存部署。 |
-| 非自回归决策 | 指针头直接读取隐藏状态，对选项打分；不需要逐 token 生成答案。 |
-| 训练链路 | BitNet BF16 基础模型 → LoRA 微调 → teacher-student 蒸馏 → I2_S 导出。 |
-| 任务类型 | `choice` 多选、`noul` 是/否、`score` 有序评分。 |
+[快速开始](#快速开始) · [Supported Platforms](#supported-platforms) · [速度与内存](#速度与内存) · [模型流程](#模型流程) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
 ## 快速开始
 
-在准备运行代码的**同一个 Python 环境**中安装。当前 PyPI 索引可能仍返回旧版；Windows x64、Python 3.11/3.12 可以直接安装[官方 0.11.10 wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl)：
-
 ```bash
-python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
-python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
+pip install bit-jev
+python -m bit_jev.demo
 ```
 
-第二行应显示发行版版本 `0.11.10` 和当前环境的 `site-packages/bit_jev/__init__.py`。如果显示 `0.4.3` 或导入路径指向另一份源码，请看[安装排错](docs/GGUF_PACKAGE.zh-CN.md)。模型权重不在 wheel 中；第一次调用 `from_pretrained()` 才会下载约 1.19 GB，之后复用缓存。
+第二条命令直接运行内置客服分流题并打印模型实际答案。首次加载才会从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载约 1.19 GB 模型；后续复用缓存。推理需要 `bit-jev 0.11.10`：如果镜像仍安装旧版或环境里保留可编辑安装，按[安装排错指南](docs/GGUF_PACKAGE.zh-CN.md)核对版本并改用官方 wheel。
+
+需要输入自己的问题时，使用 Python API；模型在 `with` 块内保持常驻，适合连续调用：
 
 ```python
 from bit_jev.gguf import BitJev
@@ -49,11 +37,30 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
     print(result["latency_ms"])
 ```
 
-Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序，推理不需要 Git、CMake、编译器或 Vulkan SDK；GPU 仍需兼容的显卡驱动。其他平台及 CUDA 后端会按需从固定源码构建，详见[安装与排错指南](docs/GGUF_PACKAGE.zh-CN.md)。代码采用 Apache-2.0；[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)单独说明权重的数据来源和许可状态。
+把 `device` 改为 `"gpu"` 可选择 Vulkan；NVIDIA CUDA 专用源码构建使用 `"cuda"`。`latency_ms` 是原生计算时间，不含模型下载与加载。[GGUF 安装与推理指南](docs/GGUF_PACKAGE.zh-CN.md)提供 CLI、离线目录和构建细节。
 
-把 `device` 改为 `"gpu"` 可选择 Vulkan；NVIDIA CUDA 专用构建使用 `"cuda"`。多 GPU 主机可传 `gpu_index`。推理接口不会生成 token，`latency_ms` 不含模型加载时间。完整配置、CLI、离线目录与原生构建见 [GGUF 安装与推理指南](docs/GGUF_PACKAGE.zh-CN.md)。
+## Supported Platforms
 
-若想直接运行内置题目，也可执行 `python -m bit_jev.demo --threads 8`；此调用不依赖 `bit-jev-demo` 命令是否已经加入 PATH。
+支持 Python 3.11 / 3.12。下表将**已有预编译且实测通过**与**仅提供源码构建路径、尚未实测**分开说明：
+
+| 平台 | 当前安装与运行状态 |
+| --- | --- |
+| **Windows** (x86_64) | **已验证**：AVX2 CPU 的 wheel 自带 CPU 与 Vulkan 程序；CPU 推理无需 Git、CMake 或编译器。Vulkan 需要兼容的显卡驱动。 |
+| **macOS** (Intel / x86_64) | **尚未实测**：提供 CPU 源码构建路径，需要 Git、CMake 3.28+ 和 C++17 编译器；没有预编译 wheel。 |
+| **macOS** (Apple Silicon / arm64) | **尚未实测**：提供 CPU 源码构建路径，需要 Git、CMake 3.28+ 和 C++17 编译器；没有预编译 wheel。 |
+| **Linux** (x86_64, ARM64) | **尚未实测**：提供 CPU 源码构建路径，需要 Git、CMake 3.28+ 和 C++17 编译器；没有预编译 wheel。 |
+
+其他平台的源码构建是否适配当前 I2_S 内核，需要在对应机器完成实测后才能确认。代码采用 Apache-2.0；[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)单独说明权重的数据来源和许可状态。
+
+## 先看结论
+
+| 重点 | 说明 |
+| --- | --- |
+| 三值骨干 | 量化后的 BitLinear 权重使用 `-1 / 0 / +1`；这不是所有张量都只有三值。 |
+| CPU 友好 | I2_S GGUF 压缩骨干配合原生 CPU runner，适合低内存部署。 |
+| 非自回归决策 | 指针头直接读取隐藏状态，对选项打分；不需要逐 token 生成答案。 |
+| 训练链路 | BitNet BF16 基础模型 → LoRA 微调 → teacher-student 蒸馏 → I2_S 导出。 |
+| 任务类型 | `choice` 多选、`noul` 是/否、`score` 有序评分。 |
 
 ## 这个项目解决什么问题
 
@@ -87,7 +94,9 @@ Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序
 
 ### bit-jev AutoDL 单题案例
 
-![bit-jev 单题 AutoDL 延迟与内存对比](docs/figures/bit-jev-autodl-case.zh-CN.svg)
+![bit-jev 单题 AutoDL 推理耗时横条对比](docs/figures/bit-jev-case-speed.zh-CN.svg)
+
+![bit-jev 单题 AutoDL 峰值内存横条对比](docs/figures/bit-jev-case-memory.zh-CN.svg)
 
 同一台 Xeon Gold 6459C / RTX 5090 主机上测试一道固定开发题，输入 703 tokens、77 个候选项；下表均不计模型加载时间。GPU 测试另排除预热。
 

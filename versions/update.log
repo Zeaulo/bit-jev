@@ -166,3 +166,9 @@
 - 从隔离安装 wheel 直接执行默认 `bit-jev-demo --threads 8`，不传入模型路径；Hugging Face 首次下载与缓存链路完成，真实 CPU 请求返回 billing。首次下载在本机代理网络下耗时约 4 分 34 秒，说明“安装即用”不等于首次推理零等待。当前 Transformers 版本还输出 tokenizer regex 告警；未在缺少训练分词对齐证据时改变 tokenizer 行为。
 - GitHub main 已推送提交 58e7a08；PyPI 接收 bit-jev 0.11.10 wheel 与 sdist，公开 JSON 的文件大小和 SHA-256 与本地一致（wheel ffc8ad7756ad9b221536ef5dcddfebead025aa66abbf06244a15e3983169b1b4，sdist dfa5acd3e7b56e57a1cfa6856311710785c9fb4a6531bdf1452f2b6859762e66）。发布后当前代理下 simple 索引仍读到旧缓存，双语安装指南补充当前版本的官方 wheel 直链。
 - Hugging Face 根目录上传 decision-engine.png 与 project-flow.zh-CN/en.png，中英文模型卡分别同步到 README.md、README.en.md、README.zh-CN.md。远端卡片与三张新图回读 SHA-256 均与本地一致；仓库文件清单包含模型卡引用的三张新图和既有 AutoDL 案例 PNG，相关 resolve URL 均返回 HTTP 200。浏览器 UI 服务在最终目视检查时返回连接错误，本次渲染核对依据为图片文件、路径、哈希及 HTTP 可访问性。
+
+[2026-09-28 21:27:38] v0.15.6（小版本，README 首屏与 AutoDL 横条图）
+- 新增 test/render_case_profile_bars.py，从已校验的公开 AutoDL 单题 JSON 分别生成中英文推理耗时、峰值占用横条图，共四组 SVG/PNG。图内标注 703 输入 tokens、77 候选项、重复次数、CPU I2_S 与 GPU FP16 混合精度差异，以及 CPU 进程 RSS 与 GPU PyTorch 分配显存的计量边界；没有将其解释为同精度硬件加速比或同口径内存节省率。
+- GitHub 中英文 README 移除原首屏大图，中文页以“普通电脑，CPU 就能跑 JEV，而且很快！”开头，随后提供 pip install bit-jev、内置 demo、Python 常驻模型 API。Supported Platforms 列明 Windows x86_64 已验证预编译路径，以及 macOS Intel、Apple Silicon 与 Linux x86_64/ARM64 尚未实测的源码构建路径。包本身保持 PyPI 0.11.10，没有重新发布。
+- 中英文基准文档与本地 Hugging Face 模型卡草稿改用分开的速度、内存图；Hub 远端模型卡及图片本次尚未同步。CPU + JEV + 火箭 Logo 生成三版候选供用户选择，未作为正式仓库主视觉发布。
+- versions/project_overall/index.html 同步首页阅读顺序、平台范围、制图脚本与图像路径、数据流及发布边界。运行制图脚本并目视检查中文 PNG；git diff --check 通过。

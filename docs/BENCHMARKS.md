@@ -39,7 +39,9 @@ The build example uses Windows MSYS2 UCRT; the Vulkan build also needs Vulkan he
 
 ## bit-jev AutoDL single-question case
 
-![bit-jev CPU/GPU latency and memory for one question](figures/bit-jev-autodl-case.en.svg)
+![bit-jev CPU/GPU mean latency for one question](figures/bit-jev-case-speed.en.svg)
+
+![bit-jev CPU/GPU peak memory observations](figures/bit-jev-case-memory.en.svg)
 
 This measurement uses the bit-jev-2b-distilled checkpoint published on Hugging Face. One fixed development request encoded to 703 input tokens and 77 options. The native CPU I2_S path ran three times; the GPU FP16 mixed-precision path ran five times. Model loading is excluded from inference time; GPU warmup is also excluded.
 

@@ -104,9 +104,11 @@ The measurements below use one fixed development request with 703 input tokens a
 | CPU, 16 threads | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
 | RTX 5090 | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
 
-![bit-jev AutoDL single-question latency and memory](bit-jev-autodl-case.en.png)
+![bit-jev AutoDL single-question inference latency comparison](bit-jev-case-speed.en.png)
 
-[中文图表](bit-jev-autodl-case.zh-CN.png)
+![bit-jev AutoDL peak memory comparison](bit-jev-case-memory.en.png)
+
+[中文图表](bit-jev-case-speed.zh-CN.png)
 
 For this one request, the 16-thread CPU to RTX 5090 latency ratio is about 22.8. The paths use different weight formats and numeric precision, so this is not an isolated hardware speedup. CPU RSS and GPU allocation are different measures. This small case study is not a general throughput or accuracy claim. Sanitized timings are in `benchmark_case_autodl.json`; the input, options, and predictions are not included. Generated tokens/s does not apply because the model scores options and emits structured decisions. No auditable held-out report for accuracy, Brier, NLL, or ECE is available, so no such values are claimed.
 

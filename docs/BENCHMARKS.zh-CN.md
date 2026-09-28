@@ -43,7 +43,9 @@ python test/render_public_base_figures.py
 
 ## bit-jev AutoDL 单题案例
 
-![bit-jev CPU/GPU 单题延迟与内存对比](figures/bit-jev-autodl-case.zh-CN.svg)
+![bit-jev CPU/GPU 单题平均推理耗时横条对比](figures/bit-jev-case-speed.zh-CN.svg)
+
+![bit-jev CPU/GPU 峰值占用横条对比](figures/bit-jev-case-memory.zh-CN.svg)
 
 这一组测量使用 Hugging Face 上发布的 bit-jev-2b-distilled 检查点。同一道开发题编码后为 703 个输入 token、77 个候选项；CPU 原生 I2_S 重复 3 次，GPU FP16 混合精度重复 5 次。模型加载时间不计入推理耗时；GPU 计时也不含预热。
 
