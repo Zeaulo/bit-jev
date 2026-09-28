@@ -14,18 +14,18 @@ tags:
 
 # bit-jev-2b-distilled
 
-[中文模型卡](README.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/)
+[中文模型卡](README.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/) · [ModelScope mirror](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
 
 ![bit-jev binary trail and accelerating rocket logo](bit-jev-logo.png)
 
-On Windows x64 with Python 3.11/3.12, install the [official wheel](https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl) with the interpreter that will run inference, then check the distribution version and import path:
+On Windows x64 with Python 3.11/3.12, install the current release with the interpreter that will run inference, then check the distribution version and import path:
 
 ```bash
-python -m pip install --upgrade --no-cache-dir "https://files.pythonhosted.org/packages/b1/2c/d044c5bccdf4d952e09e1e7a483145cb4fd4cc311da6ea01ebc1bb871b1c/bit_jev-0.11.10-py3-none-win_amd64.whl"
+python -m pip install --upgrade --no-cache-dir bit-jev==0.12.10 -i https://pypi.org/simple
 python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
-The version should be `0.11.10`, and the import path should point into the active environment's `site-packages/bit_jev`. Then run the Python example below, which does not depend on the `bit-jev-demo` console script being on PATH. The first model load downloads roughly 1.19 GB; later runs reuse the cache. See the [install guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for stale mirrors and mixed environments.
+The version should be `0.12.10`, and the import path should point into the active environment's `site-packages/bit_jev`. Then run the Python example below, which does not depend on the `bit-jev-demo` console script being on PATH. The first model load downloads roughly 1.19 GB; later runs reuse the cache. The default first tries Hugging Face and falls back to ModelScope if the connection fails. Use `source="modelscope"` to select ModelScope directly. See the [install guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for stale mirrors and mixed environments.
 
 ![bit-jev training, distillation, quantization, and CPU/Vulkan inference](project-flow.en.png)
 
@@ -70,7 +70,7 @@ This release contains the I2_S artifacts for the native CPU runner, matching tok
 
 ## Inference
 
-Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.11.10 wheel includes precompiled CPU and Vulkan GPU runners. For `device="cpu"` or `device="gpu"`, inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan needs a compatible graphics driver that supplies `vulkan-1.dll`. The roughly 1.19 GB model still downloads on first use. Other platforms and CUDA build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; CUDA needs the CUDA Toolkit.
+Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.12.10 wheel includes precompiled CPU and Vulkan GPU runners. For `device="cpu"` or `device="gpu"`, inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan needs a compatible graphics driver that supplies `vulkan-1.dll`. The roughly 1.19 GB model still downloads on first use. Other platforms and CUDA build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; CUDA needs the CUDA Toolkit.
 
 ```python
 from bit_jev.gguf import BitJev

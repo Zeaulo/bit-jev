@@ -5,7 +5,7 @@
 
 BitNet 骨干 + Kev 风格结构化决策头：把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。
 
-[English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases) · [Hugging Face 模型与模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[English documentation](README.en.md) · [项目总览](versions/project_overall/index.html) · [GitHub Releases](https://github.com/Zeaulo/bit-jev/releases) · [Hugging Face 模型与模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope 模型与模型卡](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
 
 ![bit-jev 双层训练与推理流程图](docs/figures/project-cover.zh-CN.png)
 

@@ -11,11 +11,11 @@ bit-jev scores explicit options over a BitNet backbone and returns structured an
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[Quick start](#quick-start) · [Supported Platforms](#supported-platforms) · [Measurements](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[Quick start](#quick-start) · [Supported Platforms](#supported-platforms) · [Measurements](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
 
 ## Quick start
 
-The second command at the top runs a bundled customer-routing question and prints the real model result. The first model load downloads about 1.19 GB from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Inference needs `bit-jev 0.11.10`. If an index serves an older release or an editable installation shadows it, follow the [install guide](docs/GGUF_PACKAGE.md) for the official wheel.
+The second command at the top runs a bundled customer-routing question and prints the real model result. The first load downloads about 1.19 GB; later runs reuse the cache. `bit-jev 0.12.10` first tries [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) and falls back to [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled) if it cannot connect. Use `python -m bit_jev.demo --source modelscope` to skip the Hugging Face attempt. If an index serves an older release, follow the [install guide](docs/GGUF_PACKAGE.md).
 
 To score your own request, keep the model loaded with the Python API:
 

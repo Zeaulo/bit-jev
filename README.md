@@ -11,11 +11,11 @@ bit-jev 在 BitNet 骨干上对候选项直接评分，返回结构化答案，�
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [Supported Platforms](#supported-platforms) · [速度与内存](#速度与内存) · [模型流程](#模型流程) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[快速开始](#快速开始) · [Supported Platforms](#supported-platforms) · [速度与内存](#速度与内存) · [模型流程](#模型流程) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
 
 ## 快速开始
 
-顶部第二条命令直接运行内置客服分流题并打印模型实际答案。首次加载才会从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载约 1.19 GB 模型；后续复用缓存。推理需要 `bit-jev 0.11.10`：如果镜像仍安装旧版或环境里保留可编辑安装，按[安装排错指南](docs/GGUF_PACKAGE.zh-CN.md)核对版本并改用官方 wheel。
+顶部第二条命令直接运行内置客服分流题并打印模型实际答案。首次加载才会下载约 1.19 GB 模型，后续复用缓存。`bit-jev 0.12.10` 默认先尝试 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)，连接失败时自动回退到 [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)。国内网络可直接运行 `python -m bit_jev.demo --source modelscope`，避免等待 Hugging Face 超时。若镜像仍安装旧版，请按[安装排错指南](docs/GGUF_PACKAGE.zh-CN.md)核对版本。
 
 需要输入自己的问题时，使用 Python API；模型在 `with` 块内保持常驻，适合连续调用：
 

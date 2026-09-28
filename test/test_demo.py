@@ -30,7 +30,8 @@ class DemoTests(unittest.TestCase):
         with patch("bit_jev.demo.BitJev.from_pretrained", return_value=model) as load_model, \
              contextlib.redirect_stdout(output):
             main(["--model", "example/local", "--device", "gpu", "--threads", "8"])
-        load_model.assert_called_once_with("example/local", device="gpu", threads=8, gpu_index=None)
+        load_model.assert_called_once_with("example/local", source="auto", device="gpu",
+                                           threads=8, gpu_index=None)
         model.infer.assert_called_once_with(DEMO_REQUEST)
         self.assertEqual(json.loads(output.getvalue())["answers"], {"team": "billing"})
 

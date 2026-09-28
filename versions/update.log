@@ -185,3 +185,10 @@
 - 新增 docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json，只公开逐次耗时、峰值 RSS、硬件配额、源码/模型/输入哈希和测量边界；旧 Xeon/5090 JSON 原样保留。test/render_case_profile_bars.py 在校验两份公开记录后，将速度图改为 EPYC 32 线程与另一台机器历史 RTX 5090 FP16 路径；内存图继续使用旧 Xeon/5090 同机数据。中英文 SVG/PNG 均已重新生成，图内标注跨主机、跨格式、跨精度限制。
 - README 中英文、BENCHMARKS 中英文及本地 Hugging Face 双语模型卡草稿同步新数值与旧图的归属，不声称 CPU/GPU 纯硬件加速比。versions/project_overall/index.html 同步数据流、目录树、图表来源和发布状态。PyPI 包未更改，Hugging Face 远端模型卡仍待连接恢复后同步。
 - 校验公开 EPYC JSON 与本地三份原生报告的 32 线程、16 线程逐次数字完全一致；中文速度图、中文内存图、英文速度图已目视检查。制图脚本运行通过，git diff --check 通过。
+
+[2026-09-29 00:39:18] v0.16.8（中版本，ModelScope 镜像与双站点模型下载）
+- 另一台 Windows 电脑已成功安装 0.11.10，但首次执行 `bit-jev-demo` 访问 huggingface.co 超时；`python -m bit-jev-demo` 是无效模块名。gguf.py 新增 `source=auto/huggingface/modelscope` 与 `BIT_JEV_MODEL_SOURCE` 环境变量；本地目录直接使用，auto 先以 5 秒元数据超时请求 Hugging Face，再映射到 `JingHao9616/bit-jev-2b-distilled` 从 ModelScope 获取相同推理文件。demo.py 与 JSONL CLI 增加 `--source`。PyPI 运行版本从 0.11.10 升至 0.12.10，默认依赖轻量 `modelscope-hub>=0.4.3,<1`。
+- Hugging Face 默认 README.md 改为中文，保留英文 README.en.md；上传正式 bit-jev 火箭 Logo、双语流程图、EPYC 9654 32 线程速度图和独立内存图。公开文件清单确认所有新图存在，五张关键图片的 HEAD 请求均为 HTTP 200。模型卡保留 Yelp 数据来源、未收到书面许可答复和权重未单独开放授权的说明。
+- ModelScope 账号 `JingHao9616` 的公开同名模型仓库上传了完整 I2_S GGUF、指针头、分词器、配置、双语模型卡和图片，共 21 个提交文件、0 个失败；远端 GGUF 为 1,187,288,192 字节，公开 SHA256SUMS.json 的 GGUF 摘要与原 Hugging Face 包一致。ModelScope 公开 README 和校验清单已通过 SDK 重新下载；0.12.10 的 `download_model(source="modelscope")` 成功获取 9 个必需文件并返回目录。
+- PyPI 已发布 0.12.10 Windows x64 AVX2 wheel（16,391,036 字节，SHA-256 795a29dfeb83cc0bc85d095b1d8a626e678423544aa64b0d1f79b3e175c6e7b6）和源码包（16,136,359 字节，SHA-256 b8e1b5d8c4fa197cfe382edfa6965447ee5777cf1ec0347acf7b8aa165556282）。两份公开 PyPI JSON 元数据与本地产物一致，wheel 声明 ModelScope 下载依赖。wheel 归档检查与 twine check 通过；隔离安装后屏蔽 Git/CMake，内置 CPU 程序对公开 GGUF 连续两次真实推理成功。
+- `test/test_model_sources.py` 覆盖本地目录、显式 ModelScope、Hugging Face 超时回退和非法 source；更新 `test/test_demo.py` 及发行包检查。GitHub 双语首页、PyPI 展示文案、双语 GGUF 安装指南和 `versions/project_overall/index.html` 同步下载顺序、站点链接、版本及文件职责。速度和内存图仍沿用既有实测口径，没有新增模型性能数字。
