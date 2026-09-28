@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.13.4 Windows x64 AVX2 预编译 CPU wheel、按需源码 GPU 构建、GGUF 常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
+  <meta name="description" content="bit-jev v0.13.5 Windows x64 AVX2 预编译 CPU wheel、按需源码 GPU 构建、GGUF 常驻推理、训练蒸馏、Hugging Face 模型包、测量口径、数据流与关键文件内部手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.13.4 Windows CPU 预编译 wheel</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.13.5 Windows CPU 预编译 wheel</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -134,7 +134,8 @@
 │  ├─ render_checkpoint_public_figures.py
 │  ├─ package_release.py
 │  ├─ test_pypi_inference.py
-│  ├─ test_native_preflight.py / check_pypi_dist.py
+│  ├─ test_native_preflight.py / test_version_consistency.py
+│  ├─ check_pypi_dist.py
 │  ├─ release_config.py / test_release_config.py
 │  └─ verify_release_package.py
 ├─ docs/
@@ -166,8 +167,8 @@
           <article class="glass card"><h3>关键文件职责</h3><dl class="file-list">
             <div><dt>README.md / core/README.md</dt><dd>中文首页按 bitnet.cpp 式标题导航、发布动态、快速开始、实测数据、原理与文档地图组织；core/README.md 是 PyPI 英文展示页，明确 Windows x64 AVX2 预编译适用范围、模型按需下载及其他平台/GPU 的源码构建前置条件。</dd></div>
             <div><dt>core/bit_jev/api.py / encoding.py / model.py</dt><dd>api.py 校验三类问题并格式化答案；encoding.py 不依赖 PyTorch，负责五个预留 token、state 与候选项位置编码；model.py 使用这些编码构造 block-causal 掩码、运行 PyTorch 骨干和指针头，供训练及评估。</dd></div>
-            <div><dt>core/bit_jev/gguf.py / native_build.py</dt><dd>gguf.py 在模型下载前调用 preflight_native，再从 Hugging Face 下载 GGUF、头和 tokenizer，校验文件、等待原生加载握手，提供 infer、infer_many 和 close；native_build.py 先返回已有用户缓存，其次在 Windows x64 AVX2 CPU 上返回 wheel 内 EXE，否则检查构建工具并按固定 BitNet/llama.cpp 提交编译。binary 显式覆盖两者；native_source 明确要求从本地源码构建。</dd></div>
-            <div><dt>test/test_native_preflight.py / check_pypi_dist.py / test_pypi_inference.py</dt><dd>单元测试覆盖缺工具、旧 CMake、已有缓存、包内 EXE、本地源码和自带 binary；发行包检查核对 win_amd64 wheel 内 EXE、两份 MIT 许可证、源码补丁与不包含 GGUF；真实推理脚本从安装后的 wheel 自动选 EXE，并可屏蔽 Git/CMake 工具发现后连跑两次请求。</dd></div>
+            <div><dt>core/bit_jev/gguf.py / native_build.py / __version__.py</dt><dd>gguf.py 在模型下载前调用 preflight_native，再从 Hugging Face 下载 GGUF、头和 tokenizer，校验文件、等待原生加载握手，提供 infer、infer_many 和 close；native_build.py 先返回已有用户缓存，其次在 Windows x64 AVX2 CPU 上返回 wheel 内 EXE，否则检查构建工具并按固定 BitNet/llama.cpp 提交编译。binary 显式覆盖两者；native_source 明确要求从本地源码构建。__init__.py 从 __version__.py 导入唯一运行时版本，保证原生缓存目录与包元数据一致；Vulkan SDK 缺失时给出 SDK 链接，不再误报 C++ 工具。</dd></div>
+            <div><dt>test/test_native_preflight.py / test_version_consistency.py / check_pypi_dist.py / test_pypi_inference.py</dt><dd>单元测试覆盖缺工具、旧 CMake、已有缓存、包内 EXE、本地源码、自带 binary 和 Vulkan SDK 错误提示；版本测试核对 pyproject.toml、导入版本与原生缓存目录；发行包检查核对 win_amd64 wheel 内 EXE、两份 MIT 许可证、源码补丁与不包含 GGUF；真实推理脚本从安装后的 wheel 自动选 EXE，并可屏蔽 Git/CMake 工具发现后连跑两次请求。</dd></div>
             <div><dt>core/setup.py / MANIFEST.in / native/prebuilt/</dt><dd>setup.py 将 native/main.cpp、CMakeLists.txt、ReLU² 补丁复制进包；Windows x64 时再复制预编译 CPU EXE 与两份 MIT 许可，并给 wheel 标 py3-none-win_amd64，使 Python 3.11/3.12 可共用。MANIFEST.in 使源码包带构建输入与预编译来源文件；native/CMakeLists.txt 为 MSVC main.cpp 加 /utf-8。预编译 EXE 来自固定源码、关闭 GGML_NATIVE 和 OpenMP、启用 AVX2、静态链接 MSVC 运行库的 Release 构建，PE 依赖仅 KERNEL32.dll 与 ADVAPI32.dll。</dd></div>
             <div><dt>core/bit_jev/train.py / distill.py / eval.py</dt><dd>监督训练、离线教师分数蒸馏和本地评估分别实现；输出都保存在操作者工作区。</dd></div>
             <div><dt>core/bit_jev/hub.py / checkpoint.py</dt><dd>定位基础模型与 tokenizer，优先接受本地 tokenizer 目录；恢复本地运行目录中的骨干、头和温度信息。</dd></div>
@@ -205,7 +206,7 @@
             <li><b>构建与握手</b><span>源码路径由 CMake 根据 cpu、vulkan 或 cuda 启用后端；Windows MSVC 对 main.cpp 使用 /utf-8。预编译路径直接启动已打包的程序。C++ 载入 GGUF 和 head 后发送 ready 握手，Python 此时才返回模型对象。GPU 请求无可用设备时报错，不静默退回 CPU。</span></li>
             <li><b>真实请求</b><span><code>test/test_pypi_inference.py</code> 从隔离安装的 wheel 自动取得包内 CPU EXE，在模拟 Git/CMake 不可见时加载公开 GGUF，同一模型进程对手写客服请求调用两次 infer，核对 Choice、Noul、Score 答案一致；固定上游源码仅含 ReLU² 补丁。</span></li>
           </ol>
-          <p class="mt-6 text-sm leading-7 text-slate-600">Windows 本机使用 MSVC 19.43 与固定 BitNet 0b341e58 / llama.cpp 390c3077、仅 ReLU² 补丁完成 AVX2 CPU Release 构建；关闭 GGML_NATIVE/OpenMP、静态链接 MSVC 运行库后，PE 依赖仅有 KERNEL32.dll 与 ADVAPI32.dll。发行 wheel 1,628,730 字节，源码包 1,617,019 字节；wheel 经隔离安装、模拟缺少 Git/CMake 和公开 GGUF 常驻双次推理验证。Vulkan 的既有测试不等于预编译 GPU，CUDA Toolkit 在本机未安装。</p>
+          <p class="mt-6 text-sm leading-7 text-slate-600">Windows 本机使用 MSVC 19.43 与固定 BitNet 0b341e58 / llama.cpp 390c3077、仅 ReLU² 补丁完成 AVX2 CPU Release 构建；关闭 GGML_NATIVE/OpenMP、静态链接 MSVC 运行库后，PE 依赖仅有 KERNEL32.dll 与 ADVAPI32.dll。0.9.10 wheel 1,628,945 字节，源码包 1,617,229 字节；wheel 经隔离安装、模拟缺少 Git/CMake 和公开 GGUF 常驻双次推理验证。版本单元测试保证缓存目录使用 0.9.10；Vulkan SDK 缺失时提示安装完整 SDK。Vulkan 的既有测试不等于预编译 GPU，CUDA Toolkit 在本机未安装。</p>
         </div>
       </section>
 
@@ -229,15 +230,15 @@
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.13.4 Windows CPU 预编译 wheel、Hub 模型包与公开单题数据</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.13.5 Windows CPU 预编译 wheel、Hub 模型包与公开单题数据</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已发布 bit-jev 0.9.9：Windows x64 AVX2 wheel 1,628,730 字节，附 CPU EXE、原生源码、固定依赖补丁与 MIT 许可文本；源码包 1,617,019 字节，保留其他平台/GPU 构建输入。两者都不带 GGUF 权重，公开索引 SHA-256 已与本地逐一核对。隔离安装、屏蔽 Git/CMake 后，公开模型仍能自动选择 EXE 并完成两次真实推理。GPU 仍从源码构建；CUDA 因本机没有 Toolkit 尚未实测。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>PyPI 已接收 bit-jev 0.9.10：Windows x64 AVX2 wheel 1,628,945 字节，附 CPU EXE、原生源码、固定依赖补丁与 MIT 许可文本；源码包 1,617,229 字节，保留其他平台/GPU 构建输入。两者都不带 GGUF 权重；公开版本 JSON 的大小与 SHA-256 已与本地核对。隔离安装、屏蔽 Git/CMake 后，公开模型自动选择 EXE 并完成两次真实推理；运行时版本与缓存目录一致。GPU 仍从源码构建，需要对应 SDK；CUDA 因本机没有 Toolkit 尚未实测。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；bit-jev 检查点另提供脱敏 AutoDL 单题 CPU/GPU 案例。两类数据使用不同模型路径和口径，不能混成一个通用加速比。</p></div>
           <div class="status"><span class="status-dot done"></span><b>权重与结果</b><p>Hugging Face 发布 I2_S GGUF、float32 指针头、分词器、配置、SHA-256 清单、双语模型卡与对应主视觉；config.json 的 modules_to_not_convert 已修正为空数组，远端清单哈希已复核。GitHub 发布脱敏 CPU/GPU 单题时间、内存和中英文图。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.13.4 / PyPI 0.9.9 Windows x64 AVX2 预编译 CPU wheel、Hub 模型包、公开单题案例与中文默认 README</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.13.5 / PyPI 0.9.10 Windows x64 AVX2 预编译 CPU wheel、Hub 模型包、公开单题案例与中文默认 README</footer>
   </div>
 </body>
 </html>

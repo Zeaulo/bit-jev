@@ -12,7 +12,7 @@
 
 </div>
 
-> **发布动态 · 2026-09-28**　PyPI 0.9.9 为 Windows x64、支持 AVX2 的 CPU 提供预编译推理程序：安装后 CPU 推理无需 Git、CMake 或 C++ 编译器。首次加载仍需下载约 1.19 GB 模型。其他平台及 GPU 后端继续按需编译；`device="gpu"` 使用 Vulkan，`device="cuda"` 需要 CUDA Toolkit。
+> **发布动态 · 2026-09-28**　PyPI 0.9.10 为 Windows x64、支持 AVX2 的 CPU 提供预编译推理程序：安装后 CPU 推理无需 Git、CMake 或 C++ 编译器。首次加载仍需下载约 1.19 GB 模型。其他平台及 GPU 后端继续按需编译；`device="gpu"` 使用 Vulkan，`device="cuda"` 需要 CUDA Toolkit。
 
 把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。仓库代码采用 Apache-2.0；模型权重的许可状态请读[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)。
 

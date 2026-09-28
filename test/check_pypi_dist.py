@@ -7,7 +7,7 @@ from pathlib import Path
 
 # PyPI 包只允许代码、许可证和小型原生构建输入。
 DIST = Path(__file__).resolve().parent / "pypi-dist"
-VERSION = "0.9.9"
+VERSION = "0.9.10"
 WHEEL = DIST / f"bit_jev-{VERSION}-py3-none-win_amd64.whl"
 SOURCE = DIST / f"bit_jev-{VERSION}.tar.gz"
 REQUIRED_WHEEL = {"bit_jev/gguf.py", "bit_jev/encoding.py", "bit_jev/native_build.py",

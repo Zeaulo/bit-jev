@@ -13,7 +13,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "core"))
 
 from bit_jev import __version__
 from bit_jev.gguf import BitJev
-from bit_jev.native_build import preflight_native
+from bit_jev.native_build import build_native, preflight_native
 
 
 class NativePreflightTests(unittest.TestCase):
@@ -83,6 +83,20 @@ class NativePreflightTests(unittest.TestCase):
                 with patch.object(BitJev, "__init__", return_value=None):
                     BitJev.from_pretrained(binary="existing-runner")
         preflight.assert_not_called()
+
+    def test_missing_vulkan_sdk_reports_correct_installation(self):
+        """Vulkan SDK 缺失时提示 SDK，而不是误导用户安装 C++ 工具。"""
+        # 临时头文件只用于通过路径校验；配置命令模拟 CMake 的实际错误。
+        with tempfile.TemporaryDirectory(dir=PROJECT_ROOT / "test") as temporary_cache:
+            source = Path(temporary_cache) / "llama"
+            (source / "include").mkdir(parents=True)
+            (source / "include" / "llama.h").touch()
+            with patch("bit_jev.native_build.preflight_native", return_value=None), \
+                 patch("bit_jev.native_build._run",
+                       side_effect=RuntimeError("Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR glslc)")):
+                with self.assertRaisesRegex(RuntimeError, "https://vulkan.lunarg.com/sdk/home") as caught:
+                    build_native("gpu", cache_dir=temporary_cache, source_dir=source)
+        self.assertNotIn("Windows C++ 编译工具", str(caught.exception))
 
 
 if __name__ == "__main__":

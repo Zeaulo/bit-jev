@@ -140,3 +140,11 @@
 - README 中英文、PyPI 展示页、GGUF 中英文指南、Hugging Face 双语模型卡、发布清单、PyPI 实施文档和 versions/project_overall/index.html 同步准确记录平台范围、首次模型下载、源码回退、目录树与执行顺序。
 - PyPI 正式发布 0.9.9 的 Windows x64 wheel 与源码包；公开索引返回的 SHA-256 分别为 c6c78ccba507dceeadecbbdb386bf9ee2cf94c4c19ce743f2a7ce14a8dc3a33d、2fcc6379cd8a65ceb358a6c59e2ed559bbada6942145684ecdc59dd81b6fb478，与本地产物逐一相同。
 - Hugging Face 模型仓库 jinghao1632/bit-jev-2b-distilled 的中英文 README 已同步 0.9.9 安装范围；权重、配置与已有测量文件未改动。
+
+[2026-09-28 17:29:20] v0.13.5（小版本，统一运行时版本并修正 Vulkan SDK 错误提示）
+- 另一台 Windows 机器的阿里云 pip 镜像仍使 `pip install --upgrade bit-jev` 保持在 0.8.8；随后旧版 CPU 从源码构建时再次触发 MSVC UTF-8 编码错误。官方 PyPI 已有新 wheel，文档补充指定官方索引与 `python -m pip` 的安装命令，避免镜像滞后及环境错配。
+- 另一台机器 CPU 预编译推理已成功处理密码选择请求，原生耗时 558.1118 ms；`device="gpu"` 触发 Vulkan 源码构建，CMake 明确缺少 Vulkan_LIBRARY、Vulkan_INCLUDE_DIR、glslc。native_build.py 对此改为提示安装完整 LunarG Vulkan SDK，不再附无关的 Windows C++ 工具链接；中英文 GGUF 指南说明 Vulkan SDK 与驱动/运行时的区别及检查命令。
+- 修复 0.9.9 的 PyPI 元数据与 `bit_jev.__version__` 不一致：__init__.py 改为从 __version__.py 导入，版本从 0.9.9 升至 0.9.10，项目从 0.13.4 升至 0.13.5。原生构建缓存现在使用 0.9.10 目录，不会误复用 0.8.9 缓存。
+- 新增 test/test_version_consistency.py，验证 pyproject.toml、运行时版本和原生缓存目录一致；test/test_native_preflight.py 新增 Vulkan SDK 缺失的定向诊断测试。两组共八项检查通过。0.9.10 wheel 1,628,945 字节、源码包 1,617,229 字节，均通过 twine check 与发行包内容检查；隔离安装后屏蔽 Git/CMake，公开 GGUF 两次常驻推理成功。
+- 更新 README 中英文、GGUF 中英文指南、Hugging Face 双语模型卡和 versions/project_overall/index.html 的版本、执行路径、错误诊断及关键文件职责。
+- PyPI 已接收 bit-jev 0.9.10 的 Windows x64 wheel 与源码包；公开版本 JSON 的两份文件大小和 SHA-256 与本地产物一致。Hugging Face 双语模型卡已上传 0.9.10 文案。公开 simple 索引在发布后短时间仍可能返回旧缓存，安装说明保留 `--no-cache-dir` 与官方索引参数。

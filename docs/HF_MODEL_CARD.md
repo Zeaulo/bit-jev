@@ -59,7 +59,7 @@ This release contains the I2_S artifacts for the native CPU runner, matching tok
 
 ## Inference
 
-Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.9.9 wheel includes a precompiled CPU runner, so inference needs no Git, CMake, or C++ compiler. The roughly 1.19 GB model still downloads on first use. Other platforms and GPU backends build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; Vulkan also needs a Vulkan SDK and CUDA needs a CUDA Toolkit.
+Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.9.10 wheel includes a precompiled CPU runner, so inference needs no Git, CMake, or C++ compiler. The roughly 1.19 GB model still downloads on first use. Other platforms and GPU backends build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; Vulkan also needs a Vulkan SDK and CUDA needs a CUDA Toolkit.
 
 ```bash
 pip install bit-jev

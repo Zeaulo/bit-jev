@@ -1,7 +1,7 @@
 """BitNet 结构化决策：训练、I2_S 导出与逐题 CPU 推理共用同一编码契约。"""
 
-# 包版本与 pyproject.toml、项目更新日志保持同步。
-__version__ = "0.8.9"
+# 运行时版本只从单独的版本文件读取，避免安装包与原生缓存使用不同版本号。
+from .__version__ import __version__
 
 # 默认骨干用于新训练运行；蒸馏和 CPU 推理从检查点读取实际来源。
 DEFAULT_BASE = "microsoft/bitnet-b1.58-2B-4T-bf16"

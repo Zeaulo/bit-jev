@@ -61,7 +61,7 @@ I2_S GGUF + float32 指针头
 
 ## 推理示例
 
-推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.9.9 wheel 已携带 CPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型，推理无需 Git、CMake 或 C++ 编译器。其他系统及 GPU 后端按需从固定源码构建，需要 Git、CMake 3.28+ 和 C++17 编译器；Vulkan 还需要 Vulkan SDK，CUDA 还需要 CUDA Toolkit。
+推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.9.10 wheel 已携带 CPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型，推理无需 Git、CMake 或 C++ 编译器。其他系统及 GPU 后端按需从固定源码构建，需要 Git、CMake 3.28+ 和 C++17 编译器；Vulkan 还需要 Vulkan SDK，CUDA 还需要 CUDA Toolkit。
 
 ```bash
 pip install bit-jev

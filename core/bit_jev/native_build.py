@@ -21,6 +21,7 @@ BITNET_URL = "https://github.com/microsoft/BitNet.git"
 GIT_INSTALL_URL = "https://git-scm.com/install/"
 CMAKE_INSTALL_URL = "https://cmake.org/download/"
 WINDOWS_CPP_INSTALL_URL = "https://learn.microsoft.com/cpp/build/vscpp-step-0-installation"
+VULKAN_SDK_INSTALL_URL = "https://vulkan.lunarg.com/sdk/home"
 
 
 def _run(arguments: list[str], *, directory: Path | None = None) -> str:
@@ -186,6 +187,13 @@ def build_native(device: str = "cpu", *, cache_dir: str | Path | None = None,
     try:
         _run(options)
     except RuntimeError as error:
+        # Vulkan 配置失败通常是 SDK 的库、头文件或 glslc 缺失，不能误报成 C++ 编译器问题。
+        if backend == "vulkan" and "Could NOT find Vulkan" in str(error):
+            raise RuntimeError(
+                f"{error}\n缺少 Vulkan SDK 的库、头文件或 glslc。"
+                f"请安装完整的 Vulkan SDK：{VULKAN_SDK_INSTALL_URL}\n"
+                "Windows 安装后重新打开终端，检查 VULKAN_SDK 环境变量和 glslc --version。"
+            ) from error
         # Windows 的 CMake 配置错误常来自尚未安装 C++ 工具链。
         if os.name == "nt":
             raise RuntimeError(f"{error}\nWindows C++ 编译工具：{WINDOWS_CPP_INSTALL_URL}") from error
