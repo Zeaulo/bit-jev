@@ -96,15 +96,16 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 
 `device="gpu"` 使用 Vulkan；`device="cuda"` 使用 CUDA 构建。`infer()` 复用常驻模型并返回答案、logits、概率和原生推理耗时。完整 CLI、离线目录和构建细节见[GGUF 安装与推理指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。本模型仓库只保存模型文件；两个预编译 runner 位于 PyPI 的 Windows x64 wheel。
 
-## 性能案例：AutoDL Xeon Gold 6459C / RTX 5090
+## 性能案例：AutoDL EPYC 9654 CPU 与另一台 RTX 5090
 
-以下测量来自一道固定开发题，输入 703 tokens、77 个候选项；推理计时不含加载。CPU 使用 I2_S 原生路径，GPU 使用实验性 FP16 混合精度 PyTorch 路径。这组 GPU 数字不是新 pip 包的 GGUF/Vulkan 或 GGUF/CUDA 测试结果。
+以下测量来自同一道固定开发题，输入 703 tokens、77 个候选项；原生推理计时不含模型加载。速度图采用 EPYC 9654 容器 32 核配额 / 32 线程 I2_S 新测量与另一台机器的历史 RTX 5090 FP16 混合精度 PyTorch 路径；内存图仍展示原 Xeon Gold 6459C / RTX 5090 同机案例。这组 GPU 数字不是新 pip 包的 GGUF/Vulkan 或 GGUF/CUDA 测试结果。
 
 | 路径 | 平均推理时间 | 重复次数 | 观测内存 |
 | --- | ---: | ---: | ---: |
-| CPU，8 线程 | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
-| CPU，16 线程 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
-| RTX 5090 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
+| EPYC 9654，32 核配额 / 32 线程，I2_S | 1,954.46 ms | 6 | 进程峰值 RSS 1,625.88 MiB |
+| Xeon Gold 6459C，8 线程（历史） | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
+| Xeon Gold 6459C，16 线程（历史） | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
+| 另一台机器 RTX 5090，FP16 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
 
 ![bit-jev AutoDL 单题推理耗时横条对比](bit-jev-case-speed.zh-CN.png)
 
@@ -112,7 +113,7 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 
 [English charts](bit-jev-case-speed.en.png)
 
-同一道题上，16 线程 CPU 与 RTX 5090 GPU 路径的延迟比约为 22.8。两条路径使用不同权重格式和数值精度，因此该比值不能解释为纯硬件加速比。CPU RSS 与 GPU 分配量是不同口径。此单题少量重复只作为案例，不代表通用吞吐或准确率承诺。详细的脱敏计时数据见 `benchmark_case_autodl.json`；本包没有收录输入文本、候选内容或预测结果。模型不生成答案 token，因此不适用生成 tokens/s 指标。准确率、Brier、NLL 与 ECE 尚无可复核的公开留出集报告，本页不填入推测值。
+EPYC 同机 16 线程补充测试均值 3,210.12 ms，32 线程约快 1.64 倍。图中 CPU 与 GPU 路径来自不同机器，且使用不同权重格式和数值精度，因此不能解释为纯硬件加速比。CPU RSS 与 GPU 分配量是不同口径。此单题少量重复只作为案例，不代表通用吞吐或准确率承诺。[EPYC 32 线程逐次数据](https://github.com/Zeaulo/bit-jev/blob/main/docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json)与原同机案例 `benchmark_case_autodl.json` 均不含输入文本、候选内容或预测结果。模型不生成答案 token，因此不适用生成 tokens/s 指标。准确率、Brier、NLL 与 ECE 尚无可复核的公开留出集报告，本页不填入推测值。
 
 ## 数据来源与使用边界
 

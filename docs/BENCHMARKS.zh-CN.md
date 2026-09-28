@@ -2,7 +2,7 @@
 
 [English](BENCHMARKS.md) · [返回中文 README](../README.md)
 
-本页把微软公开基础模型测量和 bit-jev AutoDL 单题案例分开记录。AutoDL 案例使用本地 Yelp 训练检查点，在收到数据权利方答复前只作为本地发布草稿使用。仓库中 [`test/`](../test/) 的脚本是测量工具；缺少兼容且有权使用的模型和输入集时，不能据此复现结果。
+本页把微软公开基础模型测量和 bit-jev AutoDL 单题案例分开记录。AutoDL 案例使用包含 Yelp 数据训练的检查点；公开的是脱敏计时与内存观察，权利方书面答复仍待收到。仓库中 [`test/`](../test/) 的脚本是测量工具；缺少兼容且有权使用的模型和输入集时，不能据此复现结果。
 
 bit-jev 对明确列出的候选项打分，不逐 token 解码答案文本。因此，“生成输出 tokens/s”不适合表示其吞吐量。优先报告**单请求延迟**；必要时可报告**输入 tokens/s**，但要说明输入 token 的计数方法。
 
@@ -47,15 +47,16 @@ python test/render_public_base_figures.py
 
 ![bit-jev CPU/GPU 峰值占用横条对比](figures/bit-jev-case-memory.zh-CN.svg)
 
-这一组测量使用 Hugging Face 上发布的 bit-jev-2b-distilled 检查点。同一道开发题编码后为 703 个输入 token、77 个候选项；CPU 原生 I2_S 重复 3 次，GPU FP16 混合精度重复 5 次。模型加载时间不计入推理耗时；GPU 计时也不含预热。
+这组测量使用 Hugging Face 上发布的 bit-jev-2b-distilled 检查点。同一道开发题编码为 703 个输入 token、77 个候选项。**速度图**使用新测 EPYC 9654 容器的 32 核配额、32 线程原生 I2_S（两次进程启动共 6 次），以及另一台机器上的历史 RTX 5090 FP16 混合精度（5 次，排除预热）。**内存图**保留原 Xeon Gold 6459C / RTX 5090 同机案例。原生推理计时不含模型加载。
 
 | 路径 | 平均推理时间 | 次数 | 峰值内存观测 |
 | --- | ---: | ---: | ---: |
-| CPU，8 线程，I2_S 原生 | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
-| CPU，16 线程，I2_S 原生 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
-| RTX 5090，FP16 混合精度 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
+| EPYC 9654，32 核配额 / 32 线程，I2_S 原生 | 1,954.46 ms | 6 | 进程峰值 RSS 1,625.88 MiB |
+| Xeon Gold 6459C，8 线程，I2_S 原生（历史） | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
+| Xeon Gold 6459C，16 线程，I2_S 原生（历史） | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
+| 另一台机器 RTX 5090，FP16 混合精度 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
 
-该固定请求中，GPU 路径延迟约为 16 线程 CPU 路径的 1/22.8。两者使用不同的权重格式与计算精度，不能把比值解释成纯硬件加速倍数。CPU RSS 与 GPU 框架分配显存不是同一种口径。公开逐次计时、硬件、模型哈希与限制见[脱敏 JSON](benchmark-data/bit-jev-autodl-case-2026-09-27.json)，中英文图由 [`test/render_checkpoint_public_figures.py`](../test/render_checkpoint_public_figures.py) 从这份文件生成；图表不读取本机原始请求。该单题开发案例不代表通用速度或准确率。
+EPYC 同机 16 线程补充检查均值为 3,210.12 ms，32 线程约快 1.64 倍。EPYC CPU 与 RTX 5090 GPU 来自不同机器，且权重格式与计算精度不同，不能把图中比值解释成纯硬件加速倍数；CPU RSS 与 GPU 框架分配显存也不是同一口径。[EPYC 脱敏记录](benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json)包含逐次时间、32 核容器配额、源码提交及模型哈希；[历史同机记录](benchmark-data/bit-jev-autodl-case-2026-09-27.json)包含旧 Xeon 与 RTX 5090 样本。中英文分图由 [`test/render_case_profile_bars.py`](../test/render_case_profile_bars.py) 从两份公开 JSON 生成，不读取原始请求文本或预测。该单题开发案例不代表通用速度或准确率。
 
 本检查点由包含 Yelp 评论记录的多源决策集训练而来。向 Yelp 发出的衍生权重和指标许可申请截至 2026-09-28 仍未收到书面答复；本项目在模型卡中公开说明该状态，并由维护者决定发布此脱敏聚合案例。模型卡没有给检查点另行指定开放权重许可证。
 

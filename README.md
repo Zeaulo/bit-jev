@@ -100,15 +100,16 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 
 ![bit-jev 单题 AutoDL 峰值内存横条对比](docs/figures/bit-jev-case-memory.zh-CN.svg)
 
-同一台 Xeon Gold 6459C / RTX 5090 主机上测试一道固定开发题，输入 703 tokens、77 个候选项；下表均不计模型加载时间。GPU 测试另排除预热。
+同一条固定开发题编码为 703 输入 tokens、77 个候选项。**速度图**采用新测的 AMD EPYC 9654 容器 32 核配额 / 32 线程 CPU，与另一台机器的历史 RTX 5090 结果；**内存图**仍展示原 Xeon Gold 6459C / RTX 5090 同机案例。下表的原生耗时均不含模型加载，GPU 还排除预热。
 
 | 路径 | 平均推理时间 | 重复次数 | 峰值内存观测 |
 | --- | ---: | ---: | ---: |
-| CPU，8 线程，I2_S 原生 | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
-| CPU，16 线程，I2_S 原生 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
-| RTX 5090，FP16 混合精度 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
+| EPYC 9654，32 核配额 / 32 线程，I2_S 原生 | 1,954.46 ms | 6（两次进程启动） | 进程峰值 RSS 1,625.88 MiB |
+| Xeon Gold 6459C，8 线程，I2_S 原生（历史） | 3,127.88 ms | 3 | 进程峰值 RSS 1,622.74 MiB |
+| Xeon Gold 6459C，16 线程，I2_S 原生（历史） | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
+| 另一台机器 RTX 5090，FP16 混合精度 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
 
-该单题上 GPU 路径约为 16 线程 CPU 路径的 22.8 倍；但两条路径使用不同权重格式和数值精度，不能据此声称纯硬件加速倍数。CPU RSS 与 GPU 分配显存口径不同。原始输入、候选内容和预测值均未公开；逐次计时、模型 SHA-256、实验边界和图表生成脚本见[公开案例数据](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json)与[性能测量规范](docs/BENCHMARKS.zh-CN.md#bit-jev-autodl-单题案例)。这组小样本不代表通用延迟或准确率。模型权重可从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载；使用前请阅读模型卡中的数据来源和许可状态。
+EPYC 同机 16 线程补充测试约 3,210.12 ms，32 线程约快 1.64 倍。EPYC CPU 与 RTX 5090 GPU 来自不同机器，使用不同权重格式与数值精度，不能据此声称纯硬件加速倍数；CPU RSS 与 GPU 分配显存也不是同一内存口径。原始输入、候选内容和预测值均未公开；逐次计时、模型 SHA-256 和实验边界见[EPYC 32 线程脱敏记录](docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json)、[原 Xeon/5090 案例](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json)与[性能测量规范](docs/BENCHMARKS.zh-CN.md#bit-jev-autodl-单题案例)。这组小样本不代表通用延迟或准确率。模型权重可从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载；使用前请阅读模型卡中的数据来源和许可状态。
 
 源码构建与实验脚本见 [CPU 快速开始](docs/CPU_QUICKSTART.zh-CN.md)。训练、蒸馏和评估依赖可用 `pip install 'bit-jev[train]'` 安装。
 

@@ -178,3 +178,10 @@
 - GitHub 中文与英文 README 共用同一 Logo；两条 pip 安装与内置 demo 命令紧接置顶口号，图片随后展示，保留 Python 常驻模型 API、平台状态和实测图。
 - 本地 Hugging Face 双语模型卡草稿将旧主视觉引用改为 bit-jev-logo.png。huggingface.co 从当前环境连接超时，远端图片、模型卡与上一版横条图尚未同步；PyPI 0.11.10 未重新发布。
 - versions/project_overall/index.html 同步正式 Logo 的职责、文件树、GitHub 首屏阅读顺序和远端状态。
+
+[2026-09-28 23:17:54] v0.15.8（小版本，EPYC 9654 32 线程单题实测与速度图）
+- 在 AutoDL Ubuntu 22.04 容器实际 32 核 CPU 配额、cpuset 64-95 的 AMD EPYC 9654 上，用与历史案例 SHA-256 一致的 I2_S GGUF、float32 指针头及 703 token/77 候选项编码请求测试。Linux 原生 runner 来自 BitNet 0b341e58、llama.cpp 390c3077，Release、GGML_NATIVE=ON、GGML_OPENMP=ON，32 线程、batch 128；两次进程启动各三次，原生延迟不含模型加载。
+- 六次 EPYC 32 线程原生耗时为 1979.920258、1946.525392、1949.816113、1971.828346、1949.075305、1929.623975 ms，均值 1954.464898 ms；两次启动的进程峰值 RSS 分别为 1625.8828125、1625.7265625 MiB。16 线程同机诊断三次均值 3210.119860 ms，因此 32 线程约快 1.64 倍。原始响应未公开。
+- 新增 docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json，只公开逐次耗时、峰值 RSS、硬件配额、源码/模型/输入哈希和测量边界；旧 Xeon/5090 JSON 原样保留。test/render_case_profile_bars.py 在校验两份公开记录后，将速度图改为 EPYC 32 线程与另一台机器历史 RTX 5090 FP16 路径；内存图继续使用旧 Xeon/5090 同机数据。中英文 SVG/PNG 均已重新生成，图内标注跨主机、跨格式、跨精度限制。
+- README 中英文、BENCHMARKS 中英文及本地 Hugging Face 双语模型卡草稿同步新数值与旧图的归属，不声称 CPU/GPU 纯硬件加速比。versions/project_overall/index.html 同步数据流、目录树、图表来源和发布状态。PyPI 包未更改，Hugging Face 远端模型卡仍待连接恢复后同步。
+- 校验公开 EPYC JSON 与本地三份原生报告的 32 线程、16 线程逐次数字完全一致；中文速度图、中文内存图、英文速度图已目视检查。制图脚本运行通过，git diff --check 通过。

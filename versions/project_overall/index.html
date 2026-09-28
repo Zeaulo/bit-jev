@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.15.7 正式 Logo、README 首屏、平台实测状态、AutoDL 横条图、Windows x64 AVX2 CPU/Vulkan wheel、GGUF 常驻推理与训练蒸馏维护手册">
+  <meta name="description" content="bit-jev v0.15.8 EPYC 9654 32 线程 AutoDL 实测、跨主机速度图、历史同机内存图、GGUF 常驻推理与训练蒸馏维护手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.15.7 正式 Logo</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.15.8 EPYC 32 线程实测</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -150,7 +150,8 @@
 │  ├─ X_LAUNCH.md
 │  ├─ benchmark-data/
 │  │  ├─ public-bitnet-base-2026-09-27.json
-│  │  └─ bit-jev-autodl-case-2026-09-27.json
+│  │  ├─ bit-jev-autodl-case-2026-09-27.json
+│  │  └─ bit-jev-epyc9654-cpu32-2026-09-28.json
 │  └─ figures/
 │     ├─ decision-engine.png
 │     ├─ bit-jev-logo.png
@@ -191,12 +192,12 @@
             <div><dt>test/benchmark_public_base.py / render_public_base_figures.py</dt><dd>前者限定微软公开 GGUF 的固定提交、文件大小与 SHA-256，记录两种路径各五次预填充和解码、进程 RSS 与整卡显存；后者验证记录，输出公开 JSON 和速度、内存 SVG/PNG。</dd></div>
             <div><dt>test/patches/public-bitnet25-compat.patch</dt><dd>在 ReLU² 补丁之后应用于固定 llama.cpp：识别原版 GGUF 的 bitnet-25 架构名，并使用独立 output.weight；此补丁只用于公开基础模型的基准复现。</dd></div>
             <div><dt>docs/benchmark-data/public-bitnet-base-2026-09-27.json</dt><dd>保留原版 BitNet 文件哈希、固定修订、硬件、二进制哈希、每阶段五个原始计时样本与内存口径；不含本机模型路径和历史 bit-jev 检查点结果。</dd></div>
-            <div><dt>docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json</dt><dd>公开 bit-jev 检查点 SHA-256、Xeon/5090 硬件、703 输入 token 与 77 候选项形状、CPU 8/16 线程及 GPU 的逐次时间、RSS/显存指标和限制；不含本机问题文本、候选内容与预测。</dd></div>
+            <div><dt>docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json / bit-jev-epyc9654-cpu32-2026-09-28.json</dt><dd>原文件保存 Xeon/5090 同机案例的 CPU 8/16 线程与 GPU 逐次时间及内存观测；新文件保存 EPYC 9654 容器 32 核配额、32 线程两次进程启动共 6 次原生耗时、同机 16 线程诊断、模型与输入哈希、固定源码提交、编译选项及内存观测。两份数据都只公开 703 token、77 候选项的形状和脱敏数字，不含题目文本、候选内容或预测。</dd></div>
             <div><dt>docs/figures/public-base-speed.svg / public-base-memory.svg</dt><dd>展示同一公开 BitNet GGUF 的 CPU 原生路径和 RTX 2060 Vulkan 混合路径；速度按预填充与解码分开，内存按 RSS 与整卡显存增量分开。</dd></div>
             <div><dt>test/render_model_framework.py / docs/figures/model-framework.svg</dt><dd>按 model.py 的打包掩码、30 层 BitNet 解码器、256 维指针头和 native/main.cpp 的逐题执行边界绘制模型结构图。原生 BitNet 层内部的 RMSNorm、RoPE、Q/K/V/O、Up/Gate/Down 与残差顺序经固定 llama.cpp 源码核对。</dd></div>
             <div><dt>test/render_model_highlights.py / docs/figures/model-highlights.zh-CN.svg / model-highlights.en.svg</dt><dd>同一脚本以中文和英文内容字典绘制首页双语核心图。三张信息卡分别限定为量化 BitLinear 三值、微软公开基础模型 CPU 峰值 RSS 和预填充/解码速度；下方按 train.py → distill.py export_teacher → distill.py train → export_distilled.py 的顺序展示 LoRA 教师和无 LoRA 学生。图注在图片脱离 README 时仍保留测量来源与不能外推至 bit-jev 的边界。</dd></div>
             <div><dt>docs/figures/bit-jev-logo.png / decision-engine.png / project-flow.* / test/render_project_flow.py</dt><dd>bit-jev-logo.png 是用户选定的正式文字、火箭、0/1 尾迹图，GitHub 双语 README 共用这一文件；decision-engine.png 是上版已发布的无文字浅色主视觉，保留作历史资产。project-flow.zh-CN/en.svg 是代码生成的双语精确步骤图，PNG 来自同一 SVG。图明确 BitNet BF16 → LoRA + 指针头 → Kev 9B logits → 学生蒸馏 → I2_S 导出，以及安装 → 后端选择 → 首次模型加载 → 候选评分。Hugging Face 本地模型卡草稿已指向新 Logo，远端仍待同步。</dd></div>
-            <div><dt>test/render_case_profile_bars.py / docs/figures/bit-jev-case-*.svg / .png</dt><dd>只读取 test/render_checkpoint_public_figures.py 已验证的脱敏 AutoDL JSON；分别绘制单题平均推理耗时与峰值容量横条图，并输出中英文 SVG/PNG。延迟图线性缩放且标明“越短越快”；内存图分别写明 CPU 进程 RSS 与 GPU PyTorch 分配显存，不计算同口径节省率。原来的双面板图保留供历史引用。</dd></div>
+            <div><dt>test/render_case_profile_bars.py / docs/figures/bit-jev-case-*.svg / .png</dt><dd>先验证原 Xeon/5090 脱敏 JSON，再核对 EPYC 新记录的模型哈希、703 token/77 候选项形状、32 核配额和 6 个正数样本。速度图取 EPYC 32 线程均值与历史 RTX 5090 均值，图内标明不同主机和 I2_S/FP16 精度；内存图继续取原 Xeon/5090 同机观察。输出中英文 SVG/PNG；原双面板图保留供历史引用。</dd></div>
             <div><dt>test/release_config.py / package_release.py / test_release_config.py</dt><dd>release_config.py 将 modules_to_not_convert 的 null 规范为空数组并同步更新 Hub 包清单；package_release.py 创建本地归档时应用相同规则；test_release_config.py 检查字段类型、已有数组保留和哈希一致。</dd></div>
             <div><dt>docs/figures/architecture.svg</dt><dd>论文式架构图（中英文首页引用）：白底直角细框、左到右数据流，骨干框内给出量化公式与 30 层堆叠，蓝色支路表示 round(W) 后的 I2_S GGUF 走原生 CPU 推理。</dd></div>
             <div><dt>docs/figures/source-architecture.svg</dt><dd>源码卡片图（X 首发配图）：四张卡片概览请求、逐题因果行、BitNet 骨干与指针头；不含既有检查点性能指标。</dd></div>
@@ -234,24 +235,24 @@
 
       <!-- 检查点案例单独呈现，明确 CPU/GPU 路径采用不同格式与精度。 -->
       <section id="checkpoint-benchmark" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">07 / bit-jev AutoDL 单题案例</p><h2 class="mt-2 text-2xl font-semibold">检查点的 CPU 与 GPU 部署路径</h2>
-        <p class="mt-5 text-sm leading-7 text-slate-700">固定题目编码为 703 个输入 token、77 个候选项，运行在 Xeon Gold 6459C / RTX 5090。CPU 使用原生 I2_S，GPU 使用实验性 FP16 混合精度。计时不含模型加载；GPU 计时另排除预热。此表仅适用于这一道开发题。</p>
+        <p class="eyebrow">07 / bit-jev AutoDL 单题案例</p><h2 class="mt-2 text-2xl font-semibold">EPYC 32 线程 CPU 与历史 GPU 部署路径</h2>
+        <p class="mt-5 text-sm leading-7 text-slate-700">固定题目编码为 703 个输入 token、77 个候选项。新 CPU 结果来自 AMD EPYC 9654 容器的 32 核配额、32 线程原生 I2_S 路径，分两次进程启动共重复 6 次；GPU 结果来自另一台机器上的历史 RTX 5090 实验性 FP16 混合精度路径，重复 5 次并排除预热。速度图跨主机、跨格式、跨精度；内存图保留原 Xeon/5090 同机测量。原生计时不含模型加载。</p>
         <div class="mt-6 grid gap-4 md:grid-cols-2"><img class="w-full rounded-xl border border-white/70" src="../../docs/figures/bit-jev-case-speed.zh-CN.svg" alt="bit-jev AutoDL 单题平均推理耗时横条对比"><img class="w-full rounded-xl border border-white/70" src="../../docs/figures/bit-jev-case-memory.zh-CN.svg" alt="bit-jev AutoDL CPU 进程 RSS 与 GPU 分配显存横条对比"></div>
-        <div class="mt-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr><th class="p-3">路径</th><th class="p-3">平均推理时间</th><th class="p-3">重复</th><th class="p-3">内存观测</th></tr></thead><tbody><tr><td class="p-3">CPU，8 线程，I2_S</td><td class="p-3">3,127.88 ms</td><td class="p-3">3 次</td><td class="p-3">RSS 1,622.74 MiB</td></tr><tr><td class="p-3">CPU，16 线程，I2_S</td><td class="p-3">1,972.17 ms</td><td class="p-3">3 次</td><td class="p-3">RSS 1,624.52 MiB</td></tr><tr><td class="p-3">RTX 5090，FP16 混合精度</td><td class="p-3">86.56 ms</td><td class="p-3">5 次</td><td class="p-3">GPU 分配 4,935.53 MiB</td></tr></tbody></table></div>
-        <p class="mt-5 text-sm leading-7 text-slate-700">同一道题中 GPU 路径约为 16 线程 CPU 路径的 1/22.8 延迟。模型格式、数值精度与内存计量方法都不同，因此不能推导出纯硬件加速倍数。逐次数据在 <code>docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json</code>；横条图由 <code>test/render_case_profile_bars.py</code> 读取经校验的数据生成。CPU RSS 与 GPU 框架分配显存不能当作相同计量对象。训练集含 Yelp 评论记录，许可申请已发出但截至 2026-09-28 尚无书面回复；Hugging Face 模型卡说明未为权重另行指定开放许可证。</p>
+        <div class="mt-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr><th class="p-3">路径</th><th class="p-3">平均推理时间</th><th class="p-3">重复</th><th class="p-3">内存观测</th></tr></thead><tbody><tr><td class="p-3">EPYC 9654，32 核配额 / 32 线程，I2_S</td><td class="p-3">1,954.46 ms</td><td class="p-3">6 次</td><td class="p-3">RSS 1,625.88 MiB</td></tr><tr><td class="p-3">Xeon Gold 6459C，8 线程，I2_S（历史）</td><td class="p-3">3,127.88 ms</td><td class="p-3">3 次</td><td class="p-3">RSS 1,622.74 MiB</td></tr><tr><td class="p-3">Xeon Gold 6459C，16 线程，I2_S（历史）</td><td class="p-3">1,972.17 ms</td><td class="p-3">3 次</td><td class="p-3">RSS 1,624.52 MiB</td></tr><tr><td class="p-3">另一台机器 RTX 5090，FP16 混合精度</td><td class="p-3">86.56 ms</td><td class="p-3">5 次</td><td class="p-3">GPU 分配 4,935.53 MiB</td></tr></tbody></table></div>
+        <p class="mt-5 text-sm leading-7 text-slate-700">同一 EPYC 容器 16 线程补充测试均值为 3,210.12 ms，32 线程约快 1.64 倍。跨主机速度图不能推导出 CPU 对 GPU 的纯硬件加速倍数，CPU RSS 与 GPU 框架分配显存也不能当作同一计量对象。逐次数据分别在 <code>docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json</code> 与 <code>bit-jev-autodl-case-2026-09-27.json</code>；图由 <code>test/render_case_profile_bars.py</code> 读取经校验的数据生成。训练集含 Yelp 评论记录，许可申请已发出但截至 2026-09-28 尚无书面回复；Hugging Face 模型卡说明未为权重另行指定开放许可证。</p>
       </section>
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.15.7 正式 Logo 与快速开始首页</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.15.8 EPYC 32 线程实测与跨主机图</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>GitHub main 已发布新首页；PyPI 已接收 0.11.10 Windows x64 AVX2 wheel，含 CPU/Vulkan 两个 EXE 与 bit-jev-demo 命令，模型权重仍单独托管在 Hugging Face。wheel 16,390,228 字节、sdist 16,135,660 字节，公开 JSON 的大小和 SHA-256 与本地一致。发布初期当前代理的 simple 索引仍有旧缓存，中英文安装指南提供本版官方 wheel 直链。隔离安装后 CPU/Vulkan 自带示例均完成真实请求；普通 Windows Vulkan 推理需要显卡驱动与系统 loader，不需要 SDK。CUDA 因本机没有 Toolkit 尚未实测。</p></div>
-          <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>发布微软基础模型的原始计时样本与 CPU/Vulkan 混合路径图；bit-jev 检查点另提供脱敏 AutoDL 单题 CPU/GPU 案例。v0.15.6 增加中英分开的推理耗时与内存横条图，数字来自同一公开 JSON；延迟条越短越快，CPU RSS 和 GPU 显存分配在图内分别标明。两类模型数据不能混成一个通用加速比。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>微软基础模型的独立基准仍与 bit-jev 检查点分开。v0.15.8 的速度图读取 EPYC 9654 32 核容器新记录和历史 RTX 5090 记录，分别说明 CPU I2_S、GPU FP16 混合精度和不同主机；内存图只使用原 Xeon/5090 同机数据。EPYC 新记录含两次进程启动共 6 次原生计时与同机 16 线程诊断，不包含原始请求或预测；这一道题不能代表通用性能。</p></div>
           <div class="status"><span class="status-dot done"></span><b>权重、模型卡与图片</b><p>Hugging Face 保存 I2_S GGUF、float32 指针头、分词器、配置与 SHA-256 清单；config.json 的 modules_to_not_convert 是空数组。GitHub 首页已使用用户选定的 bit-jev、火箭、0/1 尾迹 Logo；本地 Hugging Face 双语模型卡草稿也指向新文件，远端图片及模型卡因 huggingface.co 连接超时尚未同步。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.15.7 / PyPI 0.11.10 · 正式 Logo、README 首屏、平台实测状态与 AutoDL 横条图</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.15.8 / PyPI 0.11.10 · EPYC 32 线程实测、跨主机速度图与历史同机内存图</footer>
   </div>
 </body>
 </html>

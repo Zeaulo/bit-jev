@@ -1,0 +1,62 @@
+{
+  "format": "bit-jev-epyc9654-cpu32-case-v1",
+  "publication_status": "public_sanitized_case_study",
+  "checkpoint": {
+    "name": "bit-jev-2b-distilled",
+    "cpu_format": "I2_S GGUF with float32 pointer head",
+    "cpu_gguf_sha256": "731700ba3112e35dc9bbecf54fe97b79d91b69246d765413ce683e06250773ff",
+    "head_f32_sha256": "a3b3df8f5d4803d575e64c4f15e8ab09c00762e4140917c07925705ba43c1b27"
+  },
+  "workload": {
+    "questions": 1,
+    "input_tokens": 703,
+    "options": 77,
+    "encoded_input_sha256": "2d2921d9d0e46c1540f71c283b07668ff0fe8ac5d2fa52911588f65d0be4c9c6",
+    "input_contents_included": false
+  },
+  "hardware": {
+    "cpu": "AMD EPYC 9654 96-Core Processor",
+    "platform": "AutoDL Ubuntu 22.04 container, Linux x86_64",
+    "host_logical_cpus_visible_to_lscpu": 192,
+    "container_cpu_quota_cores": 32,
+    "container_cpuset": "64-95",
+    "numa_nodes_visible": 1
+  },
+  "build": {
+    "project_commit": "4272aacc0cabc167077e61df86acaedfab5fd35f",
+    "bitnet_commit": "0b341e582afbf9e1011f24744b554c96a3477eb5",
+    "llama_cpp_commit": "390c307752ab78fd8189f359d6954c9ba1be74af",
+    "cmake": "3.31.10",
+    "compiler": "g++ 11.4.0",
+    "configuration": "Release, GGML_NATIVE=ON, GGML_OPENMP=ON, Vulkan=OFF, CUDA=OFF",
+    "native_binary_sha256": "8f24ada846ab1f30b2b1ae4ac0a35d007747d3a95f5ae1c6cf66b465e5081077"
+  },
+  "timing_protocol": {
+    "native_runner_threads": 32,
+    "batch": 128,
+    "process_launches": 2,
+    "requests_per_launch": 3,
+    "model_loading_included_in_native_latency": false,
+    "explicit_cpu_warmup": false,
+    "same_encoded_request_repeated": true
+  },
+  "measurement": {
+    "path": "native_cpu_i2_s_32_threads",
+    "inference_ms_by_launch": [
+      [1979.920258, 1946.525392, 1949.816113],
+      [1971.828346, 1949.075305, 1929.623975]
+    ],
+    "peak_process_rss_mib_by_launch": [1625.8828125, 1625.7265625]
+  },
+  "diagnostic_16_thread_run": {
+    "inference_ms": [3225.943667, 3196.725099, 3207.690814],
+    "peak_process_rss_mib": 1623.09375
+  },
+  "comparison_boundary": {
+    "historical_gpu_source": "bit-jev-autodl-case-2026-09-27.json",
+    "gpu_hardware": "NVIDIA GeForce RTX 5090 on a different AutoDL host",
+    "gpu_path": "experimental FP16 mixed-precision PyTorch",
+    "note": "The speed figure juxtaposes deployment paths measured on different hosts and weight formats. It is not an isolated CPU-versus-GPU hardware speedup."
+  },
+  "rights_note": "The training set included Yelp review records. The maintainer directed publication of sanitized timing aggregates; no request text, options, prediction, or raw review record is included. No written Yelp response had been received on 2026-09-28."
+}

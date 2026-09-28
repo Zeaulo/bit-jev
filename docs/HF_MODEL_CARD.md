@@ -94,15 +94,16 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 
 `device="gpu"` selects Vulkan; `device="cuda"` selects a CUDA build. `infer()` reuses the resident model. See the [GGUF package guide](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.md) for CLI, offline directories, and build details. This model repository contains model files; both precompiled runners are distributed in the PyPI Windows x64 wheel.
 
-## AutoDL case study: Xeon Gold 6459C / RTX 5090
+## AutoDL case study: EPYC 9654 CPU and RTX 5090 on another host
 
-The measurements below use one fixed development request with 703 input tokens and 77 options. Inference timing excludes model loading. CPU uses the native I2_S path; GPU uses an experimental FP16 mixed-precision PyTorch path. These GPU numbers do not benchmark the new pip package's GGUF/Vulkan or GGUF/CUDA path.
+The measurements below use one fixed development request with 703 input tokens and 77 options. Native inference timing excludes model loading. The latency chart pairs a new EPYC 9654 container measurement with a 32-core quota and 32 native I2_S threads with a historical RTX 5090 FP16 mixed-precision PyTorch path from another host. The memory chart retains the original same-host Xeon Gold 6459C / RTX 5090 observations. These GPU numbers do not benchmark the pip package's GGUF/Vulkan or GGUF/CUDA path.
 
 | Path | Mean inference time | Repetitions | Observed memory |
 | --- | ---: | ---: | ---: |
-| CPU, 8 threads | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
-| CPU, 16 threads | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
-| RTX 5090 | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
+| EPYC 9654, 32-core quota / 32 threads, I2_S | 1,954.46 ms | 6 | 1,625.88 MiB peak process RSS |
+| Xeon Gold 6459C, 8 threads (historical) | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
+| Xeon Gold 6459C, 16 threads (historical) | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
+| RTX 5090 on another host, FP16 | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
 
 ![bit-jev AutoDL single-question inference latency comparison](bit-jev-case-speed.en.png)
 
@@ -110,7 +111,7 @@ The measurements below use one fixed development request with 703 input tokens a
 
 [中文图表](bit-jev-case-speed.zh-CN.png)
 
-For this one request, the 16-thread CPU to RTX 5090 latency ratio is about 22.8. The paths use different weight formats and numeric precision, so this is not an isolated hardware speedup. CPU RSS and GPU allocation are different measures. This small case study is not a general throughput or accuracy claim. Sanitized timings are in `benchmark_case_autodl.json`; the input, options, and predictions are not included. Generated tokens/s does not apply because the model scores options and emits structured decisions. No auditable held-out report for accuracy, Brier, NLL, or ECE is available, so no such values are claimed.
+On the same EPYC container, a supplemental 16-thread run averaged 3,210.12 ms, so 32 threads were about 1.64 times faster. The CPU and GPU paths in the chart ran on different hosts and used different weight formats and numeric precision; their ratio is not an isolated hardware speedup. CPU RSS and GPU allocation are different measures. This small case study is not a general throughput or accuracy claim. The [EPYC 32-thread samples](https://github.com/Zeaulo/bit-jev/blob/main/docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json) and the original same-host case in `benchmark_case_autodl.json` include no input, option text, or predictions. Generated tokens/s does not apply because the model scores options and emits structured decisions. No auditable held-out report for accuracy, Brier, NLL, or ECE is available, so no such values are claimed.
 
 ## Data provenance and use
 

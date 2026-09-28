@@ -1,6 +1,6 @@
 # Benchmark protocol and published case studies
 
-This page separates the Microsoft public-base benchmark from the bit-jev AutoDL case study. The latter uses the local Yelp-trained checkpoint and remains a local review artifact until the requested data-rights response is received. The scripts in [test/](../test/) are measurement tools; their presence does not make a result reproducible without an authorized compatible model and input set.
+This page separates the Microsoft public-base benchmark from the bit-jev AutoDL case study. The latter uses a checkpoint trained with Yelp records; sanitized timing and memory observations are public while the data-rights request remains unanswered. The scripts in [test/](../test/) are measurement tools; their presence does not make a result reproducible without an authorized compatible model and input set.
 
 bit-jev scores explicit options after reading the input. It does not decode answer text token by token, so generated-output tokens per second is not an appropriate throughput measure. Report **request latency** and, if useful, **input tokens per second** with the token-count definition stated.
 
@@ -43,15 +43,16 @@ The build example uses Windows MSYS2 UCRT; the Vulkan build also needs Vulkan he
 
 ![bit-jev CPU/GPU peak memory observations](figures/bit-jev-case-memory.en.svg)
 
-This measurement uses the bit-jev-2b-distilled checkpoint published on Hugging Face. One fixed development request encoded to 703 input tokens and 77 options. The native CPU I2_S path ran three times; the GPU FP16 mixed-precision path ran five times. Model loading is excluded from inference time; GPU warmup is also excluded.
+These measurements use the bit-jev-2b-distilled checkpoint published on Hugging Face. One fixed development request encoded to 703 input tokens and 77 options. The **latency chart** shows a newly measured EPYC 9654 container with a 32-core quota and 32 native I2_S threads (6 runs across two process launches), alongside the historical RTX 5090 FP16 mixed-precision path on another host (5 runs after warmup). The **memory chart** retains the original same-host Xeon Gold 6459C / RTX 5090 observations. Native inference timing excludes model loading.
 
 | Path | Mean inference time | Repetitions | Peak memory observation |
 | --- | ---: | ---: | ---: |
-| CPU, 8 threads, native I2_S | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
-| CPU, 16 threads, native I2_S | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
-| RTX 5090, FP16 mixed precision | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
+| EPYC 9654, 32-core quota / 32 threads, native I2_S | 1,954.46 ms | 6 | 1,625.88 MiB peak process RSS |
+| Xeon Gold 6459C, 8 threads, native I2_S (historical) | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
+| Xeon Gold 6459C, 16 threads, native I2_S (historical) | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
+| RTX 5090 on another host, FP16 mixed precision | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
 
-For this fixed request, GPU-path latency was about 1/22.8 of the 16-thread CPU path. The paths use different weight formats and arithmetic precision, so the ratio is not an isolated hardware speedup. CPU RSS and GPU framework allocation are different memory measures. The [sanitized JSON](benchmark-data/bit-jev-autodl-case-2026-09-27.json) contains each timing sample, hardware, checkpoint hashes, and limitations. The bilingual charts are generated from that file by [`test/render_checkpoint_public_figures.py`](../test/render_checkpoint_public_figures.py), without reading the local input request. This one-request development case is not a general speed or accuracy claim.
+On the same EPYC container, a supplemental 16-thread run averaged 3,210.12 ms; 32 threads were about 1.64 times faster. The EPYC CPU and RTX 5090 GPU results come from different hosts and use different weight formats and arithmetic precision, so their ratio is not isolated hardware speedup. CPU RSS and GPU framework allocation are different measures. The [new EPYC record](benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json) includes per-run timings, the container quota, source revisions and model hashes; the [historical same-host record](benchmark-data/bit-jev-autodl-case-2026-09-27.json) includes the Xeon and RTX 5090 samples. [`test/render_case_profile_bars.py`](../test/render_case_profile_bars.py) generates the bilingual charts from these public files without reading request contents or predictions. This one-request development case is not a general speed or accuracy claim.
 
 The checkpoint was trained on a multi-source decision set that includes Yelp review records. As of 2026-09-28, no written response had arrived to the permission request for derivative weights and metrics. The model card discloses this status; the maintainer chose to publish these sanitized aggregate measurements. No standalone open-weights license is specified for the checkpoint.
 

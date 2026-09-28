@@ -88,15 +88,16 @@ I2_S storage is intended to reduce backbone memory relative to less compressed f
 
 ![bit-jev AutoDL peak memory observation comparison](docs/figures/bit-jev-case-memory.en.svg)
 
-One fixed development request used 703 input tokens and 77 options on the same Xeon Gold 6459C / RTX 5090 host. Timings exclude model load; GPU timing also excludes warmup.
+One fixed development request encoded to 703 input tokens and 77 options. The **latency chart** uses a newly measured AMD EPYC 9654 container with a 32-core quota and 32 CPU threads, alongside a historical RTX 5090 result from another host. The **memory chart** retains the earlier same-host Xeon Gold 6459C / RTX 5090 case. Native timing excludes model load; GPU timing also excludes warmup.
 
 | Path | Mean inference time | Repeats | Peak memory observation |
 | --- | ---: | ---: | ---: |
-| CPU, 8 threads, native I2_S | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
-| CPU, 16 threads, native I2_S | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
-| RTX 5090, FP16 mixed precision | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
+| EPYC 9654, 32-core quota / 32 threads, native I2_S | 1,954.46 ms | 6 in two launches | 1,625.88 MiB peak process RSS |
+| Xeon Gold 6459C, 8 threads, native I2_S (historical) | 3,127.88 ms | 3 | 1,622.74 MiB peak process RSS |
+| Xeon Gold 6459C, 16 threads, native I2_S (historical) | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
+| RTX 5090 on another host, FP16 mixed precision | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
 
-On this request, the GPU path latency was about 22.8 times lower than the 16-thread CPU path. The two paths use different weight formats and numeric precision, so the ratio is not an isolated hardware speedup. Process RSS and GPU allocation are different memory measures. The [sanitized samples](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json) contain no input, option text, or prediction. This small case does not establish general latency or accuracy. Download the model from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled).
+On the same EPYC container, a supplemental 16-thread run averaged 3,210.12 ms; the 32-thread path was about 1.64 times faster. EPYC CPU and RTX 5090 GPU results came from different hosts and use different weight formats and numeric precision, so their ratio is not an isolated hardware speedup. Process RSS and GPU allocation are different memory measures. The [new EPYC record](docs/benchmark-data/bit-jev-epyc9654-cpu32-2026-09-28.json) and [historical Xeon/5090 record](docs/benchmark-data/bit-jev-autodl-case-2026-09-27.json) contain no input, option text, or prediction. This small case does not establish general latency or accuracy. Download the model from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled).
 
 ## Independent public BitNet base measurement
 
