@@ -14,11 +14,22 @@ tags:
 
 # bit-jev-2b-distilled
 
-[English model card](HF_MODEL_CARD.md) · [源码仓库](https://github.com/Zeaulo/bit-jev) · [pip 安装](https://pypi.org/project/bit-jev/)
+[English model card](README.en.md) · [源码仓库](https://github.com/Zeaulo/bit-jev) · [pip 安装](https://pypi.org/project/bit-jev/)
 
-![bit-jev 训练、蒸馏与 I2_S CPU 推理流程](figures/project-cover.zh-CN.png)
+![bit-jev 三值输入、推理引擎与候选结果](decision-engine.png)
 
-图中三值符号只代表量化 BitLinear 权重；训练与推理是分开的流程。
+首次使用只需安装 pip 包并运行自带示例：
+
+```bash
+python -m pip install --upgrade bit-jev
+bit-jev-demo
+```
+
+第一次运行会下载约 1.19 GB 模型；后续复用缓存。`bit-jev-demo --device gpu` 选择 Vulkan。示例输出是模型实际推理结果，没有预写的预测。
+
+![bit-jev 训练、蒸馏、量化与 CPU/Vulkan 推理流程](project-flow.zh-CN.png)
+
+图中三值只代表量化 BitLinear 权重；训练与推理是分开的流程。
 
 > 本仓库提供 bit-jev 的 I2_S GGUF 模型包，可通过 `bit-jev` Python 包进行 CPU 或 GPU 推理。权重来自包含 Yelp 评论数据的多源决策训练集。Yelp 权利方许可申请已发出，截至 2026-09-28 尚未收到书面答复。本模型卡公开说明来源与限制；项目代码仓库的 Apache-2.0 许可证不自动适用于此检查点。
 
@@ -61,7 +72,7 @@ I2_S GGUF + float32 指针头
 
 ## 推理示例
 
-推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.10.10 wheel 已携带 CPU 与 Vulkan GPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型。使用 `device="cpu"` 或 `device="gpu"` 推理无需 Git、CMake、C++ 编译器或 Vulkan SDK；Vulkan GPU 需要显卡驱动提供 `vulkan-1.dll`。其他系统和 CUDA 后端按需从固定源码构建，需要 Git、CMake 3.28+ 与 C++17 编译器；CUDA 构建还需要 CUDA Toolkit。
+推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.11.10 wheel 已携带 CPU 与 Vulkan GPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型。使用 `device="cpu"` 或 `device="gpu"` 推理无需 Git、CMake、C++ 编译器或 Vulkan SDK；Vulkan GPU 需要显卡驱动提供 `vulkan-1.dll`。其他系统和 CUDA 后端按需从固定源码构建，需要 Git、CMake 3.28+ 与 C++17 编译器；CUDA 构建还需要 CUDA Toolkit。
 
 ```bash
 pip install bit-jev
@@ -87,9 +98,9 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 | CPU，16 线程 | 1,972.17 ms | 3 | 进程峰值 RSS 1,624.52 MiB |
 | RTX 5090 | 86.56 ms | 5 | GPU 峰值分配 4,935.53 MiB |
 
-![bit-jev AutoDL 单题延迟和内存对比](figures/bit-jev-autodl-case.zh-CN.svg)
+![bit-jev AutoDL 单题延迟和内存对比](bit-jev-autodl-case.zh-CN.png)
 
-[English chart](figures/bit-jev-autodl-case.en.svg)
+[English chart](bit-jev-autodl-case.en.png)
 
 同一道题上，16 线程 CPU 与 RTX 5090 GPU 路径的延迟比约为 22.8。两条路径使用不同权重格式和数值精度，因此该比值不能解释为纯硬件加速比。CPU RSS 与 GPU 分配量是不同口径。此单题少量重复只作为案例，不代表通用吞吐或准确率承诺。详细的脱敏计时数据见 `benchmark_case_autodl.json`；本包没有收录输入文本、候选内容或预测结果。模型不生成答案 token，因此不适用生成 tokens/s 指标。准确率、Brier、NLL 与 ECE 尚无可复核的公开留出集报告，本页不填入推测值。
 

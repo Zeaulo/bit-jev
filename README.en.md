@@ -1,24 +1,25 @@
-<div align="center">
-
 # bit-jev
 
-### Structured decisions on a 1.58-bit BitNet backbone
-
-**I2_S GGUF · CPU / GPU inference · LoRA fine-tuning · teacher–student distillation**
+**Install a BitNet model that answers structured questions.** Supply context, a question, and options; get scores and an answer without generating answer text token by token.
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[Quick start](#quick-start) · [Benchmarks](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[Run in two commands](#run-in-two-commands) · [Python API](#quick-start) · [Architecture](#what-the-code-implements) · [Measurements](#bit-jev-autodl-single-question-case) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
-</div>
+![Minimal illustration of ternary inputs, a decision engine, and scored options](docs/figures/decision-engine.png)
 
-> **Release update · 2026-09-28** PyPI 0.10.10 includes precompiled CPU and Vulkan GPU runners for Windows x64 machines with AVX2. Inference needs no Git, CMake, C++ compiler, or Vulkan SDK; Vulkan still needs a compatible graphics driver. The roughly 1.19 GB GGUF downloads on first use. Other platforms and CUDA builds still compile from pinned source.
-
-## Quick start
+## Run in two commands
 
 ```bash
-pip install bit-jev
+python -m pip install --upgrade bit-jev
+bit-jev-demo
 ```
+
+The demo runs a built-in customer-routing request and prints the **actual model output**; no JSONL file is needed. The first run downloads the roughly 1.19 GB model from [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled); later runs reuse the cache. Installation itself does not download weights. Use `bit-jev-demo --device gpu` for Vulkan.
+
+On Windows x64 with AVX2, the 0.11.10 wheel includes precompiled CPU and Vulkan runners, so inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan requires a compatible graphics driver. Other platforms and CUDA build from pinned source on demand; see the [installation guide](docs/GGUF_PACKAGE.md). The Apache-2.0 license covers code; the [model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) separately documents checkpoint provenance and rights.
+
+## Quick start
 
 ```python
 from bit_jev import BitJev
@@ -39,11 +40,11 @@ The code combines a BitNet backbone with a Kev-inspired decision interface. Comp
 > **Q: What is a jev / kev model?**
 > A: Given one shared piece of content and several questions, the model computes scores and probabilities over the caller-supplied options — no answer text is generated token by token.
 
-The I2_S checkpoint and sanitized AutoDL measurements are now published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). The training set included Yelp review records. A permission request was sent; as of 2026-09-28, no written response has arrived. The model card states this provenance, the measurement limits, and that no standalone open-weights license has been specified.
+The I2_S checkpoint and sanitized AutoDL measurements are published on [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled). The training set included Yelp review records. A permission request was sent; as of 2026-09-28, no written response has arrived. The model card states this provenance, the measurement limits, and that no standalone open-weights license has been specified.
 
-![bit-jev training and CPU inference flow](docs/figures/project-cover.en.png)
+![bit-jev training, distillation, quantization, and inference flow](docs/figures/project-flow.en.svg)
 
-The cover separates LoRA and teacher–student distillation from I2_S CPU option scoring. **Ternary refers to quantized BitLinear weights, not every parameter.** The [measurement highlights](docs/figures/model-highlights.en.svg) retain source details; the [detailed neural framework](docs/figures/model-framework.svg) shows the branch mask, decoder internals, and pointer-head equations.
+The diagram follows BitNet BF16 → LoRA and pointer training → Kev teacher logits → full-student distillation → I2_S GGUF and pointer head → CPU/Vulkan option scoring. **Ternary refers to quantized BitLinear weights, not every parameter.** The [detailed neural framework](docs/figures/model-framework.svg) shows the branch mask, decoder internals, and pointer-head equations.
 
 [GGUF package guide](docs/GGUF_PACKAGE.md) · [CPU source quick start](docs/CPU_QUICKSTART.md) · [Architecture and artifact status](docs/MODEL_CARD.md) · [Benchmark protocol](docs/BENCHMARKS.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bit-jev"
-version = "0.10.10"
+version = "0.11.10"
 description = "A Jev/Kev-style decision model on Microsoft's 1.58-bit BitNet b1.58 backbone"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -17,6 +17,7 @@ dependencies = [
 
 [project.scripts]
 bit-jev = "bit_jev.gguf:main"
+bit-jev-demo = "bit_jev.demo:main"
 
 [project.urls]
 Homepage = "https://github.com/Zeaulo/bit-jev"

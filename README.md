@@ -1,24 +1,23 @@
-<div align="center">
-
 # bit-jev
 
-### 在 1.58-bit BitNet 上直接回答结构化问题
-
-**I2_S GGUF · CPU / GPU 推理 · LoRA 微调 · 教师学生蒸馏**
+**安装即用的 BitNet 结构化决策模型。** 给定上下文、问题和候选项，直接返回答案与概率；不用逐 token 生成回答文本。
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [实测数据](#速度与内存) · [模型流程](#模型流程) · [接口格式](#请求格式) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
+[安装运行](#两条命令开始) · [Python 接口](#快速开始) · [训练与推理流程](#模型流程) · [实测数据](#速度与内存) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)
 
-</div>
+![bit-jev 三值输入经过决策引擎输出候选结果的浅色主视觉](docs/figures/decision-engine.png)
 
-> **发布动态 · 2026-09-28**　PyPI 0.10.10 为 Windows x64、支持 AVX2 的机器提供预编译 CPU 与 Vulkan GPU 程序：推理无需 Git、CMake、C++ 编译器或 Vulkan SDK。GPU 仍需支持 Vulkan 的显卡驱动。首次加载仍需下载约 1.19 GB 模型；其他平台及 CUDA 后端继续按需编译。
+## 两条命令开始
 
-把一段共享内容和多个问题直接映射为候选项分数、概率与答案，不生成回答文本。仓库代码采用 Apache-2.0；模型权重的许可状态请读[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)。
+```bash
+python -m pip install --upgrade bit-jev
+bit-jev-demo
+```
 
-![bit-jev 双层训练与推理流程图](docs/figures/project-cover.zh-CN.png)
+`bit-jev-demo` 自带一条客服分流示例，运行后打印**模型实际给出的**答案和原生推理耗时，无需准备 JSONL 文件。首次执行会从 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) 下载约 1.19 GB 模型，后续复用缓存；安装命令本身不下载权重。想用 Vulkan GPU，执行 `bit-jev-demo --device gpu`。
 
-封面把 LoRA、教师学生蒸馏与 I2_S CPU 评分分成两条链路。图中的 `-1 / 0 / +1` 指量化 BitLinear 权重；[三值权重与公开基础模型测量详图](docs/figures/model-highlights.zh-CN.svg)保留数值来源和边界。
+Windows x64 且 CPU 支持 AVX2 时，0.11.10 wheel 自带 CPU 与 Vulkan 程序，推理不需要 Git、CMake、编译器或 Vulkan SDK；GPU 仍需兼容的显卡驱动。其他平台及 CUDA 后端会按需从固定源码构建，详见[安装与排错指南](docs/GGUF_PACKAGE.zh-CN.md)。代码采用 Apache-2.0；[模型卡](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)单独说明权重的数据来源和许可状态。
 
 ## 先看结论
 
@@ -32,11 +31,7 @@
 
 ## 快速开始
 
-安装 Python 3.11 或 3.12。在 Windows x64 且 CPU 支持 AVX2 的机器上，`pip install bit-jev` 获取含 CPU 和 Vulkan 程序的平台 wheel；`device="cpu"` 与 `device="gpu"` 都不需要现场编译。GPU 路径仍需要显卡驱动提供 `vulkan-1.dll`，不需要 Vulkan SDK。首次加载只下载 GGUF（约 1.19 GB）。其他系统与 CUDA 后端首次自动构建时需要 [Git](https://git-scm.com/install/)、[CMake 3.28+](https://cmake.org/download/) 和 C++17 编译器，CUDA 还需 CUDA Toolkit。[各平台安装与排错步骤](docs/GGUF_PACKAGE.zh-CN.md)。
-
-```bash
-pip install bit-jev
-```
+需要自行传入问题时使用 Python API。支持 Python 3.11 和 3.12；`from_pretrained()` 在第一次调用时下载并加载模型，`infer()` 返回当前模型的实际结果。
 
 ```python
 from bit_jev.gguf import BitJev
@@ -68,7 +63,9 @@ with BitJev.from_pretrained(device="cpu", threads=8) as model:
 
 ## 模型流程
 
-![bit-jev 模型流程与推理边界](docs/figures/model-framework.svg)
+![bit-jev 中英文分离的训练、蒸馏、量化与推理流程](docs/figures/project-flow.zh-CN.svg)
+
+量化后 **BitLinear 权重**取 `-1 / 0 / +1`，不代表模型所有张量都只有三值。[逐层网络结构图](docs/figures/model-framework.svg)展示掩码、解码层与指针头细节。
 
 1. `train.py` 在 Microsoft BitNet BF16 骨干上训练 LoRA 与指针头。
 2. `distill.py export_teacher` 提取教师模型对候选项的 logits。

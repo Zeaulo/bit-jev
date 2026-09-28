@@ -14,11 +14,22 @@ tags:
 
 # bit-jev-2b-distilled
 
-[中文模型卡](HF_MODEL_CARD.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/)
+[中文模型卡](README.zh-CN.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/)
 
-![bit-jev training, distillation, and I2_S CPU inference flow](figures/project-cover.en.png)
+![bit-jev ternary inputs, decision engine, and scored options](decision-engine.png)
 
-The ternary symbols represent quantized BitLinear weights; training and inference are separate flows.
+Install the package and run its built-in example:
+
+```bash
+python -m pip install --upgrade bit-jev
+bit-jev-demo
+```
+
+The first run downloads the roughly 1.19 GB model; later runs reuse the cache. Use `bit-jev-demo --device gpu` for Vulkan. The demo prints an actual prediction, not a fixed sample answer.
+
+![bit-jev training, distillation, quantization, and CPU/Vulkan inference](project-flow.en.png)
+
+The ternary symbols in the flow refer only to quantized BitLinear weights; training and inference are separate flows.
 
 > This repository provides the I2_S GGUF model package for bit-jev, usable with the `bit-jev` Python package on CPU or GPU. The checkpoint was trained on a multi-source decision dataset that includes Yelp review records. A request for permission covering derivative weights and metrics has been sent to Yelp; as of 2026-09-28, no written reply has been received. The Apache-2.0 license for the source repository does not automatically apply to this checkpoint.
 
@@ -59,7 +70,7 @@ This release contains the I2_S artifacts for the native CPU runner, matching tok
 
 ## Inference
 
-Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.10.10 wheel includes precompiled CPU and Vulkan GPU runners. For `device="cpu"` or `device="gpu"`, inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan needs a compatible graphics driver that supplies `vulkan-1.dll`. The roughly 1.19 GB model still downloads on first use. Other platforms and CUDA build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; CUDA needs the CUDA Toolkit.
+Install the Python package. On Windows x64 with an AVX2 CPU, the bit-jev 0.11.10 wheel includes precompiled CPU and Vulkan GPU runners. For `device="cpu"` or `device="gpu"`, inference needs no Git, CMake, compiler, or Vulkan SDK. Vulkan needs a compatible graphics driver that supplies `vulkan-1.dll`. The roughly 1.19 GB model still downloads on first use. Other platforms and CUDA build from pinned source and require Git, CMake 3.28+, and a C++17 compiler; CUDA needs the CUDA Toolkit.
 
 ```bash
 pip install bit-jev
@@ -85,9 +96,9 @@ The measurements below use one fixed development request with 703 input tokens a
 | CPU, 16 threads | 1,972.17 ms | 3 | 1,624.52 MiB peak process RSS |
 | RTX 5090 | 86.56 ms | 5 | 4,935.53 MiB peak GPU allocation |
 
-![bit-jev AutoDL single-question latency and memory](figures/bit-jev-autodl-case.en.svg)
+![bit-jev AutoDL single-question latency and memory](bit-jev-autodl-case.en.png)
 
-[中文图表](figures/bit-jev-autodl-case.zh-CN.svg)
+[中文图表](bit-jev-autodl-case.zh-CN.png)
 
 For this one request, the 16-thread CPU to RTX 5090 latency ratio is about 22.8. The paths use different weight formats and numeric precision, so this is not an isolated hardware speedup. CPU RSS and GPU allocation are different measures. This small case study is not a general throughput or accuracy claim. Sanitized timings are in `benchmark_case_autodl.json`; the input, options, and predictions are not included. Generated tokens/s does not apply because the model scores options and emits structured decisions. No auditable held-out report for accuracy, Brier, NLL, or ECE is available, so no such values are claimed.
 

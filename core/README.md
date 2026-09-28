@@ -1,16 +1,21 @@
 # bit-jev
 
-bit-jev scores explicit options over a 1.58-bit BitNet backbone. Its I2_S GGUF inference path loads a resident model and returns structured answers, logits, and probabilities without generating answer tokens.
+**Install, run a decision, then build your own structured requests.** bit-jev scores explicit options over a BitNet backbone and returns answers and probabilities without generating answer text token by token.
+
+![bit-jev ternary inputs and decision engine](https://raw.githubusercontent.com/Zeaulo/bit-jev/main/docs/figures/decision-engine.png)
 
 [GitHub documentation](https://github.com/Zeaulo/bit-jev) · [GGUF model and model card](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [中文说明](https://github.com/Zeaulo/bit-jev/blob/main/README.md)
 
-## Install
+## Try it
 
 ```bash
-pip install bit-jev
+python -m pip install --upgrade bit-jev
+bit-jev-demo
 ```
 
-The Windows x64 wheel includes precompiled CPU and Vulkan GPU runners for AVX2 processors. Inference on those machines needs no Git, CMake, C++ compiler, or Vulkan SDK. Vulkan GPU inference still needs a compatible graphics driver and its `vulkan-1.dll` runtime. The 1.19 GB GGUF downloads from Hugging Face on first use; installation itself does not download model weights. Other platforms build the native runner on demand and require [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Source builds of Vulkan also need its SDK; CUDA builds need a CUDA Toolkit. Both precompiled programs use pinned BitNet and llama.cpp source with the ReLU² runtime patch and carry their MIT license notices.
+The built-in demo prints a real model answer and latency. The first run downloads the 1.19 GB GGUF from Hugging Face; later runs reuse the cache. Installation itself does not download model weights. Use `bit-jev-demo --device gpu` for Vulkan.
+
+The Windows x64 wheel includes precompiled CPU and Vulkan GPU runners for AVX2 processors. Inference on those machines needs no Git, CMake, C++ compiler, or Vulkan SDK. Vulkan still needs a compatible graphics driver and its `vulkan-1.dll` runtime. Other platforms build the native runner on demand and require [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Source builds of Vulkan also need its SDK; CUDA builds need a CUDA Toolkit. Both precompiled programs use pinned BitNet and llama.cpp source with the ReLU² runtime patch and carry their MIT license notices.
 
 ## Resident inference
 

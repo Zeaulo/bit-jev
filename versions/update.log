@@ -156,3 +156,11 @@
 - test/test_native_preflight.py 八项、test/test_version_consistency.py 一项通过；发行包内容检查和 twine check 通过。0.10.10 wheel 16,388,760 字节、sdist 16,133,285 字节。隔离安装 wheel 后限制 PATH 为 Windows 系统目录、屏蔽 Git/CMake 工具发现，RTX 2060 的公开 GGUF Vulkan 路径连续两次真实推理成功，Choice、Noul、Score 答案一致。该验收不代表 Vulkan 比 CPU 快，也不代表 RTX 5090 性能。
 - 更新中英文 README、GGUF 指南、Hugging Face 双语模型卡、发行清单、PyPI 实施文档与 versions/project_overall/index.html；总览按当前加载顺序、两套预编译程序、运行时依赖和真实测试边界维护。
 - GitHub main 推送提交 9f2cd53；PyPI 接收 0.10.10 wheel 与 sdist，公开版本 JSON 文件大小及 SHA-256 与本地一致。发布当时官方 simple 索引经当前网络代理仍返回旧缓存，GGUF 双语指南增加 PyPI 官方 wheel 直链和校验值。Hugging Face 仓库 jinghao1632/bit-jev-2b-distilled 的中英文模型卡已同步，远端回读 SHA-256 与本地一致。
+
+[2026-09-28 19:14:32] v0.15.5（中版本，安装即用示例与三平台文档图像重构）
+- 项目版本从 0.14.5 升至 0.15.5，PyPI 包版本从 0.10.10 升至 0.11.10。新增 core/bit_jev/demo.py 与 bit-jev-demo 控制台入口：用户安装后直接运行一条手写客服分流请求，打印模型实际答案、原生耗时与设备；允许选择本地模型目录、CPU/Vulkan/CUDA、线程数和 GPU 序号。首次启动才下载约 1.19 GB 权重，后续复用缓存。
+- GitHub 中英文首页和 PyPI 展示页把两条命令、首次下载与 Windows x64 AVX2 CPU/Vulkan 预编译适用范围放到开头；保留 Python API、性能案例与模型权重许可边界。中英文 GGUF 指南同步 0.11.10 和 bit-jev-demo，移除指向旧 0.10.10 wheel 的过期直链。
+- 内置图像生成工具生成无文字浅色主视觉 docs/figures/decision-engine.png。test/render_project_flow.py 从同一版式与双语文案生成 project-flow.zh-CN/en.svg 与对应 PNG，准确表示 BitNet BF16 → LoRA 与指针头 → Kev 9B 教师 logits → 学生蒸馏 → I2_S 导出，以及安装 → CPU/Vulkan 后端预检查 → 首次模型下载 → 候选评分。图中三值仅限定为量化 BitLinear 权重；不在图内编造性能数字。
+- 修复 Hugging Face 双语模型卡的资源相对路径：卡片引用实际仓库根目录的 PNG，并链接 README.md / README.zh-CN.md / README.en.md；AutoDL 单题图也改用仓库已有 PNG。GitHub 继续使用清晰 SVG，Hub 使用 PNG，PyPI 展示页以 GitHub 原始图绝对链接显示主视觉。.gitignore 逐项放行新公开图。
+- test/test_demo.py 核对无需 JSONL 的入口与实际 JSON 输出契约；发行包检查增加 bit-jev-demo 入口。0.11.10 wheel 16,390,228 字节、sdist 16,135,660 字节，均通过归档与 twine check。隔离安装后的 bit-jev-demo 在本地公开模型目录上分别经 CPU 与 RTX 2060 Vulkan 路径推理成功，答案均选择 billing；这是功能验收，不作为性能结论。versions/project_overall/index.html 同步命令入口、目录树、数据流和图像引用位置。
+- 从隔离安装 wheel 直接执行默认 `bit-jev-demo --threads 8`，不传入模型路径；Hugging Face 首次下载与缓存链路完成，真实 CPU 请求返回 billing。首次下载在本机代理网络下耗时约 4 分 34 秒，说明“安装即用”不等于首次推理零等待。当前 Transformers 版本还输出 tokenizer regex 告警；未在缺少训练分词对齐证据时改变 tokenizer 行为。
