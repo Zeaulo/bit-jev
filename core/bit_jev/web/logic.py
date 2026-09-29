@@ -5,8 +5,11 @@ from __future__ import annotations
 from typing import Any
 
 
-def clean_text(value: str, name: str, maximum: int, required: bool = True) -> str:
-    """清理单个输入，并在模型下载前拒绝过长或缺失的内容。"""
+def clean_text(value: str | None, name: str, maximum: int, required: bool = True) -> str:
+    """可选的空组件值按空文本处理，必填字段继续校验类型与长度。"""
+    # Gradio 5 的折叠 Textbox 初始值可能是 None，语义上等同于未填写。
+    if value is None and not required:
+        return ""
     if not isinstance(value, str):
         raise ValueError(f"{name} 必须是文本 / must be text")
     cleaned = value.strip()
@@ -17,7 +20,7 @@ def clean_text(value: str, name: str, maximum: int, required: bool = True) -> st
     return cleaned
 
 
-def base_request(state: str, question: str, kind: str, criteria: Any) -> dict[str, Any]:
+def base_request(state: str | None, question: str, kind: str, criteria: Any) -> dict[str, Any]:
     """构造三种题型共用的单题 SystemOne 请求。"""
     # 背景未填写时向模型明确传入“常见问题”，保持界面与 API 的默认值一致。
     background = clean_text(state, "背景说明", 1200, required=False) or "常见问题"
@@ -27,8 +30,8 @@ def base_request(state: str, question: str, kind: str, criteria: Any) -> dict[st
     }}}
 
 
-def build_choice_request(state: str, question: str,
-                         options: list[str], descriptions: list[str]) -> dict[str, Any]:
+def build_choice_request(state: str | None, question: str,
+                         options: list[str], descriptions: list[str | None]) -> dict[str, Any]:
     """把二至四个选项转换为 choice；空说明复制选项内容。"""
     if len(options) != len(descriptions) or not 2 <= len(options) <= 4:
         raise ValueError("选择题需要 2 至 4 个选项 / choice needs 2 to 4 options")
@@ -43,8 +46,8 @@ def build_choice_request(state: str, question: str,
     return base_request(state, question, "choice", criteria)
 
 
-def build_noul_request(state: str, question: str, language: str,
-                       no_description: str, yes_description: str) -> dict[str, Any]:
+def build_noul_request(state: str | None, question: str, language: str,
+                       no_description: str | None, yes_description: str | None) -> dict[str, Any]:
     """把固定的否／是选项转换为 noul；空说明复制显示标签。"""
     labels = ("否", "是") if language == "zh" else ("No", "Yes")
     no_detail = clean_text(no_description, "否说明", 200, required=False) or labels[0]
@@ -52,8 +55,8 @@ def build_noul_request(state: str, question: str, language: str,
     return base_request(state, question, "noul", {"false": no_detail, "true": yes_detail})
 
 
-def build_score_request(state: str, question: str,
-                        levels: list[str], descriptions: list[str]) -> dict[str, Any]:
+def build_score_request(state: str | None, question: str,
+                        levels: list[str], descriptions: list[str | None]) -> dict[str, Any]:
     """把二至四个有序等级转换为 score；空说明复制等级文本。"""
     if len(levels) != len(descriptions) or not 2 <= len(levels) <= 4:
         raise ValueError("等级题需要 2 至 4 级 / score needs 2 to 4 levels")

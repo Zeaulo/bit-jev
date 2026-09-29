@@ -20,15 +20,15 @@ def description_input(label: str, language: str) -> gr.Textbox:
     return gr.Textbox(label=f"{label} 说明（可选）" if chinese else
                       f"{label} description (optional)",
                       placeholder="留空则复制本项内容" if chinese else "Defaults to this item’s text",
-                      lines=2, visible=False)
+                      value="", lines=2, visible=False)
 
 
 def add_option_rows(kind: str, language: str) -> tuple[list[gr.Textbox], list[gr.Textbox],
                                                          list[gr.Group], list[gr.Button]]:
     """创建二至四个选项／等级，说明输入始终占用完整表单宽度。"""
     chinese = language == "zh"
-    defaults = ((["支付与退款", "物流配送", "", ""] if chinese else
-                 ["Payments and refunds", "Shipping and delivery", "", ""])
+    defaults = ((["比特币", "黄金", "", ""] if chinese else
+                 ["Bitcoin", "Gold", "", ""])
                 if kind == "choice" else
                 (["低", "中", "高", ""] if chinese else ["Low", "Medium", "High", ""]))
     initial_count = 2 if kind == "choice" else 3
@@ -116,12 +116,13 @@ def add_form(kind: str, language: str, infer_callback: Callable) -> gr.Group:
     with gr.Group(visible=chinese, elem_classes=["decision-form"]) as panel:
         question = gr.Textbox(
             label="你的问题" if chinese else "Your question",
-            value=("哪个团队应该处理？" if chinese else "Which team should handle this?")
+            value=("2027年，如果拿出1000美金，我应该买比特币还是黄金" if chinese else
+                   "In 2027, with $1,000, should I buy Bitcoin or gold?")
             if kind == "choice" else "",
             placeholder="请输入需要判断的问题" if chinese else "Enter your decision question",
         )
         with gr.Accordion("补充背景（可选）" if chinese else "Add background (optional)", open=False):
-            state = gr.Textbox(label="背景说明" if chinese else "Background", lines=3)
+            state = gr.Textbox(label="背景说明" if chinese else "Background", value="", lines=3)
         if kind == "noul":
             descriptions = add_noul_rows(language)
             inputs = [state, question, *descriptions]

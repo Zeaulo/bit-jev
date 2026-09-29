@@ -39,6 +39,21 @@ def four_item_cases() -> list[tuple[str, list[object], str]]:
     ]
 
 
+def default_choice_case(config: dict) -> tuple[str, list[object], str]:
+    """按页面配置提取原始默认值，覆盖折叠说明产生的 null。"""
+    api_name = "infer_choice_zh"
+    dependency = next(item for item in config["dependencies"]
+                      if item.get("api_name") == api_name)
+    components = {item["id"]: item for item in config["components"]}
+    values = [components[component_id]["props"].get("value")
+              for component_id in dependency["inputs"]]
+    if values[2] != "2027年，如果拿出1000美金，我应该买比特币还是黄金":
+        raise RuntimeError("线上 Choice 默认问题不是本次指定的示例")
+    if values[3:5] != ["比特币", "黄金"]:
+        raise RuntimeError("线上 Choice 默认选项不是比特币和黄金")
+    return api_name, values, "choice"
+
+
 def check_case(api_name: str, case: list[object], kind: str,
                dependencies: list[dict]) -> None:
     """提交单条在线请求，核对答案类型和正数原生耗时。"""
@@ -77,11 +92,14 @@ def main() -> None:
     """确认公开端点存在，然后逐个验收六种界面路径。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--four-only", action="store_true", help="仅测试两种四项上限路径")
+    parser.add_argument("--default-only", action="store_true", help="直接提交中文 Choice 的页面默认值")
     args = parser.parse_args()
     response = requests.get(f"{BASE_URL}/config", headers=HEADERS, timeout=30)
     response.raise_for_status()
-    dependencies = response.json()["dependencies"]
-    selected = four_item_cases() if args.four_only else cases()
+    config = response.json()
+    dependencies = config["dependencies"]
+    selected = ([default_choice_case(config)] if args.default_only else
+                four_item_cases() if args.four_only else cases())
     for api_name, case, kind in selected:
         check_case(api_name, case, kind, dependencies)
 

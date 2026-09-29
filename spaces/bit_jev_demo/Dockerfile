@@ -3,7 +3,7 @@ FROM python:3.11-slim-bookworm
 # Linux runner 在镜像构建阶段编译；访客首次推理无需安装 Git、CMake 或编译器。
 RUN apt-get update && apt-get install -y --no-install-recommends git build-essential ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-RUN python -m pip install --no-cache-dir -i https://pypi.org/simple "cmake>=3.28,<4" "bit-jev==0.13.11"
+RUN python -m pip install --no-cache-dir -i https://pypi.org/simple "cmake>=3.28,<4" "bit-jev==0.13.12"
 RUN python -c "from bit_jev.native_build import build_native; import shutil; source = build_native('cpu', cache_dir='/opt/bit-jev-build', jobs=2); shutil.copy2(source, '/opt/bit-jev-cpu')" \
     && chmod 755 /opt/bit-jev-cpu
 

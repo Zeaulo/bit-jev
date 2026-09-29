@@ -26,6 +26,29 @@ class SpaceDemoTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_choice_request("", "问题", ["A", "A"], ["", ""])
 
+    def test_collapsed_optional_fields(self):
+        """Gradio 折叠输入会提交 None；三题型应采用已有的缺省语义。"""
+        choice = build_choice_request(None, "哪个更适合？", ["比特币", "黄金"], [None, None])
+        self.assertEqual(choice["state"], "常见问题")
+        self.assertEqual(choice["questions"]["decision"]["criteria"],
+                         {"比特币": "比特币", "黄金": "黄金"})
+        noul = build_noul_request(None, "是否继续？", "zh", None, None)
+        self.assertEqual(noul["questions"]["decision"]["criteria"],
+                         {"false": "否", "true": "是"})
+        score = build_score_request(None, "风险程度？", ["低", "高"], [None, None])
+        self.assertEqual(score["questions"]["decision"]["criteria"],
+                         [{"level": "低", "description": "低"},
+                          {"level": "高", "description": "高"}])
+
+    def test_required_and_invalid_types_still_fail(self):
+        """只有可选空值能缺省，必填项和数字仍须显式报错。"""
+        with self.assertRaisesRegex(ValueError, "你的问题 必须是文本"):
+            build_choice_request(None, None, ["比特币", "黄金"], [None, None])
+        with self.assertRaisesRegex(ValueError, "选项 1 必须是文本"):
+            build_choice_request(None, "哪个更适合？", [None, "黄金"], [None, None])
+        with self.assertRaisesRegex(ValueError, "选项 1 说明 必须是文本"):
+            build_choice_request(None, "哪个更适合？", ["比特币", "黄金"], [123, None])
+
     def test_noul_defaults(self):
         """是非题始终传递 false 和 true，空说明复制语言对应标签。"""
         chinese = build_noul_request("", "是否退款？", "zh", "", "")

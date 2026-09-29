@@ -30,6 +30,15 @@ def main() -> None:
     tabs = [item["props"].get("label") for item in demo.config["components"]
             if item.get("type") == "tabitem"]
     assert tabs == ["Choice · 选择题", "Noul · 是非题", "Score · 等级题"], tabs
+    # 第一组中文 Choice 的示例应与公开快速体验一致。
+    fields = {}
+    for item in demo.config["components"]:
+        if item.get("type") == "textbox":
+            # 首个同名“你的问题”属于 Choice，后续题型不能覆盖它。
+            fields.setdefault(item["props"].get("label"), item["props"].get("value"))
+    assert fields["你的问题"] == "2027年，如果拿出1000美金，我应该买比特币还是黄金"
+    assert fields["A. 选项"] == "比特币"
+    assert fields["B. 选项"] == "黄金"
     print("三个任务 Tab、六种语言入口与输入数量均正确")
 
 
