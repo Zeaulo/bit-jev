@@ -14,7 +14,9 @@ tags:
 
 # bit-jev-2b-distilled
 
-[中文模型卡](README.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/) · [ModelScope mirror](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
+[中文模型卡](README.md) · [Source repository](https://github.com/Zeaulo/bit-jev) · [pip package](https://pypi.org/project/bit-jev/) · [ModelScope mirror](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled) · [Live CPU demo](https://jinghao9616-bit-jev-demo.ms.show/) · [Hugging Face bilingual entry](https://huggingface.co/spaces/jinghao1632/bit-jev-demo)
+
+The bilingual test page lets you edit a customer support scenario and inspect the real model's choice, probabilities, and native compute time. Inference runs in a free ModelScope CPU Space; the free Hugging Face static Space embeds it. First-run download and model loading are excluded from the displayed inference time.
 
 ![bit-jev binary trail and accelerating rocket logo](bit-jev-logo.png)
 

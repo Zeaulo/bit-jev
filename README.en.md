@@ -11,7 +11,9 @@ bit-jev scores explicit options over a BitNet backbone and returns structured an
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[Quick start](#quick-start) · [Supported Platforms](#supported-platforms) · [Measurements](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
+[Live CPU demo (ModelScope)](https://jinghao9616-bit-jev-demo.ms.show/) · [Hugging Face bilingual entry](https://huggingface.co/spaces/jinghao1632/bit-jev-demo) · [Quick start](#quick-start) · [Supported Platforms](#supported-platforms) · [Measurements](#bit-jev-autodl-single-question-case) · [Architecture](#what-the-code-implements) · [简体中文](README.md) · [Hugging Face model](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope model](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
+
+Want to try it before installing? Open the [bilingual CPU demo](https://jinghao9616-bit-jev-demo.ms.show/) ([ModelScope Studio page](https://modelscope.cn/studios/JingHao9616/bit-jev-demo)). The current Hugging Face account cannot create a free compute Space, so its [free static page](https://huggingface.co/spaces/jinghao1632/bit-jev-demo) embeds the same ModelScope demo. Real inference runs on ModelScope's free 2-vCPU container. The first request downloads and loads the model; displayed native compute time is not directly comparable to the 32-core EPYC or RTX 5090 results below.
 
 ## Quick start
 

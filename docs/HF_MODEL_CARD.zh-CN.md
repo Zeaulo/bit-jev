@@ -14,7 +14,9 @@ tags:
 
 # bit-jev-2b-distilled
 
-[English model card](README.en.md) · [源码仓库](https://github.com/Zeaulo/bit-jev) · [pip 安装](https://pypi.org/project/bit-jev/) · [ModelScope 镜像](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
+[English model card](README.en.md) · [源码仓库](https://github.com/Zeaulo/bit-jev) · [pip 安装](https://pypi.org/project/bit-jev/) · [ModelScope 镜像](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled) · [在线测试](https://jinghao9616-bit-jev-demo.ms.show/) · [Hugging Face 双语入口](https://huggingface.co/spaces/jinghao1632/bit-jev-demo)
+
+中英双语测试页可修改客服场景并查看真实模型的选项、概率与原生计算耗时。ModelScope 免费 CPU 空间执行推理；Hugging Face 免费静态 Space 嵌入该空间。首次请求的模型下载与加载不计入页面显示的推理耗时。
 
 ![bit-jev：二进制轨迹与加速火箭 Logo](bit-jev-logo.png)
 

@@ -192,3 +192,10 @@
 - ModelScope 账号 `JingHao9616` 的公开同名模型仓库上传了完整 I2_S GGUF、指针头、分词器、配置、双语模型卡和图片，共 21 个提交文件、0 个失败；远端 GGUF 为 1,187,288,192 字节，公开 SHA256SUMS.json 的 GGUF 摘要与原 Hugging Face 包一致。ModelScope 公开 README 和校验清单已通过 SDK 重新下载；0.12.10 的 `download_model(source="modelscope")` 成功获取 9 个必需文件并返回目录。
 - PyPI 已发布 0.12.10 Windows x64 AVX2 wheel（16,391,036 字节，SHA-256 795a29dfeb83cc0bc85d095b1d8a626e678423544aa64b0d1f79b3e175c6e7b6）和源码包（16,136,359 字节，SHA-256 b8e1b5d8c4fa197cfe382edfa6965447ee5777cf1ec0347acf7b8aa165556282）。两份公开 PyPI JSON 元数据与本地产物一致，wheel 声明 ModelScope 下载依赖。wheel 归档检查与 twine check 通过；隔离安装后屏蔽 Git/CMake，内置 CPU 程序对公开 GGUF 连续两次真实推理成功。
 - `test/test_model_sources.py` 覆盖本地目录、显式 ModelScope、Hugging Face 超时回退和非法 source；更新 `test/test_demo.py` 及发行包检查。GitHub 双语首页、PyPI 展示文案、双语 GGUF 安装指南和 `versions/project_overall/index.html` 同步下载顺序、站点链接、版本及文件职责。速度和内存图仍沿用既有实测口径，没有新增模型性能数字。
+
+[2026-09-29 10:34:10] v0.17.8（中版本，中英双语在线 CPU 测试空间）
+- 项目版本由 v0.16.8 升至 v0.17.8；PyPI 包代码和版本 0.12.10 未更改。新增 `spaces/bit_jev_demo`：Docker 镜像安装 bit-jev 0.12.10 与 Gradio 5，在构建阶段从固定上游提交编译 Linux CPU runner，运行时以非特权用户按需下载约 1.19 GB 模型。`logic.py` 将有长度限制的六项双语表单输入转换为现有 choice 请求；`app.py` 用锁复用一条常驻原生进程，展示真实候选答案、概率和不含下载/加载的原生耗时。
+- ModelScope 公开 Docker 创空间 `JingHao9616/bit-jev-demo` 已在免费 2 vCPU / 8 GB 资源上构建并显示 Running；公开 Gradio `/config` 和 `/call` 端点的手写案例验收通过。中文请求返回 billing、概率 0.7935 / 0.2065、原生耗时 596.34 ms；英文请求返回 billing、概率 0.7684 / 0.2316、原生耗时 538.73 ms。两次功能验收不构成稳定性能基准，也不与 32 核 EPYC 或 RTX 5090 结果混用。
+- Hugging Face 账号创建 CPU Basic Docker Space 返回 HTTP 402（需 PRO）；已创建免费 static Space `jinghao1632/bit-jev-demo`，提供中英双语说明、正式 0/1 火箭标志、ModelScope 直达按钮，以及对实际 `jinghao9616-bit-jev-demo.ms.show` 运行域名的 iframe。Hugging Face 静态域名返回页面 HTTP 200；ModelScope 项目详情页具有 SAMEORIGIN 限制，因此未用其作为嵌入目标。实际模型计算只在 ModelScope 执行。
+- 新增 `test/test_space_demo.py` 离线输入/结果契约测试、`test/smoke_space.py` 双语线上真实请求验收、`test/deploy_space.py` 双站点空间上传及 `test/sync_space_links.py` 模型卡轻量同步脚本。中英文 GitHub README 与双语模型卡增加直达测试入口并说明计算位置与测量边界；Hugging Face 三张卡最终提交 87a203d，ModelScope 三张卡随后分别上传。`.gitignore` 排除 ModelScope SDK 自动生成的 `.ms_upload_cache`。`versions/project_overall/index.html` 同步新增代码逻辑、功能需求、数据流、目录职责和发布状态。
+- X 贴文待发布：桌面浏览器控制工具无法可靠判断当前浏览器 URL，按工具安全机制中止；本次未向 X 发送任何内容。

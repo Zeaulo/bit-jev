@@ -11,7 +11,9 @@ bit-jev 在 BitNet 骨干上对候选项直接评分，返回结构化答案，�
 
 [![PyPI version](https://img.shields.io/pypi/v/bit-jev?label=PyPI)](https://pypi.org/project/bit-jev/) [![Python 3.11 / 3.12](https://img.shields.io/badge/Python-3.11%20%2F%203.12-3776AB)](https://pypi.org/project/bit-jev/) [![License](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [Supported Platforms](#supported-platforms) · [速度与内存](#速度与内存) · [模型流程](#模型流程) · [English](README.en.md) · [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
+[在线测试（ModelScope CPU）](https://jinghao9616-bit-jev-demo.ms.show/) · [Hugging Face 双语入口](https://huggingface.co/spaces/jinghao1632/bit-jev-demo) · [快速开始](#快速开始) · [Supported Platforms](#supported-platforms) · [速度与内存](#速度与内存) · [模型流程](#模型流程) · [English](README.en.md) · [Hugging Face 模型](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) · [ModelScope 模型](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)
+
+不想先安装？[直接打开中英双语 CPU 在线测试](https://jinghao9616-bit-jev-demo.ms.show/)（[ModelScope 创空间主页](https://modelscope.cn/studios/JingHao9616/bit-jev-demo)）。Hugging Face 当前账号无法创建免费计算型 Space，其[免费静态入口](https://huggingface.co/spaces/jinghao1632/bit-jev-demo)嵌入同一个 ModelScope 测试页；实际推理在 ModelScope 免费 2 vCPU 容器运行。首次请求需下载并加载模型，页面仅显示原生计算耗时，不能与下方 32 核 EPYC / RTX 5090 案例直接比较。
 
 ## 快速开始
 

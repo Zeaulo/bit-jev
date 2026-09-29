@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.16.8 双模型站点下载与中文模型卡、EPYC 9654 实测、GGUF 常驻推理与训练蒸馏维护手册">
+  <meta name="description" content="bit-jev v0.17.8 双语在线测试空间、双模型站点下载、EPYC 9654 实测、GGUF 常驻推理与训练蒸馏维护手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.16.8 双模型站点发布</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.17.8 双语在线测试</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -32,7 +32,7 @@
       <section id="summary" class="glass hero scroll-mt-28 rounded-[2rem] p-8 md:p-12">
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并通过 pip 提供 GGUF 常驻推理。</h2>
-        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 使用 Transformers/PyTorch 训练 BitNet 骨干与指针头，先做 LoRA 微调，再由 Kev 教师 logits 蒸馏学生，导出 I2_S GGUF 和 float32 指针头。README.md 以“普通电脑，CPU 就能跑 JEV，而且很快！”开头，随即给出 <code>pip install bit-jev</code> 与 <code>python -m bit_jev.demo</code>。PyPI 0.12.10 的第一次模型加载按需下载约 1.19 GB 文件；<code>gguf.py</code> 默认先请求 Hugging Face，连接失败后回退 ModelScope，<code>source="modelscope"</code> 可直接选择国内站点。Windows x64 AVX2 的 CPU 与 Vulkan GPU 请求分别启动 wheel 内两个预编译程序。macOS Intel、macOS Apple Silicon 与 Linux x86_64/ARM64 仅有未实测的 CPU 源码构建路径，不能标为已验证支持。轻量编码模块处理 state、问题和候选项，常驻 C++ 进程的指针头直接返回概率而不生成答案 token。公开微软基础模型基准与 bit-jev 检查点 AutoDL 案例继续分开说明。</p>
+        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 使用 Transformers/PyTorch 训练 BitNet 骨干与指针头，先做 LoRA 微调，再由 Kev 教师 logits 蒸馏学生，导出 I2_S GGUF 和 float32 指针头。README.md 以“普通电脑，CPU 就能跑 JEV，而且很快！”开头，随即给出 <code>pip install bit-jev</code> 与 <code>python -m bit_jev.demo</code>。PyPI 0.12.10 的第一次模型加载按需下载约 1.19 GB 文件；<code>gguf.py</code> 默认先请求 Hugging Face，连接失败后回退 ModelScope，<code>source="modelscope"</code> 可直接选择国内站点。Windows x64 AVX2 的 CPU 与 Vulkan GPU 请求分别启动 wheel 内两个预编译程序。macOS Intel、macOS Apple Silicon 与 Linux x86_64/ARM64 仅有未实测的 CPU 源码构建路径，不能标为已验证支持。新增 <code>spaces/bit_jev_demo</code> 的中英双语表单，在 ModelScope 免费 2 vCPU Docker 空间使用镜像预编译的 Linux runner 执行真实推理；Hugging Face 免费静态 Space 通过 iframe 嵌入该运行域名，因为当前账号创建计算型 Space 返回 402。在线页面与 Python API 共用 <code>BitJev.infer()</code>，不生成答案 token；公开微软基础模型基准与 bit-jev 检查点 AutoDL 案例继续分开说明。</p>
         <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/project-flow.zh-CN.png" alt="BitNet BF16、LoRA、Kev 教师 logits、学生蒸馏、I2_S 导出、CPU/Vulkan 决策链"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">中英文精确流程图由 <code>test/render_project_flow.py</code> 从同一节点结构生成。GitHub README 首屏使用用户选定的 <code>bit-jev-logo.png</code>：图中文字为 bit-jev，火箭尾迹包含 0/1 二进制数字；口号与安装命令位于图片之前。量化三值仅指 BitLinear 权重，不指所有张量。</figcaption></figure>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
@@ -55,9 +55,11 @@
             <li><b>GGUF 请求路径</b><span><code>gguf.py</code> 先判断本地目录，再按 <code>source</code> 参数或 <code>BIT_JEV_MODEL_SOURCE</code> 选择下载站点。auto 模式用 5 秒元数据超时尝试 Hugging Face，失败后映射至 <code>JingHao9616/bit-jev-2b-distilled</code> 并用 <code>modelscope-hub</code> 下载同一组推理文件。随后等待原生加载握手并复用常驻进程；<code>cpu.py</code> 将多题请求拆成多条因果行；<code>native/main.cpp</code> 用选定 CPU/Vulkan/CUDA 后端读取隐藏状态、计算指针头并返回 JSONL 选项分布。</span></li>
             <li><b>程序选择</b><span><code>gguf.py</code> 在下载模型前调用 <code>native_build.py</code>：先找对应版本的用户缓存，再按设备选择 Windows x64 wheel 内的 CPU EXE 或 Vulkan EXE，检查 AVX2；Vulkan 额外检查系统是否能加载 <code>vulkan-1.dll</code>。只有缺少包内目标、选择 CUDA，或显式指定 <code>native_source=</code> 时才走源码构建；默认源码路径核对 BitNet/llama.cpp 固定提交并应用 ReLU² 补丁。</span></li>
             <li><b>零文件示例入口</b><span><code>core/bit_jev/demo.py</code> 保存手写客服分流请求；<code>bit-jev-demo</code> 或 <code>python -m bit_jev.demo</code> 解析 model、source、device、threads 和 gpu-index，再调用同一 <code>BitJev.from_pretrained()</code> 与 <code>infer()</code>。示例直接打印实际答案、原生耗时和设备，不预写预测结果。</span></li>
+            <li><b>在线表单路径</b><span><code>spaces/bit_jev_demo/logic.py</code> 校验六项访问者输入并生成一条 choice 请求；<code>app.py</code> 用锁保护常驻原生进程，对中文和英文标签页均调用 <code>BitJev.infer()</code>。Dockerfile 在镜像构建时完成 Linux CPU 编译，运行时只下载权重和加载模型。Hugging Face 静态入口不执行 Python，而是嵌入 ModelScope 的公开 Gradio 运行域名。</span></li>
           </ol></article>
           <article class="glass card"><h3>功能需求层</h3><ol class="step-list">
             <li><b>安装即用</b><span>用户执行 <code>python -m pip install --upgrade bit-jev</code> 和 <code>python -m bit_jev.demo</code> 即可完成第一个真实请求；首次启动才下载约 1.19 GB 模型，之后复用站点缓存。国内网络可指定 <code>--source modelscope</code> 跳过 Hugging Face；指定 <code>--device gpu</code> 改用 Vulkan。</span></li>
+            <li><b>中英双语在线试用</b><span>用户在 ModelScope 免费空间切换中文或 English 标签页，填写情境、问题与两个候选，直接读取真实答案、概率和原生计算时间。首次下载和加载时间单独说明；表单拒绝空字段、重复候选标识和超长文本。Hugging Face 免费静态页面提供同一空间的嵌入和直达入口。</span></li>
             <li><b>结构化输出</b><span>Choice 返回候选项概率，Noul 返回真假判断，Score 返回有序评分分布；每题只在调用方给出的候选集合内选择。</span></li>
             <li><b>题目隔离</b><span>训练路径用注意力掩码隔离分支；原生路径逐题清理 KV 缓存后执行独立因果行，保证一个问题不能看到另一个问题文本。</span></li>
             <li><b>一次读出</b><span>每条原生因果行以前向计算取得所有候选分数；没有逐个生成答案 token 的循环。多题原生请求仍逐题重算共享 state。</span></li>
@@ -82,6 +84,7 @@
             <div class="flow-node"><small>6 / pip 加载</small><b>demo.py → gguf.py / native_build.py</b><span>bit-jev-demo 生成手写请求。预检查先选已有缓存；Windows x64 AVX2 按 CPU/GPU 选 wheel 内 CPU 或 Vulkan EXE，GPU 检查系统 loader。其他平台、CUDA 或指定源码才构建。随后优先从本地目录读取；auto 模式先向 Hugging Face 请求，网络失败时从 ModelScope 获取 GGUF、头和 tokenizer，最后等待加载握手。</span></div>
             <div class="flow-node"><small>7 / 原生计算</small><b>native/main.cpp</b><span>cpu.py 将多题拆成因果行；原生程序逐行清 KV、用选定后端运行 I2_S 骨干、读取隐藏状态并应用指针头。</span></div>
             <div class="flow-node"><small>8 / 输出</small><b>JSONL → TypeSafe</b><span>原生程序返回 logits、概率和原生耗时；gguf.py 恢复 Choice、Noul、Score 答案。</span></div>
+            <div class="flow-node"><small>在线体验支线</small><b>Gradio → BitJev.infer</b><span>浏览器双语表单 → logic.py 校验和 choice JSON → ModelScope 2 vCPU 容器中的常驻进程 → 答案、概率、原生耗时；Hugging Face 静态页面通过 iframe 复用相同后端。</span></div>
             <div class="flow-node"><small>预编译构建支线</small><b>固定源码 → CPU 与 Vulkan Release</b><span>BitNet 0b341e58、llama.cpp 390c3077、ReLU² 补丁。CPU 使用 MSVC 静态运行库；Vulkan 使用 MinGW 静态 GCC 运行库和编入的着色器，只动态加载系统 vulkan-1.dll。两者关闭 GGML_NATIVE/OpenMP，启用 AVX2。</span></div>
           </div>
           <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/model-framework.svg" alt="bit-jev 深度学习模型结构：请求打包、分支掩码、BitNet 解码层的注意力和前馈残差、256 维指针头"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">模型结构图：从共享 state、多问题封装与分支因果掩码进入 30 层 BitNet 解码器；单层依次执行注意力归一化、Q/K/V 与 RoPE、注意力输出、残差、前馈归一化、Up 与 ReLU² Gate、Down 和残差。最终隐藏状态在选项结束位置和决定位置取样，经两个 256 维线性投影、点积、温度缩放与 softmax 得到候选概率。底部区分 PyTorch 打包路径共享 state 与原生 CPU 逐题重算。图片描述源码结构，不代表已有公开 bit-jev 权重。</figcaption></figure>
@@ -121,6 +124,11 @@
 │     ├─ setup_autodl.sh / run_train.sh
 │     ├─ run_distill.sh / run_eval.sh
 │     └─ fetch_kev_suites.py
+├─ spaces/
+│  ├─ bit_jev_demo/
+│  │  ├─ Dockerfile / README.md / app.py / logic.py / logo.png
+│  └─ hf_static/
+│     ├─ README.md / index.html / styles.css / app.js / logo.png
 ├─ test/
 │  ├─ bootstrap_bitnet.py
 │  ├─ patches/
@@ -137,6 +145,7 @@
 │  ├─ render_checkpoint_public_figures.py
 │  ├─ render_case_profile_bars.py
 │  ├─ render_project_flow.py / test_demo.py / test_model_sources.py
+│  ├─ test_space_demo.py / smoke_space.py / deploy_space.py / sync_space_links.py
 │  ├─ package_release.py
 │  ├─ publish_model_hubs.py
 │  ├─ test_pypi_inference.py
@@ -179,6 +188,9 @@
           </div>
           <article class="glass card"><h3>关键文件职责</h3><dl class="file-list">
             <div><dt>README.md / README.en.md / core/README.md</dt><dd>GitHub 中文默认首页用口号置顶，紧接 pip 安装与运行命令，再展示用户选定的 bit-jev Logo；英文首页采用同样顺序。两页的 Supported Platforms 表把 Windows x64 AVX2 预编译与 macOS/Linux 未实测源码路径分开。core/README.md 是 0.12.10 的 PyPI 展示文案，提供 Hugging Face 与 ModelScope 双模型链接及直连用法。</dd></div>
+            <div><dt>spaces/bit_jev_demo/Dockerfile / app.py / logic.py / README.md / logo.png</dt><dd>Dockerfile 使用 Python 3.11，安装公开 PyPI 0.12.10 与 Gradio 5，在镜像构建阶段从固定 BitNet/llama.cpp 提交编译 Linux CPU runner，再以非特权用户运行 7860 端口。app.py 用中文和英文标签页管理一条常驻 BitJev 进程，并序列化推理以保护单进程 JSONL 契约；logic.py 限制六个输入字段长度、构造 choice 请求并只展示 infer 实际返回的答案、概率和原生耗时。README.md 解释首次 1.19 GB 下载、数据许可和 2 vCPU 测量边界；logo.png 是正式 0/1 火箭标志的独立拷贝。</dd></div>
+            <div><dt>spaces/hf_static/README.md / index.html / styles.css / app.js / logo.png</dt><dd>Hugging Face 静态 Space 无计算资源。README.md 声明 static SDK 与当前账号的 402 限制；index.html 放置中英文导航、ModelScope 直达按钮和对实际 ms.show 域名的 iframe。styles.css 管理响应式浅色页面，app.js 仅切换两种说明语言；模型计算始终发生在 ModelScope 容器中。项目详情页因 SAMEORIGIN 禁止嵌入，故 iframe 不使用详情页 URL。</dd></div>
+            <div><dt>test/test_space_demo.py / smoke_space.py / deploy_space.py / sync_space_links.py</dt><dd>test_space_demo.py 离线核对 choice 请求和结果展示及非法输入；smoke_space.py 通过公开 Gradio /config、/call 及 SSE 分别提交中英手写客服案例，核对真实候选答案与正耗时，不写入模型输出文件。deploy_space.py 仅上传公开空间源码；sync_space_links.py 只同步双语模型卡，不重新上传 GGUF。ModelScope 令牌从环境读取，Hugging Face 使用本机 Hub 凭据；源码不含权重和密钥。</dd></div>
             <div><dt>core/bit_jev/demo.py / test/test_demo.py</dt><dd>demo.py 内置不含私有数据的客服题，解析 model/source/device/threads/gpu-index 并复用 GGUF 常驻 API；test_demo.py 模拟模型，核对无需 JSONL 的命令调用与 JSON 输出。真实模型推理验收另由 test/test_pypi_inference.py 完成。</dd></div>
             <div><dt>core/bit_jev/api.py / encoding.py / model.py</dt><dd>api.py 校验三类问题并格式化答案；encoding.py 不依赖 PyTorch，负责五个预留 token、state 与候选项位置编码；model.py 使用这些编码构造 block-causal 掩码、运行 PyTorch 骨干和指针头，供训练及评估。</dd></div>
             <div><dt>core/bit_jev/gguf.py / native_build.py / __version__.py</dt><dd>gguf.py 在模型下载前调用 preflight_native，再先看本地目录；远程 auto 模式尝试 Hugging Face 并在失败时回退 ModelScope，显式 source 和环境变量可固定站点。两站点只下载 GGUF、头、配置和 tokenizer 等必需文件；完成后等待原生加载握手，提供 infer、infer_many 和 close。native_build.py 先返回已有用户缓存，其次在 Windows x64 AVX2 上按 cpu 或 gpu/vulkan 返回 wheel 内对应 EXE。包内 GPU 程序启动前检查 vulkan-1.dll；指定 binary 显式覆盖，native_source 强制源码构建。源码构建才检查 Git/CMake 并按固定提交编译；缺 Vulkan SDK 时指向项目构建指南。__init__.py 从 __version__.py 导入运行时版本，保证原生缓存目录与包元数据一致。</dd></div>
@@ -245,15 +257,15 @@
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.16.8 Hugging Face / ModelScope 双站点与 PyPI 0.12.10</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.17.8 中英双语在线测试与 PyPI 0.12.10</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
           <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>GitHub main 维护中文默认首页和双站点下载说明。PyPI 0.12.10 已接收 Windows x64 AVX2 wheel 与源码包；wheel 内仍有 CPU/Vulkan 两个预编译 EXE、bit-jev-demo 命令，并新增轻量 modelscope-hub 依赖。公开 PyPI JSON 的两份文件大小与 SHA-256 均与本地一致。隔离安装后 CPU 常驻推理两次通过，屏蔽 Git/CMake 后仍直接使用包内程序；Vulkan 延续 0.11.10 的实测记录，本次未重测。Windows Vulkan 仍需兼容显卡驱动和系统 loader，CUDA 仍需源码构建与 Toolkit。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>微软基础模型的独立基准仍与 bit-jev 检查点分开。v0.15.8 的速度图读取 EPYC 9654 32 核容器新记录和历史 RTX 5090 记录，分别说明 CPU I2_S、GPU FP16 混合精度和不同主机；内存图只使用原 Xeon/5090 同机数据。EPYC 新记录含两次进程启动共 6 次原生计时与同机 16 线程诊断，不包含原始请求或预测；这一道题不能代表通用性能。</p></div>
-          <div class="status"><span class="status-dot done"></span><b>权重、模型卡与图片</b><p>Hugging Face 与 ModelScope 均保存相同的 I2_S GGUF、float32 指针头、分词器、配置和模型文件 SHA-256；ModelScope 远端核对 GGUF 为 1,187,288,192 字节。两处默认模型卡均为中文，另有英文卡；新 Logo、中文/英文流程图、速度图和内存图均已上传。Hugging Face 的五张关键图片 HEAD 请求均为 200；ModelScope 的公开 README 与 SHA256SUMS.json 已通过 SDK 下载核对。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>权重、双语在线测试与图片</b><p>Hugging Face 与 ModelScope 均保存相同的 I2_S GGUF、float32 指针头、分词器、配置和模型文件 SHA-256。ModelScope 公开 Docker 创空间使用免费 2 vCPU / 8 GB，容器日志确认 Gradio 5 启动；公开 Gradio 接口的中文手写客服题实际返回 billing、概率 0.7935、原生耗时 596.34 ms，英文题实际返回 billing、概率 0.7684、原生耗时 538.73 ms。这是各一次功能验收，不是性能基准。Hugging Face 账号创建免费计算 Space 被 402 拒绝，免费静态 Space 已发布双语入口并嵌入 ModelScope 的 ms.show 运行域名。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.16.8 / PyPI 0.12.10 · 双模型站点、中文默认模型卡与 EPYC 实测图</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.17.8 / PyPI 0.12.10 · 双语空间、双模型站点与 EPYC 实测图</footer>
   </div>
 </body>
 </html>

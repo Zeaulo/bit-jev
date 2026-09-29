@@ -1,0 +1,22 @@
+/* 静态入口采用浅色阅读层级，避免掩盖真实推理所在平台。 */
+:root { font-family: Inter, "Noto Sans SC", system-ui, sans-serif; color: #10203b; background: #f5f8fc; }
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(circle at 15% 10%, #d9ebff 0, transparent 34%), #f5f8fc; }
+.shell { max-width: 1150px; margin: 0 auto; padding: 24px 24px 72px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.logo { width: 104px; height: 104px; object-fit: contain; }
+.language { display: flex; padding: 4px; border: 1px solid #d5e1f1; border-radius: 14px; background: white; }
+.language button { border: 0; padding: 10px 16px; border-radius: 10px; background: transparent; color: #4d6382; cursor: pointer; }
+.language button[aria-pressed="true"] { color: white; background: #0d52bd; }
+.intro { margin: 20px 0 30px; padding: 36px; border: 1px solid #e5ecf5; border-radius: 28px; background: rgba(255,255,255,.86); box-shadow: 0 20px 70px rgba(28,72,125,.08); }
+.eyebrow { color: #0d65c8; font-size: 13px; font-weight: 700; letter-spacing: .1em; }
+h1 { max-width: 860px; margin: 12px 0; font-size: clamp(30px, 5vw, 54px); line-height: 1.17; letter-spacing: -.035em; }
+.intro > p:not(.eyebrow) { max-width: 850px; line-height: 1.75; color: #526783; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 20px; }
+.actions a { padding: 13px 18px; border-radius: 12px; font-weight: 700; text-decoration: none; }
+.primary { color: white; background: #0d52bd; }
+.secondary { color: #0d52bd; background: #e8f1ff; }
+.note { font-size: 13px; }
+.frame-wrap { height: 830px; overflow: hidden; border: 1px solid #dae5f3; border-radius: 24px; background: white; box-shadow: 0 20px 70px rgba(28,72,125,.07); }
+.frame-wrap iframe { display: block; width: 100%; height: 100%; border: 0; }
+@media (max-width: 650px) { .shell { padding: 12px 12px 40px; } .intro { padding: 24px; } .logo { width: 76px; height: 76px; } .frame-wrap { height: 690px; } }
