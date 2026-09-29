@@ -218,3 +218,4 @@
 [2026-09-29 15:13:01] v0.19.9（小版本，GPU 耗时标签修正）
 - 项目版本由 v0.19.8 升至 v0.19.9，PyPI 包版本由 0.13.10 升至 0.13.11。共用页面的结果摘要根据原生响应 `device` 显示 CPU 或 GPU，不再把 Vulkan/CUDA 的计算耗时误标成 CPU；`test/test_space_demo.py` 增加 GPU 标签验收。双语首页、GGUF 指南、模型卡、Dockerfile 和项目总览同步 0.13.11 版本号。
 - 0.13.11 已发布到官方 PyPI：Windows wheel 17,750,457 字节、SHA-256 d0be557a85c8224fab2a8466c45d7ffaa1a0da13a2bf06c0fbacbc40a58a9d80；源码包 17,491,878 字节、SHA-256 5855f4cae915e586c33e91785659e580234ea52c5a09bbd9913ed460a21da127，均与本地一致。归档检查、twine check、版本一致性与 CPU/GPU 标签测试通过；隔离环境已从官方 PyPI 升级到 0.13.11。Hugging Face 与 ModelScope 双语模型卡已同步该版本号，ModelScope Docker 空间重新部署中。
+- [2026-09-29 15:39:06] ModelScope Docker 空间 0.13.11 镜像构建后进入 Running。公开接口的中文／英文 Choice、Noul、Score 六条真实请求及 Choice、Score 四项请求全部通过；返回正确题型、完整候选概率、HTML 概率条和正数原生耗时。包内 Logo 的公开 Gradio 图片 URL 经 GET 返回 HTTP 200、image/png。该八条功能验收的耗时不作为跨硬件性能基准；Hugging Face 静态 Space 继续嵌入同一 ModelScope 运行域名。
