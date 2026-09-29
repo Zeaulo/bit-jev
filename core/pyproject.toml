@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bit-jev"
-version = "0.12.10"
+version = "0.13.11"
 description = "A Jev/Kev-style decision model on Microsoft's 1.58-bit BitNet b1.58 backbone"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -14,6 +14,7 @@ dependencies = [
     "transformers>=4.48,<5",
     "huggingface_hub",
     "modelscope-hub>=0.4.3,<1",
+    "gradio>=5,<6",
 ]
 
 [project.scripts]
@@ -34,3 +35,6 @@ benchmark = ["psutil>=5.9"]
 
 [tool.setuptools.packages.find]
 include = ["bit_jev*"]
+
+[tool.setuptools.package-data]
+"bit_jev.web" = ["logo.png"]

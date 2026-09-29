@@ -85,8 +85,11 @@ def present_result(result: dict[str, Any], language: str) -> tuple[str, dict[str
         value = answer["score"]
         title = (f"期望等级索引：**{value:.2f}**（首级为 0）" if language == "zh"
                  else f"Expected level index: **{value:.2f}** (first level is 0)")
-    timing = (f"CPU 原生计算：**{latency:.2f} ms**" if language == "zh"
-              else f"Native CPU compute: **{latency:.2f} ms**")
+    # 原生路径会返回实际设备，不能把 Vulkan/CUDA 用户的耗时标为 CPU。
+    device = str(result["device"]).lower()
+    hardware = "GPU" if device in {"gpu", "vulkan", "cuda"} else "CPU"
+    timing = (f"{hardware} 原生计算：**{latency:.2f} ms**" if language == "zh"
+              else f"Native {hardware} compute: **{latency:.2f} ms**")
     return f"{title}\n\n{timing}", {
         "type": kind, "answer": value, "probabilities": answer.get("probabilities"),
         "legend": answer.get("legend"), "confidence": answer.get("confidence"),

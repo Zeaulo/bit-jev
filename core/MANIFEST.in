@@ -3,3 +3,4 @@ include native/CMakeLists.txt
 include native/llama-relu2.patch
 recursive-include native/prebuilt *.exe BITNET_LICENSE LLAMA_CPP_LICENSE
 include LICENSE
+include bit_jev/web/logo.png

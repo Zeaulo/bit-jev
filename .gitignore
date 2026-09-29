@@ -12,6 +12,7 @@
 /test/native-source/
 /test/pypi-dist/
 /test/venv-pypi/
+/test/web-venv/
 /test/dependency_validation/
 /test/release/
 /test/release_smoke/

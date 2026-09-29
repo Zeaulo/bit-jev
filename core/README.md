@@ -1,6 +1,6 @@
 # bit-jev
 
-**Install, run a decision, then build your own structured requests.** bit-jev scores explicit options over a BitNet backbone and returns answers and probabilities without generating answer text token by token.
+**Install, open a local decision page, then build your own structured requests.** bit-jev scores explicit options over a BitNet backbone and returns answers and probabilities without generating answer text token by token.
 
 ![bit-jev ternary inputs and decision engine](https://raw.githubusercontent.com/Zeaulo/bit-jev/main/docs/figures/decision-engine.png)
 
@@ -9,11 +9,11 @@
 ## Try it
 
 ```bash
-python -m pip install --upgrade bit-jev
-bit-jev-demo
+pip install bit-jev -i https://pypi.org/simple --upgrade
+python -m bit_jev.demo
 ```
 
-The built-in demo prints a real model answer and latency. The first run downloads the 1.19 GB GGUF from Hugging Face or, if that connection fails, ModelScope; later runs reuse the cache. Installation itself does not download model weights. Use `bit-jev-demo --source modelscope` to select ModelScope directly, or `--device gpu` for Vulkan.
+The second command opens a local Gradio page with Choice, Noul, and Score tabs. Choice and Score let you add or remove items within a two-to-four-item range. The first submitted question downloads the 1.19 GB GGUF from Hugging Face or, if that connection fails, ModelScope; later requests reuse the loaded model. Installation and page startup do not download weights. Use `python -m bit_jev.demo --source modelscope` to select ModelScope directly, or `--device gpu` for Vulkan. Use `--once` for the former one-shot JSON command.
 
 The Windows x64 wheel includes precompiled CPU and Vulkan GPU runners for AVX2 processors. Inference on those machines needs no Git, CMake, C++ compiler, or Vulkan SDK. Vulkan still needs a compatible graphics driver and its `vulkan-1.dll` runtime. Other platforms build the native runner on demand and require [Git](https://git-scm.com/install/), [CMake 3.28+](https://cmake.org/download/), and a C++17 compiler ([Windows C++ Build Tools](https://learn.microsoft.com/cpp/build/vscpp-step-0-installation)). Source builds of Vulkan also need its SDK; CUDA builds need a CUDA Toolkit. Both precompiled programs use pinned BitNet and llama.cpp source with the ReLU² runtime patch and carry their MIT license notices.
 

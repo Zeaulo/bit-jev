@@ -206,3 +206,15 @@
 - Hugging Face 静态入口更新三题型引导和简短的“免费空间使用 2 vCPU 进行推理”说明，继续嵌入 ModelScope 推理页面；本地两个 Space README 和 versions/project_overall/index.html 同步实际页面路径、默认值与文件职责。
 - 四项公开 API 验收发现 Gradio State 忽略直接提交的计数，已将计数改为隐藏 Number 并重新部署；Choice 与 Score 的线上四项响应分别包含四个候选概率与四个等级概率。test/test_space_demo.py 覆盖三题型默认值、四项上限和结果；test/check_space_layout.py 核对三个 Tab、六条 API 及可提交的 Number 计数；test/check_space_status.py 查询构建；test/smoke_space.py 验收中英文各三条真实请求及两条四项请求。离线测试、配置检查、Python 编译与 git diff --check 通过。
 - ModelScope Studio 提交 df252ff6819b92aaf6101b7ecca0f86ed5381e47 构建成功并进入 Running；六条中英文真实推理和两条四项推理均通过，返回正数原生耗时。公开 /config 返回 HTTP 200，包含三个任务 Tab 和真实 PNG URL。Hugging Face 静态 Space 提交 269284de3112909d8d73c29d91f5f6e5fae577ee，页面及 Logo 均返回 HTTP 200，页面继续嵌入 ModelScope 运行域名。功能验收时间不作为性能基准。
+
+[2026-09-29 14:53:04] v0.19.8（中版本，本机与在线共用 Gradio 页面）
+- 项目版本从 v0.18.8 升至 v0.19.8，PyPI 包从 0.12.10 升至 0.13.10。新增 core/bit_jev/web 分层模块：forms.py 负责三题型双语表单，logic.py 负责输入规范化，service.py 负责第一次请求时加载模型并复用常驻进程，presentation.py 负责结论和安全转义后的概率条，app.py 负责本机与公开空间的页面装配。正式 Logo 随 wheel 打包，页面不依赖外部图片 URL。
+- `python -m bit_jev.demo` 默认在本机回环地址启动 Gradio 网页；`--once` 保留手写请求的单次 JSON 命令行推理。中文和英文 GitHub 首页、PyPI README、GGUF 指南与双语模型卡把快速开始改为 `pip install bit-jev -i https://pypi.org/simple --upgrade` 加网页启动命令。页面启动不下载权重，第一次提交才按原有路径选择 Hugging Face 或 ModelScope 下载约 1.19 GB 的模型。
+- Choice 和 Score 均可添加或删除任意选项／等级，删除后后续项目和说明一起前移，活动项数量限制为二至四；Noul 保持固定否／是。依据用户截图把窄列说明改成项目下方的整行展开输入，表单改为单列，结果先显示结论与概率条，完整 JSON 放入高级折叠区。ModelScope Space 改成薄入口，直接复用包内页面，避免本机与远端实现分叉；Hugging Face 静态 Space 仍嵌入 ModelScope 的计算页面。
+- 更新 `test/test_demo.py`、`test/test_space_demo.py`、`test/check_space_layout.py`、`test/smoke_space.py`，新增 `test/test_web_forms.py`、`test/test_web_presentation.py` 与 `test/smoke_local_web.py`。重绘双语流程图中的本机网页节点，更新 `versions/project_overall/index.html` 的代码、功能、数据流及目录职责。发行包归档检查和 twine check 已通过。
+- PyPI 0.13.10 已发布；官方 JSON 中 Windows wheel 为 17,750,340 字节、SHA-256 e560194794106eba1e0cc005ac3916a2946f28c76cba87ef417f8d19f327c3ae，源码包为 17,491,680 字节、SHA-256 df530a2885f687a033ed29d88924fcdc62aac2bdb0472e52b8cac03fabde1af6，均与本地一致。独立 Gradio 5 环境从 wheel 安装后，本机服务、三个 Tab 与六条 API 成功启动；屏蔽 Git/CMake 后包内 CPU 程序对本地 GGUF 连续两次真实推理成功。浏览器检查 Choice 删除中间项后后续内容及说明前移、Score 三级显示删除入口，手机宽度下表单无横向溢出。
+- Hugging Face 与 ModelScope 模型卡已同步新快速开始和双语流程 PNG。ModelScope 初次重建因默认 pip 镜像没有 0.13.10 而失败，Dockerfile 改用官方 PyPI 索引后重新构建；随后公开空间验收结果另行补记。
+
+[2026-09-29 15:13:01] v0.19.9（小版本，GPU 耗时标签修正）
+- 项目版本由 v0.19.8 升至 v0.19.9，PyPI 包版本由 0.13.10 升至 0.13.11。共用页面的结果摘要根据原生响应 `device` 显示 CPU 或 GPU，不再把 Vulkan/CUDA 的计算耗时误标成 CPU；`test/test_space_demo.py` 增加 GPU 标签验收。双语首页、GGUF 指南、模型卡、Dockerfile 和项目总览同步 0.13.11 版本号。
+- 0.13.11 已发布到官方 PyPI：Windows wheel 17,750,457 字节、SHA-256 d0be557a85c8224fab2a8466c45d7ffaa1a0da13a2bf06c0fbacbc40a58a9d80；源码包 17,491,878 字节、SHA-256 5855f4cae915e586c33e91785659e580234ea52c5a09bbd9913ed460a21da127，均与本地一致。归档检查、twine check、版本一致性与 CPU/GPU 标签测试通过；隔离环境已从官方 PyPI 升级到 0.13.11。Hugging Face 与 ModelScope 双语模型卡已同步该版本号，ModelScope Docker 空间重新部署中。

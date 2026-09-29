@@ -56,11 +56,13 @@ def check_case(api_name: str, case: list[object], kind: str,
             if not line or not line.startswith("data:"):
                 continue
             payload = json.loads(line[5:].strip())
-            if not isinstance(payload, list) or len(payload) != 2:
+            if not isinstance(payload, list) or len(payload) != 3:
                 continue
-            summary, detail = payload
+            summary, chart, detail = payload
             if not isinstance(detail, dict) or detail.get("type") != kind:
                 raise RuntimeError(f"{api_name} 未返回预期题型：{summary}")
+            if "jev-prob" not in str(chart):
+                raise RuntimeError(f"{api_name} 未返回可读的概率条")
             if kind in ("choice", "score") and len(detail.get("probabilities") or {}) != int(case[0]):
                 raise RuntimeError(f"{api_name} 未计算请求中的全部 {case[0]} 个项目")
             if float(detail.get("latency_ms", 0)) <= 0:

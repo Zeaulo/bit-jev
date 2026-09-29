@@ -5,9 +5,9 @@ import unittest
 from pathlib import Path
 
 
-# 待测纯逻辑位于 Space 源码目录；测试脚本始终留在项目根目录 test/。
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "spaces" / "bit_jev_demo"))
-from logic import build_choice_request, build_noul_request, build_score_request, present_result  # noqa: E402
+# Space 与本地入口共享包内逻辑；测试优先加载当前仓库源码。
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "core"))
+from bit_jev.web.logic import build_choice_request, build_noul_request, build_score_request, present_result  # noqa: E402
 
 
 class SpaceDemoTest(unittest.TestCase):
@@ -62,6 +62,14 @@ class SpaceDemoTest(unittest.TestCase):
                     {"answers": {"decision": answer}, "latency_ms": 123.45, "device": "cpu"}, "zh")
                 self.assertIn(expected, summary)
                 self.assertEqual(detail["latency_ms"], 123.45)
+
+    def test_gpu_timing_label(self):
+        """Vulkan 路径显示实际 GPU 设备，避免误标为 CPU。"""
+        result = {"answers": {"decision": {"type": "noul", "noul": .6}},
+                  "latency_ms": 42.5, "device": "gpu"}
+        summary, detail = present_result(result, "zh")
+        self.assertIn("GPU 原生计算", summary)
+        self.assertEqual(detail["device"], "gpu")
 
 
 if __name__ == "__main__":

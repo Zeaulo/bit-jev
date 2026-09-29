@@ -1,7 +1,7 @@
 # Run JEV fast on an everyday computer—using just a CPU.
 
 ```bash
-pip install bit-jev
+pip install bit-jev -i https://pypi.org/simple --upgrade
 python -m bit_jev.demo
 ```
 
@@ -17,7 +17,7 @@ Want to try it before installing? Open the [bilingual CPU demo](https://jinghao9
 
 ## Quick start
 
-The second command at the top runs a bundled customer-routing question and prints the real model result. The first load downloads about 1.19 GB; later runs reuse the cache. `bit-jev 0.12.10` first tries [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) and falls back to [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled) if it cannot connect. Use `python -m bit_jev.demo --source modelscope` to skip the Hugging Face attempt. If an index serves an older release, follow the [install guide](docs/GGUF_PACKAGE.md).
+The second command starts a local Gradio page at `http://127.0.0.1:7860` and opens your browser. It offers Choice, Noul, and Score forms; Choice and Score let you add or remove items while keeping two to four. Starting the page does not download weights. The first submitted question downloads about 1.19 GB and loads the model; later requests reuse it. `bit-jev 0.13.11` tries [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled) and falls back to [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled). Use `python -m bit_jev.demo --source modelscope` to select ModelScope directly, or `--device gpu` for Vulkan. Add `--once` for the former one-shot JSON CLI behavior. If an index serves an older release, follow the [install guide](docs/GGUF_PACKAGE.md).
 
 To score your own request, keep the model loaded with the Python API:
 

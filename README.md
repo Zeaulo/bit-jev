@@ -1,7 +1,7 @@
 # 普通电脑，CPU 就能跑 JEV，而且很快！
 
 ```bash
-pip install bit-jev
+pip install bit-jev -i https://pypi.org/simple --upgrade
 python -m bit_jev.demo
 ```
 
@@ -17,7 +17,7 @@ bit-jev 在 BitNet 骨干上对候选项直接评分，返回结构化答案，�
 
 ## 快速开始
 
-顶部第二条命令直接运行内置客服分流题并打印模型实际答案。首次加载才会下载约 1.19 GB 模型，后续复用缓存。`bit-jev 0.12.10` 默认先尝试 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)，连接失败时自动回退到 [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)。国内网络可直接运行 `python -m bit_jev.demo --source modelscope`，避免等待 Hugging Face 超时。若镜像仍安装旧版，请按[安装排错指南](docs/GGUF_PACKAGE.zh-CN.md)核对版本。
+顶部第二条命令会在本机启动并打开 Gradio 页面，地址为 `http://127.0.0.1:7860`。可直接切换 Choice、Noul、Score 三个题型；Choice 和 Score 可添加、删除选项或等级，保留 2 至 4 项。页面启动时不下载模型，首次提交问题才下载约 1.19 GB 权重并加载，之后复用常驻模型。`bit-jev 0.13.11` 默认先尝试 [Hugging Face](https://huggingface.co/jinghao1632/bit-jev-2b-distilled)，连接失败时自动回退到 [ModelScope](https://www.modelscope.cn/models/JingHao9616/bit-jev-2b-distilled)。国内网络可运行 `python -m bit_jev.demo --source modelscope`；使用 Vulkan GPU 可加 `--device gpu`。若需要原来的一次性命令行 JSON 输出，可加 `--once`。若镜像仍安装旧版，请按[安装排错指南](docs/GGUF_PACKAGE.zh-CN.md)核对版本。
 
 需要输入自己的问题时，使用 Python API；模型在 `with` 块内保持常驻，适合连续调用：
 

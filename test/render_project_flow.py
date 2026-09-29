@@ -27,8 +27,8 @@ COPY = {
         ],
         "infer_label": "02  安装与推理",
         "infer": [
-            ("pip install bit-jev", "安装 Python 包"),
-            ("CPU / Vulkan", "Windows x64 AVX2 预编译"),
+            ("官方 PyPI 安装", "获取 Python 包"),
+            ("本机 Gradio 页面", "CPU / Vulkan 推理"),
             ("首次加载模型", "约 1.19 GB，之后复用缓存"),
             ("候选项评分", "答案、概率与原生耗时"),
         ],
@@ -50,8 +50,8 @@ COPY = {
         ],
         "infer_label": "02  INSTALL & INFER",
         "infer": [
-            ("pip install bit-jev", "install Python package"),
-            ("CPU / Vulkan", "prebuilt on Windows x64 AVX2"),
+            ("Official PyPI install", "install Python package"),
+            ("Local Gradio page", "CPU / Vulkan inference"),
             ("First model load", "~1.19 GB; then cached"),
             ("Score options", "answers, probabilities, latency"),
         ],

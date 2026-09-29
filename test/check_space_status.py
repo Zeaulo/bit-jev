@@ -20,10 +20,10 @@ def main() -> None:
     data = api.get_repo("JingHao9616/bit-jev-demo", "studio")
     print("runtime:", data.runtime)
     if args.build_logs:
-        # 仅为调试构建失败展示最近二十行，不输出令牌或完整环境变量。
-        result = api.get_repo_logs("JingHao9616/bit-jev-demo", log_type="build", page_size=20)
+        # 构建失败可能发生在 pip 依赖解析，保留足够行数查看真正错误。
+        result = api.get_repo_logs("JingHao9616/bit-jev-demo", log_type="build", page_size=100)
         lines = "".join(result.get("logs", [])).splitlines()
-        print("last build lines:", *lines[-8:], sep="\n")
+        print("last build lines:", *lines[-50:], sep="\n")
     if args.run_logs:
         # 运行日志只保留最近行，避免公开接口验收期间打印大段依赖输出。
         result = api.get_repo_logs("JingHao9616/bit-jev-demo", log_type="run", page_size=20)

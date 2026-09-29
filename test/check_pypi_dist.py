@@ -13,6 +13,9 @@ VERSION = tomllib.loads((Path(__file__).resolve().parents[1] / "core" / "pyproje
 WHEEL = DIST / f"bit_jev-{VERSION}-py3-none-win_amd64.whl"
 SOURCE = DIST / f"bit_jev-{VERSION}.tar.gz"
 REQUIRED_WHEEL = {"bit_jev/gguf.py", "bit_jev/demo.py", "bit_jev/encoding.py", "bit_jev/native_build.py",
+                  "bit_jev/web/__init__.py", "bit_jev/web/app.py", "bit_jev/web/forms.py",
+                  "bit_jev/web/logic.py", "bit_jev/web/service.py", "bit_jev/web/presentation.py",
+                  "bit_jev/web/logo.png",
                   "bit_jev/_native/main.cpp", "bit_jev/_native/CMakeLists.txt",
                   "bit_jev/_native/llama-relu2.patch", "bit_jev/_bin/bit-jev-cpu.exe",
                   "bit_jev/_bin/bit-jev-vulkan.exe",
@@ -31,6 +34,7 @@ def main():
         source_names = {name.removeprefix(f"bit_jev-{VERSION}/") for name in archive.getnames()}
     missing_wheel = REQUIRED_WHEEL - wheel_names
     missing_source = {"native/main.cpp", "native/CMakeLists.txt", "native/llama-relu2.patch",
+                      "bit_jev/web/logo.png", "bit_jev/web/app.py", "bit_jev/web/forms.py",
                       "native/prebuilt/win_amd64/bit-jev-cpu.exe",
                       "native/prebuilt/win_amd64/bit-jev-vulkan.exe",
                       "native/prebuilt/licenses/BITNET_LICENSE",
@@ -42,6 +46,8 @@ def main():
         raise AssertionError("wheel 缺少安装即用命令 bit-jev-demo")
     if "Requires-Dist: modelscope-hub" not in metadata:
         raise AssertionError("wheel 缺少 ModelScope 下载器依赖")
+    if "Requires-Dist: gradio" not in metadata:
+        raise AssertionError("wheel 缺少本地 Gradio 页面依赖")
     if any(name.endswith((".gguf", ".safetensors", ".pt")) for name in wheel_names | source_names):
         raise AssertionError("发行包意外包含模型权重")
     if WHEEL.stat().st_size > 50_000_000 or SOURCE.stat().st_size > 50_000_000:
