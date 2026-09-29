@@ -199,3 +199,10 @@
 - Hugging Face 账号创建 CPU Basic Docker Space 返回 HTTP 402（需 PRO）；已创建免费 static Space `jinghao1632/bit-jev-demo`，提供中英双语说明、正式 0/1 火箭标志、ModelScope 直达按钮，以及对实际 `jinghao9616-bit-jev-demo.ms.show` 运行域名的 iframe。Hugging Face 静态域名返回页面 HTTP 200；ModelScope 项目详情页具有 SAMEORIGIN 限制，因此未用其作为嵌入目标。实际模型计算只在 ModelScope 执行。
 - 新增 `test/test_space_demo.py` 离线输入/结果契约测试、`test/smoke_space.py` 双语线上真实请求验收、`test/deploy_space.py` 双站点空间上传及 `test/sync_space_links.py` 模型卡轻量同步脚本。中英文 GitHub README 与双语模型卡增加直达测试入口并说明计算位置与测量边界；Hugging Face 三张卡最终提交 87a203d，ModelScope 三张卡随后分别上传。`.gitignore` 排除 ModelScope SDK 自动生成的 `.ms_upload_cache`。`versions/project_overall/index.html` 同步新增代码逻辑、功能需求、数据流、目录职责和发布状态。
 - X 贴文待发布：桌面浏览器控制工具无法可靠判断当前浏览器 URL，按工具安全机制中止；本次未向 X 发送任何内容。
+
+[2026-09-29 12:25:47] v0.18.8（中版本，双语三题型空间与图片修复）
+- 项目版本由 v0.17.8 升至 v0.18.8；PyPI 包和推理检查点未更改。ModelScope Gradio 页面重排为 Choice、Noul、Score 三个任务 Tab，语言由全局开关切换。Choice 默认两项、Score 默认三级，均可增加至最多四项；Noul 固定否／是。问题必填，背景与每项说明折叠且可选；空背景传入“常见问题”，空说明复制对应选项或等级文本。
+- 新增 spaces/bit_jev_demo/forms.py 管理表单、显隐和固定的六个公开 API；logic.py 分题型校验输入并格式化真实返回结果。app.py 继续复用单条 2 vCPU 原生推理进程。ModelScope 页面 Logo 改从公开模型仓库的真实 PNG 地址加载，绕过 Studio 将 Git LFS 指针当作图片响应的问题；Docker 镜像不再复制备用 logo.png。
+- Hugging Face 静态入口更新三题型引导和简短的“免费空间使用 2 vCPU 进行推理”说明，继续嵌入 ModelScope 推理页面；本地两个 Space README 和 versions/project_overall/index.html 同步实际页面路径、默认值与文件职责。
+- 四项公开 API 验收发现 Gradio State 忽略直接提交的计数，已将计数改为隐藏 Number 并重新部署；Choice 与 Score 的线上四项响应分别包含四个候选概率与四个等级概率。test/test_space_demo.py 覆盖三题型默认值、四项上限和结果；test/check_space_layout.py 核对三个 Tab、六条 API 及可提交的 Number 计数；test/check_space_status.py 查询构建；test/smoke_space.py 验收中英文各三条真实请求及两条四项请求。离线测试、配置检查、Python 编译与 git diff --check 通过。
+- ModelScope Studio 提交 df252ff6819b92aaf6101b7ecca0f86ed5381e47 构建成功并进入 Running；六条中英文真实推理和两条四项推理均通过，返回正数原生耗时。公开 /config 返回 HTTP 200，包含三个任务 Tab 和真实 PNG URL。Hugging Face 静态 Space 提交 269284de3112909d8d73c29d91f5f6e5fae577ee，页面及 Logo 均返回 HTTP 200，页面继续嵌入 ModelScope 运行域名。功能验收时间不作为性能基准。

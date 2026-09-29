@@ -1,61 +1,94 @@
-"""在线演示的输入校验和结果整理；不依赖 Gradio。"""
+"""在线演示的三种请求转换与结果整理；不依赖 Gradio。"""
 
 from __future__ import annotations
 
 from typing import Any
 
 
-def build_request(state: str, question: str, first_key: str, first_description: str,
-                  second_key: str, second_description: str) -> dict[str, Any]:
-    """把双语表单转换成现有 BitJev.infer 接受的 choice 请求。"""
-    # 六个字段都由访问者输入；先限制长度，避免公共 CPU 空间被超长请求占满。
-    fields = {
-        "state": (state, 1200),
-        "question": (question, 300),
-        "first_key": (first_key, 40),
-        "first_description": (first_description, 200),
-        "second_key": (second_key, 40),
-        "second_description": (second_description, 200),
-    }
-    cleaned: dict[str, str] = {}
-    for name, (value, maximum) in fields.items():
-        # 候选标识和描述的空白同样会影响结构化答案，统一剔除首尾空白。
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"{name} 不能为空 / cannot be empty")
-        cleaned[name] = value.strip()
-        if len(cleaned[name]) > maximum:
-            raise ValueError(f"{name} 最多 {maximum} 个字符 / max {maximum} characters")
-    if cleaned["first_key"] == cleaned["second_key"]:
-        raise ValueError("两个候选标识必须不同 / option keys must differ")
-    return {
-        "state": cleaned["state"],
-        "questions": {
-            "team": {
-                "type": "choice",
-                "instructions": cleaned["question"],
-                "criteria": {
-                    cleaned["first_key"]: cleaned["first_description"],
-                    cleaned["second_key"]: cleaned["second_description"],
-                },
-            },
-        },
-    }
+def clean_text(value: str, name: str, maximum: int, required: bool = True) -> str:
+    """清理单个输入，并在模型下载前拒绝过长或缺失的内容。"""
+    if not isinstance(value, str):
+        raise ValueError(f"{name} 必须是文本 / must be text")
+    cleaned = value.strip()
+    if required and not cleaned:
+        raise ValueError(f"{name} 不能为空 / cannot be empty")
+    if len(cleaned) > maximum:
+        raise ValueError(f"{name} 最多 {maximum} 个字符 / max {maximum} characters")
+    return cleaned
+
+
+def base_request(state: str, question: str, kind: str, criteria: Any) -> dict[str, Any]:
+    """构造三种题型共用的单题 SystemOne 请求。"""
+    # 背景未填写时向模型明确传入“常见问题”，保持界面与 API 的默认值一致。
+    background = clean_text(state, "背景说明", 1200, required=False) or "常见问题"
+    instruction = clean_text(question, "你的问题", 300)
+    return {"state": background, "questions": {"decision": {
+        "type": kind, "instructions": instruction, "criteria": criteria,
+    }}}
+
+
+def build_choice_request(state: str, question: str,
+                         options: list[str], descriptions: list[str]) -> dict[str, Any]:
+    """把二至四个选项转换为 choice；空说明复制选项内容。"""
+    if len(options) != len(descriptions) or not 2 <= len(options) <= 4:
+        raise ValueError("选择题需要 2 至 4 个选项 / choice needs 2 to 4 options")
+    # 字典键是用户实际看见的选项，答案可直接在页面上解释。
+    criteria: dict[str, str] = {}
+    for index, (option, description) in enumerate(zip(options, descriptions)):
+        label = clean_text(option, f"选项 {index + 1}", 80)
+        detail = clean_text(description, f"选项 {index + 1} 说明", 200, required=False)
+        if label in criteria:
+            raise ValueError("选项内容不能重复 / option text must be unique")
+        criteria[label] = detail or label
+    return base_request(state, question, "choice", criteria)
+
+
+def build_noul_request(state: str, question: str, language: str,
+                       no_description: str, yes_description: str) -> dict[str, Any]:
+    """把固定的否／是选项转换为 noul；空说明复制显示标签。"""
+    labels = ("否", "是") if language == "zh" else ("No", "Yes")
+    no_detail = clean_text(no_description, "否说明", 200, required=False) or labels[0]
+    yes_detail = clean_text(yes_description, "是说明", 200, required=False) or labels[1]
+    return base_request(state, question, "noul", {"false": no_detail, "true": yes_detail})
+
+
+def build_score_request(state: str, question: str,
+                        levels: list[str], descriptions: list[str]) -> dict[str, Any]:
+    """把二至四个有序等级转换为 score；空说明复制等级文本。"""
+    if len(levels) != len(descriptions) or not 2 <= len(levels) <= 4:
+        raise ValueError("等级题需要 2 至 4 级 / score needs 2 to 4 levels")
+    criteria: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for index, (level, description) in enumerate(zip(levels, descriptions)):
+        label = clean_text(level, f"等级 {index + 1}", 80)
+        detail = clean_text(description, f"等级 {index + 1} 说明", 200, required=False)
+        if label in seen:
+            raise ValueError("等级内容不能重复 / level text must be unique")
+        seen.add(label)
+        criteria.append({"level": label, "description": detail or label})
+    return base_request(state, question, "score", criteria)
 
 
 def present_result(result: dict[str, Any], language: str) -> tuple[str, dict[str, Any]]:
-    """展示模型实际返回的答案、概率和原生计算耗时。"""
-    # 推理结果由 bit_jev.gguf.BitJev.infer 生成；不注入预设答案或模拟耗时。
-    answer = result["answers"]["team"]
-    choice = answer["choice"]
+    """按返回题型展示真实答案、概率与原生计算时间。"""
+    answer = result["answers"]["decision"]
+    kind = answer["type"]
     latency = float(result["latency_ms"])
-    title = (f"模型选择：**{choice}**" if language == "zh"
-             else f"Model choice: **{choice}**")
-    timing = (f"CPU 原生计算：**{latency:.2f} ms**（不含首次下载与加载）"
-              if language == "zh" else
-              f"Native CPU compute: **{latency:.2f} ms** (excludes download and loading)")
+    if kind == "choice":
+        value = answer["choice"]
+        title = f"模型选择：**{value}**" if language == "zh" else f"Model choice: **{value}**"
+    elif kind == "noul":
+        value = answer["noul"]
+        title = (f"回答“是”的概率：**{value:.1%}**" if language == "zh"
+                 else f"Probability of Yes: **{value:.1%}**")
+    else:
+        value = answer["score"]
+        title = (f"期望等级索引：**{value:.2f}**（首级为 0）" if language == "zh"
+                 else f"Expected level index: **{value:.2f}** (first level is 0)")
+    timing = (f"CPU 原生计算：**{latency:.2f} ms**" if language == "zh"
+              else f"Native CPU compute: **{latency:.2f} ms**")
     return f"{title}\n\n{timing}", {
-        "answer": choice,
-        "probabilities": answer["probabilities"],
-        "latency_ms": latency,
-        "device": result["device"],
+        "type": kind, "answer": value, "probabilities": answer.get("probabilities"),
+        "legend": answer.get("legend"), "confidence": answer.get("confidence"),
+        "latency_ms": latency, "device": result["device"],
     }

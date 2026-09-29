@@ -11,7 +11,7 @@ RUN python -c "from bit_jev.native_build import build_native; import shutil; sou
 RUN useradd -m -u 1000 user
 ENV HOME=/home/user BIT_JEV_BINARY=/opt/bit-jev-cpu PYTHONUNBUFFERED=1
 WORKDIR /app
-COPY --chown=user:user app.py logic.py logo.png ./
+COPY --chown=user:user app.py forms.py logic.py ./
 USER user
 EXPOSE 7860
 CMD ["python", "app.py"]

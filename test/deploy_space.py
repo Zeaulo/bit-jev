@@ -24,7 +24,7 @@ def deploy_modelscope() -> None:
         raise RuntimeError("请通过 MODELSCOPE_API_TOKEN 环境变量提供发布令牌")
     api = HubApi(token=token)
     result = api.upload_folder(MODELSCOPE_REPO, "studio", SPACE_DIR,
-                               path_in_repo="", commit_message="Add bilingual CPU inference demo",
+                               path_in_repo="", commit_message="Update bilingual Choice Noul Score demo",
                                ignore_patterns=["__pycache__/*", "*.pyc", ".ms_upload_cache"],
                                disable_tqdm=True)
     print("ModelScope upload:", result)
@@ -38,7 +38,7 @@ def deploy_huggingface() -> None:
     # 当前账号创建 Docker 计算 Space 返回 402；保持已创建的静态 Space 类型。
     api = HfApi()
     result = api.upload_folder(repo_id=HUGGINGFACE_REPO, repo_type="space",
-                               folder_path=HF_STATIC_DIR, commit_message="Add bilingual live demo entry",
+                               folder_path=HF_STATIC_DIR, commit_message="Update three-mode live demo entry",
                                ignore_patterns=["__pycache__/*", "*.pyc"])
     print("Hugging Face upload:", result.commit_url)
 

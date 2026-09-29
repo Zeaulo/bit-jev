@@ -3,16 +3,16 @@ const copy = {
   zh: {
     eyebrow: "真实模型 · 免费 CPU 演示",
     title: "普通电脑，CPU 就能跑 JEV，而且很快！",
-    description: "在下方修改客服分流案例并运行。答案、概率和耗时来自真实模型；首次请求需下载约 1.19 GB 权重。",
+    description: "选择选择题、是非题或等级题，填写问题后运行真实模型。",
     open: "打开在线测试 ↗",
-    note: "此 Hugging Face 页面是免费静态入口。实际推理在 ModelScope 免费 2 vCPU 空间执行；若下方嵌入被浏览器阻止，请点击“打开在线测试”。页面推理时间不含首次下载与加载。",
+    note: "说明 / Note: 免费空间使用 2 vCPU 进行推理。",
   },
   en: {
     eyebrow: "Real model · free CPU demo",
     title: "Run structured JEV decisions on an everyday CPU.",
-    description: "Edit the customer support example below and run it. The answer, probabilities, and compute time come from the real model. The first request downloads about 1.19 GB.",
+    description: "Choose Choice, Noul, or Score, enter a question, and run the real model.",
     open: "Open the live test ↗",
-    note: "This Hugging Face page is a free static entry point. Inference runs in a free 2-vCPU ModelScope Space. If your browser blocks the embed, choose “Open the live test.” Displayed compute time excludes download and loading.",
+    note: "Note: The free Space uses 2 vCPUs for inference.",
   },
 };
 
@@ -27,7 +27,7 @@ function setLanguage(language) {
   }
 }
 
-// 按钮只切换页面引导语言；嵌入页面自身包含中英两个选项卡。
+// 按钮只切换页面引导语言；嵌入页面有独立的中英文语言开关。
 for (const button of document.querySelectorAll("[data-lang]")) {
   button.addEventListener("click", () => setLanguage(button.dataset.lang));
 }
