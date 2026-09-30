@@ -226,3 +226,10 @@
 - 新增实施文档 `docs/OPTIONAL_INPUT_FIX.zh-CN.md`；`test/test_space_demo.py` 覆盖 Choice、Noul、Score 的 None、必填缺失与数字误用，`test/check_space_layout.py` 核对默认示例。修复前回归测试复现了原错误，修复后七项请求测试通过。`versions/project_overall/index.html` 同步当前默认值、校验顺序和版本。发行与在线验收状态后续补记。
 - [2026-09-29 19:32:25] 0.13.12 已发布到官方 PyPI：Windows wheel 17,750,572 字节、SHA-256 50876ee557a1011f830d1f6d2068027f279084b09fdecb37c10fe57588d84cb2；源码包 17,492,020 字节、SHA-256 7e5d549a07728f7c1a065dd0262eab74a96d55bdef0c4c55c16473636d184a9f，公开文件与本地一致。归档检查、twine check、版本一致性、本地 Gradio 页面六 API 启动均通过；本机从新 wheel 启动页面后，在默认 Choice 不展开背景或选项说明直接点击推理，正常返回比特币和黄金的概率条。Hugging Face 与 ModelScope 双语模型卡已同步 0.13.12。ModelScope 首次构建早于 PyPI 索引更新而无法找到该版本，发布后重启构建，现待在线验收。
 - [2026-09-29 19:45:49] ModelScope Docker 空间 0.13.12 镜像安装官方 PyPI 源码包并完成 Linux CPU runner 编译，运行状态进入 Running。公开 `--default-only` 请求从 `/config` 读取默认问题、比特币／黄金选项和折叠字段原值后直接推理成功，返回两项概率及 653.61 ms 原生 CPU 耗时。中英文 Choice、Noul、Score 六条及 Choice、Score 四项上限两条真实请求全部通过；这些单次耗时仅为功能验收记录，不作为性能比较。Hugging Face 静态 Space 继续嵌入同一 ModelScope 运行域名。
+
+
+[2026-09-30 11:45:16] v0.19.12（小版本，概率区域暗色主题修复）
+- PyPI 包由 0.13.12 升至 0.13.13。概率卡片的固定亮色配色改为 Gradio 主题变量，标题、选项与百分比显式读取当前文字色；暗色概率条使用较亮的紫色。样式拆分到 core/bit_jev/web/theme.py，本机及 ModelScope 页面共用；Hugging Face 静态 Space 嵌入同一页面。
+- 新增 docs/DARK_PROBABILITY_FIX.zh-CN.md 与 test/preview_web_themes.py；更新当前安装说明、双语模型卡、Space Dockerfile 和详细项目总览。发布验收结果完成后追加记录。
+- [2026-09-30 11:58:29] 12 项现有结果呈现、表单、Space 输入契约和版本测试通过，三任务 Tab／六条 API 配置检查通过。Gradio 5 浏览器预览中，Choice、Noul、Score 双语概率卡分别在亮色和暗色主题可读；实际发行包默认 Choice CPU 推理成功，暗色选项及百分比色为 #f3f4f6，卡片色为 #111827。浏览器 viewport 设置未实际生效，本次不宣称完成手机断点验收。
+- PyPI 0.13.13 已发布并从官方索引安装成功：Windows wheel 17,755,149 字节，SHA-256 f944b0f472bb713aab4672971657a52fa786276cbcd7aabd1879a75a8bf33880；源码包 17,501,017 字节，SHA-256 895fbbb5ee431876e4cb50b0debc0282284fd5bb1f4e6376cf7467909870db12。归档检查、twine check 与官方 JSON 摘要核对通过；双站点模型卡同步完成，Hugging Face 提交 5d2fe7c。ModelScope Space 提交 66e9419 正在构建 0.13.13。

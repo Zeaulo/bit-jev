@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="bit-jev v0.19.10 本地与在线共用三题型 Gradio 页面、双模型站点下载、EPYC 9654 实测、GGUF 常驻推理与训练蒸馏维护手册">
+  <meta name="description" content="bit-jev v0.19.12 本地与在线共用三题型 Gradio 页面、双模型站点下载、EPYC 9654 实测、GGUF 常驻推理与训练蒸馏维护手册">
   <title>bit-jev · 项目总览</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
   <div class="relative mx-auto max-w-7xl px-5 pb-20 pt-7 lg:px-10">
     <!-- 导航锚点与下方各章节的 id 一一对应。 -->
     <header class="glass sticky top-4 z-20 flex flex-wrap items-center justify-between gap-4 rounded-3xl px-6 py-4">
-      <div><p class="eyebrow">内部开发手册 · v0.19.10 可选字段空值修复</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
+      <div><p class="eyebrow">内部开发手册 · v0.19.12 概率区域暗色主题修复</p><h1 class="text-xl font-semibold tracking-tight">bit-jev 项目总览</h1></div>
       <nav class="flex flex-wrap gap-2 text-sm" aria-label="页面导航">
         <a class="nav-pill" href="#summary">项目简述</a>
         <a class="nav-pill" href="#architecture">项目架构</a>
@@ -32,7 +32,7 @@
       <section id="summary" class="glass hero scroll-mt-28 rounded-[2rem] p-8 md:p-12">
         <p class="eyebrow">01 / 项目简述</p>
         <h2 class="mt-4 max-w-4xl text-3xl font-semibold leading-tight tracking-tight md:text-5xl">在 BitNet 骨干上实现 Kev 式结构化决策，并通过 pip 提供 GGUF 常驻推理。</h2>
-        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 使用 Transformers/PyTorch 训练 BitNet 骨干与指针头，先做 LoRA 微调，再由 Kev 教师 logits 蒸馏学生，导出 I2_S GGUF 和 float32 指针头。README.md 以“普通电脑，CPU 就能跑 JEV，而且很快！”开头，随即给出 <code>pip install bit-jev -i https://pypi.org/simple --upgrade</code> 与 <code>python -m bit_jev.demo</code>。PyPI 0.13.12 的默认 demo 启动本机 Gradio 页面；首次提交才按需下载约 1.19 GB 文件并加载模型。<code>gguf.py</code> 默认先请求 Hugging Face，连接失败后回退 ModelScope，<code>source="modelscope"</code> 可直接选择国内站点。Windows x64 AVX2 的 CPU 与 Vulkan GPU 请求分别启动 wheel 内两个预编译程序。macOS Intel、macOS Apple Silicon 与 Linux x86_64/ARM64 仅有未实测的 CPU 源码构建路径。<code>core/bit_jev/web</code> 同时构建本地和 ModelScope 免费 2 vCPU 空间的 Choice、Noul、Score 页面，Choice 与 Score 支持增加或删除项目，范围二至四项；Hugging Face 免费静态 Space 通过 iframe 嵌入该运行域名，因为当前账号创建计算型 Space 返回 402。页面与 Python API 共用 <code>BitJev.infer()</code>，不生成答案 token；公开微软基础模型基准与 bit-jev 检查点 AutoDL 案例继续分开说明。</p>
+        <p class="mt-6 max-w-4xl text-base leading-8 text-slate-700">bit-jev 使用 Transformers/PyTorch 训练 BitNet 骨干与指针头，先做 LoRA 微调，再由 Kev 教师 logits 蒸馏学生，导出 I2_S GGUF 和 float32 指针头。README.md 以“普通电脑，CPU 就能跑 JEV，而且很快！”开头，随即给出 <code>pip install bit-jev -i https://pypi.org/simple --upgrade</code> 与 <code>python -m bit_jev.demo</code>。PyPI 0.13.13 的默认 demo 启动本机 Gradio 页面；首次提交才按需下载约 1.19 GB 文件并加载模型。<code>gguf.py</code> 默认先请求 Hugging Face，连接失败后回退 ModelScope，<code>source="modelscope"</code> 可直接选择国内站点。Windows x64 AVX2 的 CPU 与 Vulkan GPU 请求分别启动 wheel 内两个预编译程序。macOS Intel、macOS Apple Silicon 与 Linux x86_64/ARM64 仅有未实测的 CPU 源码构建路径。<code>theme.py</code> 通过 Gradio 当前主题变量设置概率卡片背景、文字、边框和轨道，显式设置标题、选项和百分比颜色；暗色模式提高概率条亮度。本机与在线页面读取同一份样式。<code>core/bit_jev/web</code> 同时构建本地和 ModelScope 免费 2 vCPU 空间的 Choice、Noul、Score 页面，Choice 与 Score 支持增加或删除项目，范围二至四项；Hugging Face 免费静态 Space 通过 iframe 嵌入该运行域名，因为当前账号创建计算型 Space 返回 402。页面与 Python API 共用 <code>BitJev.infer()</code>，不生成答案 token；公开微软基础模型基准与 bit-jev 检查点 AutoDL 案例继续分开说明。</p>
         <figure class="mt-7 overflow-hidden rounded-2xl border border-white/70 bg-white/70 p-3"><img class="w-full rounded-xl" src="../../docs/figures/project-flow.zh-CN.png" alt="BitNet BF16、LoRA、Kev 教师 logits、学生蒸馏、I2_S 导出、CPU/Vulkan 决策链"><figcaption class="px-2 pt-3 text-xs leading-6 text-slate-600">中英文精确流程图由 <code>test/render_project_flow.py</code> 从同一节点结构生成。GitHub README 首屏使用用户选定的 <code>bit-jev-logo.png</code>：图中文字为 bit-jev，火箭尾迹包含 0/1 二进制数字；口号与安装命令位于图片之前。量化三值仅指 BitLinear 权重，不指所有张量。</figcaption></figure>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="metric"><strong>BitNet</strong><span>三元权重骨干与 I2_S 导出格式</span></div>
@@ -195,9 +195,10 @@
             <p class="mt-5 text-sm leading-7 text-slate-600"><code>learning/</code> 的上游源码、<code>runs/</code> 的本地检查点、<code>export/</code> 的 GGUF、<code>core/build/</code> 的二进制、<code>test/release/</code> 的模型包及测试结果均是本地生成或下载资产，不属于公开仓库。</p>
           </div>
           <article class="glass card"><h3>关键文件职责</h3><dl class="file-list">
-            <div><dt>README.md / README.en.md / core/README.md</dt><dd>GitHub 中文默认首页用口号置顶，紧接指定的 PyPI 安装与网页启动命令，再展示 bit-jev Logo；英文首页采用同样顺序。Supported Platforms 表区分 Windows x64 AVX2 预编译和 macOS/Linux 未实测源码路径。core/README.md 是 0.13.12 的 PyPI 展示文案，提供本地页面、Hugging Face 与 ModelScope 模型链接。</dd></div>
+            <div><dt>README.md / README.en.md / core/README.md</dt><dd>GitHub 中文默认首页用口号置顶，紧接指定的 PyPI 安装与网页启动命令，再展示 bit-jev Logo；英文首页采用同样顺序。Supported Platforms 表区分 Windows x64 AVX2 预编译和 macOS/Linux 未实测源码路径。core/README.md 是 0.13.13 的 PyPI 展示文案，提供本地页面、Hugging Face 与 ModelScope 模型链接。</dd></div>
             <div><dt>core/bit_jev/web/app.py / forms.py / logic.py / service.py / presentation.py / logo.png</dt><dd>app.py 创建三个任务 Tab、全局语言切换和本机启动器；forms.py 以单列表单安排问题、背景、二至四个可增删项目、整行可折叠说明、提交按钮与结果。logic.py 拒绝空问题、重复项目及过长文本，给可选字段补默认值并整理三类答案。service.py 对第一次推理延迟加载模型，锁住常驻原生进程；presentation.py 转义用户文本并输出结论与概率条，原始 JSON 收入高级折叠区。logo.png 随 wheel 打包，网页不依赖外部图片服务。</dd></div>
-            <div><dt>spaces/bit_jev_demo/Dockerfile / app.py / README.md</dt><dd>Dockerfile 使用 Python 3.11、PyPI 0.13.12 与 Gradio 5，在镜像构建阶段编译 Linux CPU runner，以非特权用户运行 7860 端口。app.py 只给共用 web 页面传入空间配置；README.md 说明二至四项编辑、按需下载与 2 vCPU 环境。业务表单与结果代码不再在 Space 目录复制。</dd></div>
+            <div><dt>core/bit_jev/web/theme.py / test/preview_web_themes.py</dt><dd>theme.py 保存共用 PAGE_CSS，app.py 在创建 Gradio Blocks 时导入；presentation.py 继续负责概率 HTML 的安全转义。卡片读取 --background-fill-secondary、--body-text-color、--border-color-primary；.dark 祖先控制概率条颜色。preview_web_themes.py 使用三题型双语固定数值验收主题及长选项排版，不下载模型，也不生成性能指标。</dd></div>
+            <div><dt>spaces/bit_jev_demo/Dockerfile / app.py / README.md</dt><dd>Dockerfile 使用 Python 3.11、PyPI 0.13.13 与 Gradio 5，在镜像构建阶段编译 Linux CPU runner，以非特权用户运行 7860 端口。app.py 只给共用 web 页面传入空间配置；README.md 说明二至四项编辑、按需下载与 2 vCPU 环境。业务表单与结果代码不再在 Space 目录复制。</dd></div>
             <div><dt>spaces/hf_static/README.md / index.html / styles.css / app.js / logo.png</dt><dd>Hugging Face 静态 Space 无计算资源。README.md 声明 static SDK 与当前账号的 402 限制；index.html 放置中英文导航、ModelScope 直达按钮和对实际 ms.show 域名的 iframe。styles.css 管理响应式浅色页面，app.js 仅切换两种说明语言；模型计算始终发生在 ModelScope 容器中。项目详情页因 SAMEORIGIN 禁止嵌入，故 iframe 不使用详情页 URL。</dd></div>
             <div><dt>test/test_space_demo.py / test_web_forms.py / test_web_presentation.py / check_space_layout.py / smoke_local_web.py / smoke_space.py</dt><dd>test_space_demo.py 核对三类请求缺省值和四项上限；test_web_forms.py 验证删除任意项时项目与说明一起前移，以及二项下限和四项上限；test_web_presentation.py 核对概率条与用户文本转义。check_space_layout.py 不下载权重，检查三个 Tab 与六个固定 API；smoke_local_web.py 启动本机服务，检查配置后退出；smoke_space.py 对公开空间提交中英文真实题。check_space_status.py 读取 ModelScope 构建状态，deploy_space.py 上传空间，sync_space_links.py 同步模型卡；令牌从环境读取。</dd></div>
             <div><dt>core/bit_jev/demo.py / test/test_demo.py</dt><dd>demo.py 默认启动本机网页，支持 model/source/device/threads/gpu-index/host/port/no-browser；--once 使用内置手写客服题执行一次推理并打印 JSON。test_demo.py 模拟两条路径，真实模型验收由 test/test_pypi_inference.py 完成。</dd></div>
@@ -266,15 +267,15 @@
 
       <!-- 发布状态标记权重已上传，并记录当前数据权利回复状态。 -->
       <section id="boundary" class="glass scroll-mt-28 rounded-[2rem] p-8 md:p-10">
-        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.19.10 可选字段空值修复、PyPI 0.13.12</h2>
+        <p class="eyebrow">08 / 发布状态</p><h2 class="mt-2 text-2xl font-semibold">v0.19.12 概率区域暗色主题修复、PyPI 0.13.13</h2>
         <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>0.13.12 Windows x64 AVX2 wheel（17,750,572 字节）和源码包（17,492,020 字节）已发布到官方 PyPI；公开 SHA-256 与本地产物一致。wheel 保留 CPU/Vulkan 两个预编译 EXE、Gradio 5、共用 web 模块和随包 Logo。本机从新 wheel 安装后启动三个 Tab、六条 API；浏览器在默认 Choice 上不展开背景或说明，直接点击推理，正常返回比特币与黄金的概率条和原生耗时。先前已实测屏蔽 Git/CMake 后包内 CPU 程序能对本地 GGUF 推理，Choice 删除选项会正确前移，Score 支持删除等级，手机宽度无横向溢出。Vulkan 延续 0.11.10 的实测记录，本次未重测；CUDA 仍需源码构建与 Toolkit。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>源码与 PyPI</b><p>0.13.13 修复概率区域亮色／暗色主题，继承 0.13.12 的空说明回退、默认 Choice 题、三题型六条 API 和选项增删行为。原生 CPU/Vulkan 程序与模型权重未变。发行包与在线页面发布验收结果记录在 versions/update.log；本次不重复进行性能基准。</p></div>
           <div class="status"><span class="status-dot done"></span><b>测量工具与公开数据</b><p>微软基础模型的独立基准仍与 bit-jev 检查点分开。v0.15.8 的速度图读取 EPYC 9654 32 核容器新记录和历史 RTX 5090 记录，分别说明 CPU I2_S、GPU FP16 混合精度和不同主机；内存图只使用原 Xeon/5090 同机数据。EPYC 新记录含两次进程启动共 6 次原生计时与同机 16 线程诊断，不包含原始请求或预测；这一道题不能代表通用性能。</p></div>
-          <div class="status"><span class="status-dot done"></span><b>权重、三题型在线测试与图片</b><p>Hugging Face 与 ModelScope 均保存相同的 I2_S GGUF、float32 指针头、分词器、配置和模型文件 SHA-256；双语模型卡已同步 PyPI 0.13.12。ModelScope 免费 2 vCPU / 8 GB Docker 空间构建 0.13.12 后进入 Running。公开 /config 的默认中文 Choice 为 2027 年 1000 美金题及比特币／黄金；保留折叠背景和说明的初始空值直接提交，真实推理成功，返回两项概率条和正数原生耗时。中英 Choice、Noul、Score 六条请求及 Choice、Score 两条四项请求也全部通过。在线请求只验收功能，不构成性能基准。包内 Logo 在先前版本的公开 Gradio 文件 URL 经 GET 返回 HTTP 200、image/png；Hugging Face 免费静态 Space 嵌入同一 ModelScope 运行域名。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
+          <div class="status"><span class="status-dot done"></span><b>权重、三题型在线测试与图片</b><p>Hugging Face 与 ModelScope 均保存相同的 I2_S GGUF、float32 指针头、分词器、配置和模型文件 SHA-256；双语模型卡已同步 PyPI 0.13.13。ModelScope 免费 2 vCPU / 8 GB Docker 空间正在构建 0.13.13；后续验收追加到版本日志。以下默认及八条请求验收为 0.13.12 记录：公开 /config 的默认中文 Choice 为 2027 年 1000 美金题及比特币／黄金；保留折叠背景和说明的初始空值直接提交，真实推理成功，返回两项概率条和正数原生耗时。中英 Choice、Noul、Score 六条请求及 Choice、Score 两条四项请求也全部通过。在线请求只验收功能，不构成性能基准。包内 Logo 在先前版本的公开 Gradio 文件 URL 经 GET 返回 HTTP 200、image/png；Hugging Face 免费静态 Space 嵌入同一 ModelScope 运行域名。Yelp 权利方书面答复仍待收到，检查点未声明开放权重许可证。</p></div>
         </div>
       </section>
     </main>
-    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.19.10 / PyPI 0.13.12 · 本机与在线共用页面、双模型站点与 EPYC 实测图</footer>
+    <footer class="py-8 text-center text-xs text-slate-500">bit-jev 内部项目记录 · 内容对应 v0.19.12 / PyPI 0.13.13 · 本机与在线共用页面、双模型站点与 EPYC 实测图</footer>
   </div>
 </body>
 </html>

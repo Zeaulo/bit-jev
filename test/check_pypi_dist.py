@@ -15,6 +15,7 @@ SOURCE = DIST / f"bit_jev-{VERSION}.tar.gz"
 REQUIRED_WHEEL = {"bit_jev/gguf.py", "bit_jev/demo.py", "bit_jev/encoding.py", "bit_jev/native_build.py",
                   "bit_jev/web/__init__.py", "bit_jev/web/app.py", "bit_jev/web/forms.py",
                   "bit_jev/web/logic.py", "bit_jev/web/service.py", "bit_jev/web/presentation.py",
+                  "bit_jev/web/theme.py",
                   "bit_jev/web/logo.png",
                   "bit_jev/_native/main.cpp", "bit_jev/_native/CMakeLists.txt",
                   "bit_jev/_native/llama-relu2.patch", "bit_jev/_bin/bit-jev-cpu.exe",

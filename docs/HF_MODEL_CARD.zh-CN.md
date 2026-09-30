@@ -26,7 +26,7 @@ python -m bit_jev.demo
 python -c "from importlib.metadata import version; import bit_jev; print(version('bit-jev'), bit_jev.__file__)"
 ```
 
-版本应为 `0.13.12`，导入路径应指向当前环境的 `site-packages/bit_jev`。第二条命令会在本机打开与在线测试同源的 Choice、Noul、Score 页面；Choice 和 Score 均能添加或删除选项，保留 2 至 4 项。首次提交才下载约 1.19 GB 模型。需要从 ModelScope 直接下载时可加 `--source modelscope`，使用 Vulkan 可加 `--device gpu`，旧式单题 JSON 可加 `--once`。下方仍保留完整 Python API 示例。镜像版本滞后及环境混用的处理见[安装指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。
+版本应为 `0.13.13`，导入路径应指向当前环境的 `site-packages/bit_jev`。第二条命令会在本机打开与在线测试同源的 Choice、Noul、Score 页面；Choice 和 Score 均能添加或删除选项，保留 2 至 4 项。首次提交才下载约 1.19 GB 模型。需要从 ModelScope 直接下载时可加 `--source modelscope`，使用 Vulkan 可加 `--device gpu`，旧式单题 JSON 可加 `--once`。下方仍保留完整 Python API 示例。镜像版本滞后及环境混用的处理见[安装指南](https://github.com/Zeaulo/bit-jev/blob/main/docs/GGUF_PACKAGE.zh-CN.md)。
 
 ![bit-jev 训练、蒸馏、量化与 CPU/Vulkan 推理流程](project-flow.zh-CN.png)
 
@@ -73,7 +73,7 @@ I2_S GGUF + float32 指针头
 
 ## 推理示例
 
-推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.13.12 wheel 已携带 CPU 与 Vulkan GPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型。使用 `device="cpu"` 或 `device="gpu"` 推理无需 Git、CMake、C++ 编译器或 Vulkan SDK；Vulkan GPU 需要显卡驱动提供 `vulkan-1.dll`。其他系统和 CUDA 后端按需从固定源码构建，需要 Git、CMake 3.28+ 与 C++17 编译器；CUDA 构建还需要 CUDA Toolkit。
+推荐使用 pip 包。Windows x64 且 CPU 支持 AVX2 时，bit-jev 0.13.13 wheel 已携带 CPU 与 Vulkan GPU 原生 runner；首次加载会按需下载约 1.19 GB 的模型。使用 `device="cpu"` 或 `device="gpu"` 推理无需 Git、CMake、C++ 编译器或 Vulkan SDK；Vulkan GPU 需要显卡驱动提供 `vulkan-1.dll`。其他系统和 CUDA 后端按需从固定源码构建，需要 Git、CMake 3.28+ 与 C++17 编译器；CUDA 构建还需要 CUDA Toolkit。
 
 ```python
 from bit_jev.gguf import BitJev

@@ -10,25 +10,7 @@ import gradio as gr
 
 from .forms import add_form
 from .service import ModelSession, WebConfig
-
-
-# 内容单列排布；说明输入展开后不在狭窄侧栏中逐字换行。
-PAGE_CSS = """
-.gradio-container { max-width: 1020px !important; margin: 0 auto !important; }
-.decision-form { padding: 18px !important; }
-.decision-summary { margin-top: 14px; font-size: 1.05rem; }
-.jev-results { padding: 18px 20px; border: 1px solid #dce5f2;
-  border-radius: 16px; background: #f8fbff; }
-.jev-results h3 { margin: 0 0 14px; font-size: 1rem; color: #253858; }
-.jev-prob-row + .jev-prob-row { margin-top: 16px; }
-.jev-prob-heading { display: flex; justify-content: space-between; gap: 12px;
-  margin-bottom: 7px; color: #273951; overflow-wrap: anywhere; }
-.jev-prob-heading strong { white-space: nowrap; }
-.jev-prob-track { height: 12px; border-radius: 999px; background: #e5ebf5; overflow: hidden; }
-.jev-prob-fill { height: 100%; border-radius: inherit; background: #5865e8; }
-@media (max-width: 640px) { .decision-form { padding: 10px !important; }
-  .jev-results { padding: 14px; } }
-"""
+from .theme import PAGE_CSS
 
 
 def switch_language(language: str) -> list[dict]:
