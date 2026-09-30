@@ -233,3 +233,4 @@
 - 新增 docs/DARK_PROBABILITY_FIX.zh-CN.md 与 test/preview_web_themes.py；更新当前安装说明、双语模型卡、Space Dockerfile 和详细项目总览。发布验收结果完成后追加记录。
 - [2026-09-30 11:58:29] 12 项现有结果呈现、表单、Space 输入契约和版本测试通过，三任务 Tab／六条 API 配置检查通过。Gradio 5 浏览器预览中，Choice、Noul、Score 双语概率卡分别在亮色和暗色主题可读；实际发行包默认 Choice CPU 推理成功，暗色选项及百分比色为 #f3f4f6，卡片色为 #111827。浏览器 viewport 设置未实际生效，本次不宣称完成手机断点验收。
 - PyPI 0.13.13 已发布并从官方索引安装成功：Windows wheel 17,755,149 字节，SHA-256 f944b0f472bb713aab4672971657a52fa786276cbcd7aabd1879a75a8bf33880；源码包 17,501,017 字节，SHA-256 895fbbb5ee431876e4cb50b0debc0282284fd5bb1f4e6376cf7467909870db12。归档检查、twine check 与官方 JSON 摘要核对通过；双站点模型卡同步完成，Hugging Face 提交 5d2fe7c。ModelScope Space 提交 66e9419 正在构建 0.13.13。
+- [2026-09-30 12:09:38] ModelScope 0.13.13 容器进入 Running；check_live_theme.py 核对公开 /config 的 CSS 与包内 PAGE_CSS 完全一致，Hugging Face 已发布静态入口嵌入同一运行域名。线上默认 Choice 真推理通过，返回比特币／黄金两项概率及正数原生耗时；本次仅作功能验收。远端浏览器导航超时，未宣称完成线上截图验收；亮暗视觉证据来自正式安装包的本机 Gradio 5 页面。
